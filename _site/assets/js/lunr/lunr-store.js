@@ -11,9 +11,9 @@ var store = [{
         "url": "http://localhost:4000/blog/boxes/asd/",
         "teaser": null
       },{
-        "title": null,
-        "excerpt":"Overview PlayerTwo is MrR3boot’s follow-up box to his box Player - this time created in collaboration with b14ckh34rt. Recon A nmap -p- 10.10.10.170 reveals an interesting port 8545 besides the usual ssh and http ports. Not shown: 65532 closed ports PORT STATE SERVICE 22/tcp open ssh 80/tcp open http 8545/tcp...","categories": [],
-        "tags": null,
-        "url": "http://localhost:4000/blog/2020-04-30-player2/",
+        "title": "HackTheBox - PlayerTwo",
+        "excerpt":"Overview PlayerTwo is MrR3boot’s follow-up box to his box Player - this time created in collaboration with b14ckh34rt. Recon A nmap -p- 10.10.10.170 reveals an interesting port 8545 besides the usual ssh and http ports. Not shown: 65532 closed ports PORT STATE SERVICE 22/tcp open ssh 80/tcp open http 8545/tcp...","categories": ["Boxes"],
+        "tags": ["heap","binary"],
+        "url": "http://localhost:4000/blog/boxes/player2/",
         "teaser": null
       }]
