@@ -193,6 +193,25 @@
 
       <section class="page__content" itemprop="text">
         
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-cog"></i> Table of Contents</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#looking-into">Looking into</a></li>
+  <li><a href="#first-lap---collecting-addresses">First lap - collecting addresses</a></li>
+  <li><a href="#second-lap---getting-shell">Second lap - getting shell</a></li>
+  <li><a href="#appendix">Appendix</a>
+    <ul>
+      <li><a href="#code">Code</a></li>
+      <li><a href="#resources">Resources</a></li>
+    </ul>
+  </li>
+</ul>
+
+            </nav>
+          </aside>
+        
         <h1 id="overview">Overview</h1>
 <p class="text-justify">Running the binary just asks us to <code class="language-plaintext highlighter-rouge">ROP me outside, how 'about dah?</code> which hints at <ins>r</ins>eturn <ins>o</ins>riented <ins>p</ins>rogramming (ROP) - redirecting code execution by abusing a buffer overflow vulnerability. And indeed, when hammering the input with a lot of characters we get a seg fault:</p>
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kali@kali:~$ ./ropme
