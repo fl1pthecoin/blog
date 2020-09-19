@@ -223,7 +223,7 @@
         <h1 id="starting-the-travel---overview">Starting the travel - Overview</h1>
 <p class="text-justify"><code class="language-plaintext highlighter-rouge">Travel</code> is an interesting box created by <a href="https://app.hackthebox.eu/users/77141">jkr</a> and his team member <a href="https://app.hackthebox.eu/users/13569">xct</a>. It required some fuzzing and enumerating to get a foothold, exploiting memcached abusing a SSRF vulnerability and finally modifying users by taking advantage of our LDAP privileges.</p>
 <h2 id="recon">Recon</h2>
-<p>Since <a href="#Nmap scan">the nmap scan</a> just shows ssh, http and https as open, we browse to 10.10.10.189 and the landing page mentions a blog, so scanning for subdomains is the next logical step:</p>
+<p>Since <a href="#Nmap scan">the nmap scan</a> just shows ssh, http and https as open, we browse to 10.10.10.189 and the landing page not only gives away the domain name <code class="language-plaintext highlighter-rouge">travel.htb</code> but also mentions a blog site, so scanning for subdomains is the next logical step:</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>wfuzz <span class="nt">-c</span> <span class="nt">--filter</span> <span class="s2">"l!=144"</span> <span class="nt">-z</span> file,/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt <span class="nt">-u</span> <span class="s2">"http://travel.htb"</span> <span class="nt">-H</span> <span class="s2">"Host: FUZZ.travel.htb"</span>
 
 000000032:   200        345 L    1408 W   24462 Ch    <span class="s2">"blog"</span>                         
@@ -237,6 +237,8 @@
   <li>Wordpress login at http://blog.travel.htb/wp-login.php</li>
   <li>WP user registration not allowed</li>
 </ul>
+
+<p>but unfortunately none of these infos will be of use.</p>
 
 <p class="text-justify">Also, from reading the source code of the landing page we find another subdomain called <code class="language-plaintext highlighter-rouge">http://blog-dev.travel.htb/</code> which we get a 403 forbidden when browsing to. However we can scan this subdomain either with gobuster or nmap to find out that there’s a git repository hidden:</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kali@kali:~/HTB/boxes/travel<span class="nv">$ </span>nmap <span class="nt">-A</span> <span class="nt">-T</span> 5 blog.travel.htb
@@ -575,11 +577,12 @@ Service detection performed. Please report any incorrect results at https://nmap
       
   <nav class="pagination">
     
-      <a href="/boxes/forwardslash/" class="pagination--pager" title="HackTheBox - Forwardslash
+      <a href="/boxes/player2/" class="pagination--pager" title="HackTheBox - PlayerTwo
 ">Previous</a>
     
     
-      <a href="#" class="pagination--pager disabled">Next</a>
+      <a href="/challenges/RopMe/" class="pagination--pager" title="Hackthebox - RopMe
+">Next</a>
     
   </nav>
 
@@ -603,7 +606,7 @@ Service detection performed. Please report any incorrect results at https://nmap
     
     <h2 class="archive__item-title" itemprop="headline">
       
-        <a href="/boxes/forwardslash/" rel="permalink">HackTheBox - Forwardslash
+        <a href="/challenges/RopMe/" rel="permalink">Hackthebox - RopMe
 </a>
       
     </h2>
@@ -613,11 +616,11 @@ Service detection performed. Please report any incorrect results at https://nmap
 
 
 
-  4 minute read
+  6 minute read
 
 </p>
     
-    <p class="archive__item-excerpt" itemprop="description">Write-up of the box Forwardslash from Hack The Box
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the challange pwn challenge RopMe from Hack The Box
 </p>
   </article>
 </div>
