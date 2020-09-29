@@ -10,3 +10,4 @@ sidebar:
   title: "Navigation"
   nav: sidebar-sample
 ---
+If you have any comments on my writeups or spot a mistake, feel free to contact me.
