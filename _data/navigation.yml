@@ -11,6 +11,10 @@ main:
   # - title: "Sitemap"
   #   url: /sitemap/
 sidebar-sample:
+  #- title: "Raspberry Pi"
+  #  children:
+  #    - title: "MQTT"
+  #      url: /pi
   - title: "HackTheBox"
     children:
       - title: "Boxes"
