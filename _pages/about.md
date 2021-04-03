@@ -9,7 +9,7 @@ sidebar:
   nav: sidebar-sample
 classes: wide
 ---
-This is the private homepage of Philipp Menner - currently teaching physics and maths at [Klenze-Gymnasium](http://klenze-gymnasium.de) München.
+This is the private homepage of Philipp Menner - currently teaching physics, maths and the elective [physical computing](https://klenze-gymnasium.de/?page_id=2613) at [Klenze-Gymnasium](https://klenze-gymnasium.de) München.
 <br/>
 <br/><br/>
 # Disclaimer

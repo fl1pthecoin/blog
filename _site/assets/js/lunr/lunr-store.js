@@ -18,8 +18,14 @@ var store = [{
         "teaser": null
       },{
         "title": "Hackthebox - RopMe",
-        "excerpt":"Overview Running the binary just asks us to ROP me outside, how 'about dah? which hints at return oriented programming (ROP) - redirecting code execution by abusing a buffer overflow vulnerability. And indeed, when hammering the input with a lot of characters we get a seg fault: kali@kali:~$ ./ropme ROP...","categories": ["challenges"],
+        "excerpt":"Overview Running the binary just asks us to ROP me outside, how 'about dah? which hints at return oriented programming (ROP) - redirecting code execution by abusing a buffer overflow vulnerability. And indeed, when hammering the input with a lot of characters we get a seg fault: $ ./ropme ROP...","categories": ["challenges"],
         "tags": ["ROP","pwn"],
         "url": "http://localhost:4000/challenges/RopMe/",
+        "teaser": null
+      },{
+        "title": "HackTheBox - Time",
+        "excerpt":"Overview This is a brief walkthrough for the box Time from HackTheBox with some remarks on file/directory permissions in the appendix. Getting a shell on the box, user flag As only port 22 and 80 are open we take a look at the website and find an online beautifier and...","categories": ["boxes"],
+        "tags": ["linux"],
+        "url": "http://localhost:4000/boxes/Time/",
         "teaser": null
       }]

