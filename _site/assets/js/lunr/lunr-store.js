@@ -17,7 +17,7 @@ var store = [{
         "url": "http://localhost:4000/boxes/travel/",
         "teaser": null
       },{
-        "title": "Hackthebox - RopMe",
+        "title": "HackThebox - RopMe",
         "excerpt":"Overview Running the binary just asks us to ROP me outside, how 'about dah? which hints at return oriented programming (ROP) - redirecting code execution by abusing a buffer overflow vulnerability. And indeed, when hammering the input with a lot of characters we get a seg fault: $ ./ropme ROP...","categories": ["challenges"],
         "tags": ["ROP","pwn"],
         "url": "http://localhost:4000/challenges/RopMe/",

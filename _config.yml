@@ -20,7 +20,7 @@ title                    : "#keepLearning"
 title_separator          : "-"
 subtitle                 : # site tagline that appears below site title in masthead
 name                     : "Philipp Menner"
-description              : "An amazing website."
+description              : "HackTheBox write-ups for retired boxes and challenges."
 url                      : "http://vpm.rocks" # the base hostname & protocol for your site e.g. "https://mmistakes.github.io"
 #baseurl                  : "/blog" # the subpath of your site, e.g. "/blog"
 repository               : # GitHub username/repo-name e.g. "mmistakes/minimal-mistakes"
