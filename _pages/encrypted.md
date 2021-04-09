@@ -16,4 +16,4 @@ If you have any comments on my writeups or spot a mistake, feel free to contact 
 
 Note: For protected write-ups, use the md5 sum of root password hash\\
 Linux: `/etc/passwd`\\
-Unix: `/etc/master.passwd`\\
+Unix: `/etc/master.passwd`
