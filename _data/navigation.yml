@@ -21,6 +21,8 @@ sidebar-sample:
         url: /boxes
       - title: "Challenges"
         url: /challenges
+      - title: "Protected Writeups"
+        url: /protected
         #- title: "Other"
         #url: /other
         #  - title: "Parent Page B"
