@@ -33,6 +33,9 @@
 <loc>http://localhost:4000/challenges/</loc>
 </url>
 <url>
+<loc>http://localhost:4000/protected/</loc>
+</url>
+<url>
 <loc>http://localhost:4000/</loc>
 </url>
 <url>
