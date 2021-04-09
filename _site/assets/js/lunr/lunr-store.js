@@ -28,4 +28,10 @@ var store = [{
         "tags": ["linux"],
         "url": "http://localhost:4000/boxes/Time/",
         "teaser": null
+      },{
+        "title": "Writeup: HackTheBox - Schooled",
+        "excerpt":"Overview I always like to see different operating systems than Linux and Windows so I looked forward for this FreeBSD box and was not disappointed. Most of the user part required exploiting the learning platform Moodle which I enjoyed even more so because of being a teacher myself. For root,...","categories": ["protected"],
+        "tags": ["freebsd","bsd","moodle","pkg"],
+        "url": "http://localhost:4000/protected/Schooled-active/",
+        "teaser": null
       }]
