@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.22.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+--><html lang="en" class="no-js">
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>HackTheBox - Debugging Interface - #keepLearning</title>
+<meta name="description" content="Write-up of the challenge Debugging Interface from Hack The Box">
+
+
+  <meta name="author" content="Philipp Menner">
+  
+  <meta property="article:author" content="Philipp Menner">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="#keepLearning">
+<meta property="og:title" content="HackTheBox - Debugging Interface">
+<meta property="og:url" content="https://vpm.rocks/protected/debugging_interface/">
+
+
+  <meta property="og:description" content="Write-up of the challenge Debugging Interface from Hack The Box">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2021-04-16T21:33:36-04:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://vpm.rocks/protected/debugging_interface/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Philipp Menner",
+      "url": "https://vpm.rocks/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--secret_post">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/"><img src="/assets/images/88x88.png" alt="#keepLearning"></a>
+        
+        <a class="site-title" href="/">
+          #keepLearning
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/about/">About</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+
+
+  <div class="archive">
+    
+      <h1 id="page-title" class="page__title">HackTheBox - Debugging Interface</h1>
+    
+    <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <p class="post-meta">
+      <time class="dt-published" datetime="2021-04-16T21:33:36-04:00" itemprop="datePublished">Apr 16, 2021
+      </time></p>
+  </header>
+
+  <div class="post-content e-content" itemprop="articleBody">  
+
+    <div id="secure-container" style="display: none;">4ee6d2d018875428000384b2e0420241c50129c495c0c85a947044b0ada9583e6797053e55919e31de89cd7f2f48df3b3cecc3180ceb3d57037f7720d08c85a1aaa3b4f22990d253ae933fc1c16e72247efe7bad7bf27b9d0f75a92795905cde13daeba969698ba0c240b08fdf0138cc8dcb0461f2b7984029f509ada332548782bd34cdca8752fe39bb2290f009f8d5e417f2d53d1c5b12e18ffcd405b601bcce420edf015a8fc368e28c866e6224757e67c5939d65810d6e0ebff748c7b66748d7e1b415d767075b29ef3a1225d64efa5a5ada396fd2e1205e2bade6176e4455a7b70169741d9a58c952c1c86bbf067016419004ff174d4e3b1c712c1d2dd371734501bcc4e8d259e839efbb96d448458f2e2c0095e7cdf08b711afbec5b47bbf6a6c4eee655937ec6fa4ce426aef2da47f63ef15216ed766dfe85c21e7c5bc40a6c25a7dac1746865bce1cb6fa35c02424be20ad5ebf6d415a433f3f154157d54fc33876a12c9809a801bcc696b5529e16ae4620444de5a1260ed051173cb601ea81a44208e37ecb4ef69bd59c895bb8c18416af3f7e72f59b92e6362dffc071abb9d821577a1db9b8afe5e9e1e8bf007e12593b788729c9136025bc42cadbe26254910d654918ef73fc0b69f0b2e35cd7fb35587cc5279afe202202eb70e033668f579d4dd8e9ffdf5bceebe2d31d438484e8286baea09bbc9fe89747ce37badbf58a6ac634b60b8160c682aceb49482f96fce5a8495f6e74951c559afc259081af759f453a465485e364c97748aa3a4fea32a1b6e2e2873c2e8d06616f61c5aefd6edee5562064cbd74abaa91e16a878485210047526b161c878f58bb4f73f1f1d8c67a1a0af913386d03831170680a33691b2a0fbc49a7ade56ada5e67b08297a352b1031d8b110b076f170c64f5704f4e3aaacc5fe2469eecd7d6d9f331192886ac513cfd985faac399401b6e5fee124ea1e393cef34abf7cbf6e9bc26e7e816cd2fe0f760fa0e4d90df0d3e5cc4d25754170d493fe3bba2101da4d90809da0be0356bebfa6ce5008e3a59b7cf7ba8e96503710d0e5d6961f81288b7505ab5c061cebc6fa8b8c0d04b6852827efbafe52bbd6e59abeb08f9432728f5ba278c13617cf086e643f768a98f310691bbf56548ec400c84320dd078f95ddd47f16d36eafc1082a4498c0a9941ac574214ccbc9486443376064f5a3c203d05f548d9911d2cf843209cfffd2662f7cf50c27ac5d67838036abfba2a749113d7befc4932d061f070560052ecd746659562dab9e61f450522c69f9daa76b1a9a3ee09a3a3b47e1219c1c5b94e121f9a5e37983791bcaac8c3f2e1801803d792d824acfa66ef52ca92b1f91b37961f33ffe652ede514386ffad846a52a1beb553ee0d0e067117e1eb84439a05351a1b11cd82fe1c1ac8e7a8201c22b0593a470365c823eab1b6da58b882e6400b299a0f43f1eb6497385b5d17c782a1f2cec23bc9b2a0cc9b579808aee9ec7aede83abb8aade8757992ca8afc2fb51bd85b0bef0c7effe7306cd6c0cc34465b66044992b045e8f8ee4e724fff113813981e73a780c1da816d9585bd09b973d78d88ec0cf0dcb3f91ce9059ad001a23b3ca03a7c09491a9ba48cef5aaf00558beaaa9503aa510b60dac5d191832ca03ad87ad6648f14efd6878db1fa23d524fc62e2b5842fc0caf46ace901fbd541a0f5c4563758b616026b3d9e8272544573cccdc3bd6eec54645096437cfdf03690f5e981d32c85d10361f03b635830038fc59a7b3ae29ec1db7d1700bd91b620c225641943c8e3d998385c1d8deef7e908c90305a49d496a2fda5fe8fc6ec59b9a68d9078b709b1f97dfea7bf8ee9196ec75a2cc2ed09df2acb106c5a5f5ce4d38b5dd1b949c7262126ba888111cd22caddce51987407721d662de583175b4e00980ad26fad37a1582f0136511340959889d130b2dd5b4827a45a4fc2f6a33c856f786fea10959ef806f9884e72bb0bac1d903b9df390d5ac351f29072383935b036ec25b6152d4531ee25471a9fa1b797cacd78e3a47c2ec7a67e6bcb8f286a714d7d7adabfc7ee8a82cc11c678732c7f51ba7b9ef96b7f39139e413c91df9d3bab92426abaa4b09386dd42bd457d90b893f1a2aa8c784f691f85ef7962fb9589cb62d3c27745ceb2e7db409151660db317b06d8be430d009ae1d007802bf26575748a49d3bebfed89d1a2a2432432bd6399a9be9a8d979d6a3d510094bdc9cbca80d9ec55db612ec7a424e0b35c6703f99a761046a89af56de5d8d89e816240ebe2d6860e27e2da98867c511f656c0b36ee4354510619223c08b34adb968919cb363ada1dbd0cd33bca60651304ee5fa6edb9e55bc8a894ebe0c53b95844d3e215ec20b56abfdaa833a8ca7108e682c79cb42cd7f891a45b83c39a7204216b3980c63cee600815e50e740c771ed4cd73644872fcd06809519fb83f98975512af30ca8d0e3c0e440e40b4ea48966ec420562254c16b3b1aab3feb785e26d0e9879d753e50966ce7444327c61b510c00d29fddad8b50d98130f3ae93f7b64af4cda4c493ce629993431a227994ce1b3a8a6c8435897548dddaec96bbf13ed749d812654aaa09e341bb88e4fd26fd91fab7295136e47f762d8b99aee47d20e366f6e8e0529eb84ff4d687e31d9ab0e889d0e3ea55cc080a25d892925fbcf59cf31c2bb5084d22a2c756241054c386545938ff2537e6afcc19cb49562c5376806b5ec5b9655c7ce935fc013836b40b873c8ac6c794af19125a59d5b336f34c5344c489b422f00605c82460dfd01edb3e7f35efcbf0dfaebbab1342d54a845347f3b4e229f4f7ae76a15588772f7c00a753b92dac33eb69419c2f8d91cf55adbd919496ddf631e9a66742a9de8ec204363d88f65640b3795e1b8fed71223756ce5b6d25465fc8d0162419a580d3f00d99a0ec521b55848397a12a050580f8ea33a402a87c958032d095dc9ae08cdf477303e1d8a7d61d1223ecc39799c7dffe1ed023a5f29f83eeaa853ff04bbc98d5d6f931b49ee51d6035190e535551844e0a3dbdeb6912753cf08f507ae12e92b96e6297c21d7c8ea0026841844f7fae97951a8d20677286faad9c56a1c2806c8d1f59bfcf19e4d59066d827df26937faa6f8e5924349b0a2ecf55861ccb083439e0433f45dffd188cf</div>
+
+    <div id="decryptor">
+      This is an active machine - please enter the password to view this content.<br><br>
+      <input id="key" type="text" value="">
+      <input id="decrypt" type="button" value="Decrypt">
+    </div>
+  </div>
+<a class="u-url" href="/protected/debugging_interface/" hidden></a>
+</article>
+
+<!-- post decryption -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/ricmoo/aes-js/e27b99df/index.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.js"></script>
+<script>
+  var storedEncrypted = '';
+  function decrypt(key) {
+    var text = storedEncrypted;
+    var keyArray = sha256.update(key + _gj.salt).array();
+    var iv = aesjs.utils.hex.toBytes(_gj.iv);
+    var encryptedBytes = aesjs.utils.hex.toBytes(text);
+    var aesCbc = new aesjs.ModeOfOperation.cbc(keyArray, iv);
+    var decryptedBytes = aesCbc.decrypt(encryptedBytes);
+    var final = aesjs.utils.utf8.fromBytes(decryptedBytes);
+
+    if (final.includes("0db9774b86aa5a219a0939cdd5c5aa08")){
+      var text = $($.parseHTML(final)).filter('#0db9774b86aa5a219a0939cdd5c5aa08').html();
+      $('#secure-container').html(text);
+      $('#secure-container').show();
+      $('#decryptor').hide(); 
+    }else{
+      // invalid key
+    }
+    
+       
+  }    
+  $(document).ready(function() {
+    $( "#decrypt" ).click(function() {
+      storedEncrypted = $('#secure-container').text().trim();
+      key =  $('#key').val();
+      decrypt(key);
+    });
+  });   
+</script>
+<div id="crypt_params"><script>var _gj = {salt: '83594e579f11f3f0',  iv: '2500bb779862e9c41bbf2ed6b5dae23b' } </script></div>
+<!-- end of post decryption -->
+
+  </div>
+</div>
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap">
+<form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term...">
+  </form>
+  <div id="results" class="results"></div>
+</div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">© 2021 Philipp Menner. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>
