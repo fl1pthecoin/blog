@@ -1,7 +1,7 @@
 <!doctype html>
 <!--
-  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
-  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Minimal Mistakes Jekyll Theme 4.22.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
   Free for personal and commercial use under the MIT license
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
 -->
@@ -14,13 +14,16 @@
 
 
   <meta name="author" content="Philipp Menner">
+  
+  <meta property="article:author" content="Philipp Menner">
+  
 
 
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="#keepLearning">
 <meta property="og:title" content="Write-up: HackTheBox - Travel">
-<meta property="og:url" content="http://localhost:4000/boxes/travel/">
+<meta property="og:url" content="https://vpm.rocks/boxes/travel/">
 
 
   <meta property="og:description" content="Cool box with little guessing and much to learn.">
@@ -42,7 +45,7 @@
   
 
 
-<link rel="canonical" href="http://localhost:4000/boxes/travel/">
+<link rel="canonical" href="https://vpm.rocks/boxes/travel/">
 
 
 
@@ -53,7 +56,7 @@
     
       "@type": "Person",
       "name": "Philipp Menner",
-      "url": "http://localhost:4000/"
+      "url": "https://vpm.rocks/"
     
   }
 </script>
@@ -66,7 +69,7 @@
 <!-- end _includes/seo.html -->
 
 
-<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="#keepLearning Feed">
+
 
 <!-- https://t.co/dKP3o1e -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,6 +80,7 @@
 
 <!-- For all browsers -->
 <link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
 
 <!--[if IE]>
   <style>
@@ -94,17 +98,10 @@
 <![endif]-->
 
 
-
     <!-- start custom head snippets -->
 
 <!-- insert favicons. use https://realfavicongenerator.net/ -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/site.webmanifest">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-<meta name="msapplication-TileColor" content="#da532c">
-<meta name="theme-color" content="#ffffff">
+
 <!-- end custom head snippets -->
 
   </head>
@@ -130,7 +127,7 @@
     <div class="masthead__menu">
       <nav id="site-nav" class="greedy-nav">
         
-          <a class="site-logo" href="/"><img src="/assets/images/88x88.png" alt=""></a>
+          <a class="site-logo" href="/"><img src="/assets/images/88x88.png" alt="#keepLearning"></a>
         
         <a class="site-title" href="/">
           #keepLearning
@@ -179,15 +176,26 @@
           <h1 id="page-title" class="page__title" itemprop="headline">Write-up: HackTheBox - Travel
 </h1>
           
-            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          8 minute read
+        
+      </span>
+    
+  </p>
 
 
-
-
-  8 minute read
-
-</p>
-          
         </header>
       
 
@@ -196,26 +204,7 @@
           <aside class="sidebar__right sticky">
             <nav class="toc">
               <header><h4 class="nav__title"><i class="fas fa-cog"></i> Table of Contents</h4></header>
-              <ul class="toc__menu">
-  <li><a href="#starting-the-travel---overview">Starting the travel - Overview</a>
-    <ul>
-      <li><a href="#recon">Recon</a></li>
-      <li><a href="#getting-rce">Getting RCE</a></li>
-      <li><a href="#on-the-box">On the box</a></li>
-    </ul>
-  </li>
-  <li><a href="#root-part">Root part.</a>
-    <ul>
-      <li><a href="#connecting-the-dots">Connecting the dots</a></li>
-    </ul>
-  </li>
-  <li><a href="#resources">Resources</a>
-    <ul>
-      <li><a href="#nmap-scan">Nmap scan</a></li>
-      <li><a href="#tools-and-reading">Tools and reading</a></li>
-    </ul>
-  </li>
-</ul>
+              <ul class="toc__menu"><li><a href="#starting-the-travel---overview">Starting the travel - Overview</a><ul><li><a href="#recon">Recon</a></li><li><a href="#getting-rce">Getting RCE</a></li><li><a href="#on-the-box">On the box</a></li></ul></li><li><a href="#root-part">Root part.</a><ul><li><a href="#connecting-the-dots">Connecting the dots</a></li></ul></li><li><a href="#resources">Resources</a><ul><li><a href="#nmap-scan">Nmap scan</a></li><li><a href="#tools-and-reading">Tools and reading</a></li></ul></li></ul>
 
             </nav>
           </aside>
@@ -263,14 +252,14 @@ template.php		<span class="c"># Contains class `TemplateHelper` and a helper fun
 <p class="text-justify">The next steps all revolve around these three files so reading them thoroughly is definitely recommended.
 If we look at <code class="language-plaintext highlighter-rouge">rss_template.php</code> more closely we see what the mitigations mentioned in the <code class="language-plaintext highlighter-rouge">safe</code> function of <code class="language-plaintext highlighter-rouge">template.php</code> are for:</p>
 <div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># From rss_template.php</span>
-<span class="nx">SERVER</span><span class="p">[</span><span class="s1">'QUERY_STRING'</span><span class="p">];</span>
+<span class="no">SERVER</span><span class="p">[</span><span class="s1">'QUERY_STRING'</span><span class="p">];</span>
         <span class="k">if</span><span class="p">(</span><span class="nb">strpos</span><span class="p">(</span><span class="nv">$url</span><span class="p">,</span> <span class="s2">"custom_feed_url"</span><span class="p">)</span> <span class="o">!==</span> <span class="kc">false</span><span class="p">){</span>	<span class="c1"># Searches the URL for the first occurence of `custom_feed_url`</span>
                 <span class="nv">$tmp</span> <span class="o">=</span> <span class="p">(</span><span class="nb">explode</span><span class="p">(</span><span class="s2">"="</span><span class="p">,</span> <span class="nv">$url</span><span class="p">));</span>    <span class="c1"># break URL into two parts</span>
                 <span class="nv">$url</span> <span class="o">=</span> <span class="nb">end</span><span class="p">(</span><span class="nv">$tmp</span><span class="p">);</span>               <span class="c1"># set $url to the string after the '='</span>
         <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>				<span class="c1"># if no custom feed was specified use the following one:</span>
                 <span class="nv">$url</span> <span class="o">=</span> <span class="s2">"http://www.travel.htb/newsfeed/customfeed.xml"</span><span class="p">;</span>
          <span class="p">}</span>
-         <span class="nv">$feed</span> <span class="o">=</span> <span class="nx">get_feed</span><span class="p">(</span><span class="nv">$url</span><span class="p">);</span>                <span class="c1"># call get_feed rss</span>
+         <span class="nv">$feed</span> <span class="o">=</span> <span class="nf">get_feed</span><span class="p">(</span><span class="nv">$url</span><span class="p">);</span>                <span class="c1"># call get_feed rss</span>
 </code></pre></div></div>
 <p class="text-justify">So reading the code, we can apparently specify a custom feed url. To test this we set up a local http server and try to access it browsing to <code class="language-plaintext highlighter-rouge">http://blog.travel.htb/awesome-rss/?custom_feed_url=http://IP:8000/</code> and we record a GET request:</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>kali@kali:~<span class="nv">$ </span>python <span class="nt">-m</span> http.server
@@ -278,20 +267,20 @@ Serving HTTP on 0.0.0.0 port 8000 <span class="o">(</span>http://0.0.0.0:8000/<s
 10.10.10.189 - - <span class="o">[</span>01/AUG/2020 10:25:32] <span class="s2">"GET / HTTP/1.1"</span> 200 -
 </code></pre></div></div>
 <p>Therefore we have a server side request forgery (SSRF) vulnerability, lets see what we can request by looking at how the content is processed:</p>
-<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">function</span> <span class="nf">url_get_contents</span> <span class="p">(</span><span class="nv">$url</span><span class="p">)</span> <span class="p">{</span>
-    <span class="nv">$url</span> <span class="o">=</span> <span class="nx">safe</span><span class="p">(</span><span class="nv">$url</span><span class="p">);</span>
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">function</span> <span class="n">url_get_contents</span> <span class="p">(</span><span class="nv">$url</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$url</span> <span class="o">=</span> <span class="nf">safe</span><span class="p">(</span><span class="nv">$url</span><span class="p">);</span>
         <span class="nv">$url</span> <span class="o">=</span> <span class="nb">escapeshellarg</span><span class="p">(</span><span class="nv">$url</span><span class="p">);</span>
-        <span class="nv">$pl</span> <span class="o">=</span> <span class="s2">"curl "</span><span class="o">.</span><span class="nv">$url</span><span class="p">;</span>
+        <span class="nv">$pl</span> <span class="o">=</span> <span class="s2">"curl "</span><span class="mf">.</span><span class="nv">$url</span><span class="p">;</span>
         <span class="nv">$output</span> <span class="o">=</span> <span class="nb">shell_exec</span><span class="p">(</span><span class="nv">$pl</span><span class="p">);</span>
     <span class="k">return</span> <span class="nv">$output</span><span class="p">;</span>
 <span class="p">}</span>
 <span class="c1"># in short:</span>
-<span class="k">return</span> <span class="nb">shell_exec</span><span class="p">(</span><span class="s2">"curl "</span><span class="o">.</span><span class="nb">escapeshellarg</span><span class="p">(</span><span class="nv">$url</span><span class="p">))</span>
+<span class="k">return</span> <span class="nb">shell_exec</span><span class="p">(</span><span class="s2">"curl "</span><span class="mf">.</span><span class="nb">escapeshellarg</span><span class="p">(</span><span class="nv">$url</span><span class="p">))</span>
 </code></pre></div></div>
 <p class="text-justify">As this is a simple curl call and the input is sanitized via escapeshellarg, I was not able to use this to upload a shell. 
 Looking further at the <code class="language-plaintext highlighter-rouge">safe</code> function from <code class="language-plaintext highlighter-rouge">temlpate.php</code> we see a comment <code class="language-plaintext highlighter-rouge">// this should be secure</code> hinting, that it’s probably not secure. So where can we do something forbidden?
 Playing around a little bit and searching the web <a href="https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery">I found out</a> that we can circumvent the localhost restriction using the IP <code class="language-plaintext highlighter-rouge">0.0.0.0</code>. What do we want to access on localhost? Well, looking at <code class="language-plaintext highlighter-rouge">rss_template.php</code> again, we see that there is a connection established to a memcached service via</p>
-<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$simplepie</span><span class="o">-&gt;</span><span class="na">set_cache_location</span><span class="p">(</span><span class="s1">'memcache://127.0.0.1:11211/?timeout=60&amp;prefix=xct_'</span><span class="p">);</span>
+<div class="language-php highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$simplepie</span><span class="o">-&gt;</span><span class="nf">set_cache_location</span><span class="p">(</span><span class="s1">'memcache://127.0.0.1:11211/?timeout=60&amp;prefix=xct_'</span><span class="p">);</span>
 </code></pre></div></div>
 <p class="text-justify">Searching now for <code class="language-plaintext highlighter-rouge">memcached SSRF</code> I found the tool <a href="https://github.com/tarunkant/Gopherus">Gopherus</a> which came in handy to create payloads. Following through the steps, choosing the default payload and changing the IP from <code class="language-plaintext highlighter-rouge">127.0.0.1</code> to <code class="language-plaintext highlighter-rouge">0.0.0.0</code> results in the following string, which we enter as the custom feed url:</p>
 <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>gopher://0.0.0.0:11211/_%0d%0aset%20SpyD3r%204%200%2016%0d%0aO:5:%22Hello%22:0:%7B%7D%0d%0a
@@ -511,23 +500,15 @@ Service detection performed. Please report any incorrect results at https://nmap
 
 
   
-  
-  
 
   <p class="page__taxonomy">
     <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
     <span itemprop="keywords">
     
-      
-      
       <a href="/tags/#docker" class="page__taxonomy-item" rel="tag">docker</a><span class="sep">, </span>
     
-      
-      
       <a href="/tags/#ldap" class="page__taxonomy-item" rel="tag">ldap</a><span class="sep">, </span>
     
-      
-      
       <a href="/tags/#memcached" class="page__taxonomy-item" rel="tag">memcached</a>
     
     </span>
@@ -540,15 +521,11 @@ Service detection performed. Please report any incorrect results at https://nmap
 
 
   
-  
-  
 
   <p class="page__taxonomy">
     <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
     <span itemprop="keywords">
     
-      
-      
       <a href="/categories/#boxes" class="page__taxonomy-item" rel="tag">boxes</a>
     
     </span>
@@ -566,11 +543,11 @@ Service detection performed. Please report any incorrect results at https://nmap
     <h4 class="page__share-title">Share on</h4>
   
 
-  <a href="https://twitter.com/intent/tweet?text=Write-up%3A+HackTheBox+-+Travel%20http%3A%2F%2Flocalhost%3A4000%2Fboxes%2Ftravel%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  <a href="https://twitter.com/intent/tweet?text=Write-up%3A+HackTheBox+-+Travel%20https%3A%2F%2Fvpm.rocks%2Fboxes%2Ftravel%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
 
-  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fboxes%2Ftravel%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fvpm.rocks%2Fboxes%2Ftravel%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
 
-  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fboxes%2Ftravel%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fvpm.rocks%2Fboxes%2Ftravel%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
 </section>
 
 
@@ -604,23 +581,34 @@ Service detection performed. Please report any incorrect results at https://nmap
 <div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
-    <h2 class="archive__item-title" itemprop="headline">
+    <h2 class="archive__item-title no_toc" itemprop="headline">
       
-        <a href="/boxes/Schooled/" rel="permalink">Writeup: HackTheBox - Schooled
+        <a href="/protected/theneedle/" rel="permalink">HackTheBox - The Needle
 </a>
       
     </h2>
     
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
 
-
-
-
-  8 minute read
-
-</p>
+  <p class="page__meta">
     
-    <p class="archive__item-excerpt" itemprop="description">Write-up of the box Schooled from Hack The Box
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the hardware challenge The Needle from Hack The Box
 </p>
   </article>
 </div>
@@ -633,81 +621,114 @@ Service detection performed. Please report any incorrect results at https://nmap
 <div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
-    <h2 class="archive__item-title" itemprop="headline">
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/protected/debugging_interface/" rel="permalink">HackTheBox - Debugging Interface
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the challenge Debugging Interface from Hack The Box
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/protected/Schooled-active/" rel="permalink">Writeup: HackTheBox - Schooled
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          9 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Schooled is a FreeBSD box that I enjoyed greatly.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
       
         <a href="/boxes/Time/" rel="permalink">Write-up: HackTheBox - Time
 </a>
       
     </h2>
     
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
 
-
-
-
-  5 minute read
-
-</p>
+  <p class="page__meta">
     
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          5 minute read
+        
+      </span>
+    
+  </p>
+
+
     <p class="archive__item-excerpt" itemprop="description">Medium rated box, being more on the easier side of it that involves exploiting a CVE to get a shell and editing a script that is run as root for priv esc.
-</p>
-  </article>
-</div>
-
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/challenges/RopMe/" rel="permalink">Write-up: HackThebox - RopMe
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  6 minute read
-
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">A challenge to practice return-oriented programming.
-</p>
-  </article>
-</div>
-
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/boxes/player2/" rel="permalink">Write-up: HackTheBox - PlayerTwo
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  25 minute read
-
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">One of those boxes where every step was very hard for me. It took me weeks and some nudges to complete but it taught me a lot!
 </p>
   </article>
 </div>
@@ -761,7 +782,7 @@ Service detection performed. Please report any incorrect results at https://nmap
       
     
 
-    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
   </ul>
 </div>
 
@@ -772,7 +793,6 @@ Service detection performed. Please report any incorrect results at https://nmap
 
     
   <script src="/assets/js/main.min.js"></script>
-  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
 
 
 
@@ -780,8 +800,6 @@ Service detection performed. Please report any incorrect results at https://nmap
 <script src="/assets/js/lunr/lunr.min.js"></script>
 <script src="/assets/js/lunr/lunr-store.js"></script>
 <script src="/assets/js/lunr/lunr-en.js"></script>
-
-
 
 
 

