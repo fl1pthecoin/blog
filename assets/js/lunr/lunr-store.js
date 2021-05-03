@@ -46,4 +46,16 @@ var store = [{
         "tags": ["hardware"],
         "url": "/protected/theneedle/",
         "teaser": null
+      },{
+        "title": "HackTheBox - Factory",
+        "excerpt":"Overview The challenge description in this case is helpful and reads the following: Our infrastructure is under attack! The HMI interface went offline and we lost control of some critical PLCs in our ICS system. Moments after the attack started we managed to identify the target but did not have...","categories": ["protected"],
+        "tags": ["hardware"],
+        "url": "/protected/factory/",
+        "teaser": null
+      },{
+        "title": "HackTheBox - Sharp",
+        "excerpt":"Recon The nmap scan shows an open smbport which we try to enum anonymously via $ smbclient -L 10.10.10.219 Enter WORKGROUP\\kali's password: Anonymous login successful Sharename Type Comment --------- ---- ------- ADMIN$ Disk Remote Admin C$ Disk Default share dev Disk IPC$ IPC Remote IPC kanban Disk SMB1 disabled --...","categories": ["boxes"],
+        "tags": ["c sharp","windows","RE"],
+        "url": "/boxes/Sharp/",
+        "teaser": null
       }]
